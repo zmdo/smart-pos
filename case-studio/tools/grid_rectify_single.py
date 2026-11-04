@@ -12,6 +12,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from subject_localization import LocalizationError, SubjectLocalizer
+
 
 class UncertainGrid(ValueError):
     pass
@@ -263,7 +265,7 @@ def line_overlay(img, v, h):
     return canvas
 
 
-def save_comparison(out, result_name='corrected.png', result_label='AFTER v2.1'):
+def save_comparison(out, result_name='corrected.png', result_label='AFTER v2.2'):
     from PIL import Image, ImageDraw
     out = Path(out)
     images = [Image.open(out / name).convert('RGB') for name in ('original.png', result_name)]
@@ -326,11 +328,11 @@ def validate_angles(before, after):
     return warnings
 
 
-def process(src, classification, out, detector=None):
+def process(src, classification, out, detector=None, localizer=None):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=False)
     report = {'source': str(src), 'classification': classification, 'status': 'skipped',
-              'method': 'single-square-grid-joint-homography-v2.1',
+              'method': 'single-square-grid-joint-homography-v2.2',
               'quality_policy': 'grid_first', 'warnings': []}
     reason = eligibility(classification)
     if reason:
@@ -343,21 +345,20 @@ def process(src, classification, out, detector=None):
             if max(img.shape[:2]) > 3000:
                 raise UncertainGrid('image_exceeds_3000px_experiment_limit')
             h, w = img.shape[:2]
-            if detector is None:
-                from standardize_pair_v2 import detect_persons
-                detector = detect_persons
-            boxes = detector(img)
-            significant = [b for b in boxes if (b[2] - b[0]) * (b[3] - b[1]) > .025 * w * h
-                           and b[3] - b[1] > .25 * h]
-            if len(significant) != 1:
-                raise UncertainGrid('detector_did_not_confirm_one_subject')
-            box = significant[0]
-            if box[3] - box[1] < .42 * h:
-                raise UncertainGrid('subject_too_small')
+            if localizer is None:
+                wrapped = None if detector is None else lambda im, size, conf: [
+                    {'box': b, 'confidence': 1.} for b in detector(im)]
+                localizer = SubjectLocalizer(detector=wrapped)
+            subject = localizer.localize(img, classification)
+            box, boxes, masks = subject.box, subject.boxes, subject.masks
+            report['localization'] = subject.trace
+            overlay = img.copy()
+            mask_union = np.any(np.asarray(masks), axis=0)
+            overlay[mask_union] = (.65*overlay[mask_union] + .35*np.array([70, 170, 80])).astype(np.uint8)
+            cv2.rectangle(overlay, tuple(map(int, box[:2])), tuple(map(int, box[2:])), (0, 160, 255), 3)
+            cv2.imwrite(str(out / 'subject_overlay.jpg'), overlay)
             # SAM frees exposed grid beside shoulders/legs that a broad box hides.
             # This mask is only for detection; every output pixel uses the SAME H.
-            from standardize_pair_v2 import segment_persons
-            masks = segment_persons(img, boxes)
             exclude = np.zeros((h, w), np.uint8)
             pad = max(8, int(min(w, h) * .012))
             for b, mask in zip(boxes, masks):
@@ -369,6 +370,10 @@ def process(src, classification, out, detector=None):
                 # Include face stickers even when SAM only finds exposed skin.
                 head_end = y1 + int((y2 - y1) * .21)
                 exclude[max(0, y1):min(h, head_end), max(0, x1):min(w, x2)] = 1
+            coarse = subject.trace['vlm'].get('box')
+            if coarse is not None:
+                x1, y1, x2, y2 = map(int, coarse)
+                exclude[max(0, y1):min(h, y1+int((y2-y1)*.21)), max(0, x1):min(w, x2)] = 1
             exclude = cv2.dilate(exclude, np.ones((2 * pad + 1, 2 * pad + 1), np.uint8)) > 0
             v, u = detect_segments(img, exclude)
             H, sv, sh, grid = solve_grid(v, u, img.shape)
@@ -398,6 +403,8 @@ def process(src, classification, out, detector=None):
             report['quality'] = 'usable_with_notes' if report['warnings'] else 'pass'
             (out / 'candidate.png').rename(out / 'corrected.png')
             save_comparison(out)
+        except LocalizationError as e:
+            report.update({'status': 'needs_review', 'reason': str(e), 'localization': e.trace})
         except UncertainGrid as e:
             report['status'] = 'needs_review'
             report['reason'] = str(e)
@@ -418,8 +425,9 @@ def main():
     job = json.loads(args.job.read_text())
     assets = [a for a in job['assets'] if not args.asset_id or a['id'] in args.asset_id]
     summary = []
+    localizer = SubjectLocalizer()
     for a in assets:
-        r = process(args.job.parent / 'input' / a['path'], a.get('class'), args.out / a['id'])
+        r = process(args.job.parent / 'input' / a['path'], a.get('class'), args.out / a['id'], localizer=localizer)
         r['asset_id'] = a['id']
         summary.append(r)
         (args.out / 'summary.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2))

@@ -10,6 +10,10 @@ for row in rows:
     print(row['asset_id'], row['status'], row.get('reason', ''))
     if row.get('warnings'):
         print('  quality notes:', ', '.join(row['warnings']))
+    if row.get('localization'):
+        loc = row['localization']
+        print('  localization:', loc.get('route', 'unresolved'),
+              'VLM requests:', loc.get('vlm', {}).get('request_count', 0))
     if row['status'] == 'corrected':
         for axis in ('vertical', 'horizontal'):
             b, a = row['before'][axis], row['after'][axis]
