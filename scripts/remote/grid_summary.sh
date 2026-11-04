@@ -1,17 +1,16 @@
 #!/bin/bash
-set -uo pipefail
-cd /tmp/grid
-for d in */; do
-  n=${d%/}
-  echo "=== $n"
-  /root/apps/portrait-studio/.venv/bin/python - "$n" <<'PY'
+set -euo pipefail
+: "${1:?Usage: grid_summary.sh /absolute/experiment/directory}"
+/root/apps/portrait-studio/.venv/bin/python - "$1/summary.json" <<'PY'
 import json, sys
-n = sys.argv[1]
-d = json.load(open(f'/tmp/grid/{n}/meta.json'))
-def fmt(x):
-    return '-' if not x else f"中位 {x['median']}° p90 {x['p90']}° max {x['max']}° (n={x['n']})"
-print('  校正前 竖:', fmt(d['before']['vertical']), ' 横:', fmt(d['before']['horizontal']))
-print('  校正后 竖:', fmt(d['final']['vertical']), ' 横:', fmt(d['final']['horizontal']))
-print('  rotate:', d.get('rotate_deg'), ' affine:', d.get('affine_rectified'), d.get('skipped', ''))
+from collections import Counter
+rows = json.load(open(sys.argv[1]))
+print(dict(Counter(row['status'] for row in rows)))
+for row in rows:
+    print(row['asset_id'], row['status'], row.get('reason', ''))
+    if row['status'] == 'corrected':
+        for axis in ('vertical', 'horizontal'):
+            b, a = row['before'][axis], row['after'][axis]
+            print(f"  {axis}: median {b['median_deg']:.3f} -> {a['median_deg']:.3f}; "
+                  f"p90 {b['p90_deg']:.3f} -> {a['p90_deg']:.3f} degrees")
 PY
-done
