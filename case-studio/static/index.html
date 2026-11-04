@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case Studio · 会员案例素材体检</title>
+<link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<header class="bar">
+  <div class="brand"><b>UP</b><span>CASE STUDIO<small>会员案例素材体检</small></span></div>
+  <nav><button id="historyBtn">批次记录</button></nav>
+  <div class="who" id="who">未登录</div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>先体检，再出图</h1>
+    <p>上传门店素材包或标准说明包，系统识别 6 类素材、去重、评分，算出每个会员"能出哪几张、缺什么"。</p>
+  </section>
+
+  <section class="panel" id="uploadPanel">
+    <div class="panel-head"><h2>1 · 上传素材包</h2><span class="hint">zip / tar.gz · ≤2 GB</span></div>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".zip,.tar,.gz,.tgz" hidden>
+      <b id="fileName">点击选择或拖入压缩包</b>
+      <small>上传后自动开始体检（dry-run，不生成成品图）</small>
+    </label>
+    <button class="primary" id="startBtn" disabled>开始体检</button>
+  </section>
+
+  <section class="panel hidden" id="jobPanel">
+    <div class="panel-head"><h2 id="jobTitle">进行中</h2><span class="badge" id="jobBadge"></span></div>
+    <div class="stage" id="stage">准备中</div>
+    <div class="track"><i id="bar"></i></div>
+    <div class="stats" id="stats"></div>
+    <div class="err hidden" id="err"></div>
+  </section>
+
+  <section id="results"></section>
+</main>
+
+<dialog id="loginDialog"><form id="loginForm" method="dialog">
+  <h3>输入访问令牌</h3>
+  <p>服务端 settings.json 里的 access_token</p>
+  <input id="token" type="password" placeholder="访问令牌" required autofocus>
+  <button class="primary">进入</button>
+  <div class="err" id="loginErr"></div>
+</form></dialog>
+
+<dialog id="historyDialog"><div class="panel-head"><h3>批次记录</h3><button id="closeHist" class="ghost">关闭</button></div><div id="historyList"></div></dialog>
+
+<script src="/static/app.js"></script>
+</body></html>

@@ -1,0 +1,15 @@
+# 临时/本地产物
+_remote/
+*.zip
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# 不要提交任何密钥/凭据
+.env
+*.secret
