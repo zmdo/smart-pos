@@ -1,4 +1,4 @@
-"""Conservative, joint two-axis rectification of single-person square-grid photos.
+"""Grid-led, joint two-axis rectification of single-person square-grid photos.
 
 Run on the GPU server; comparison images are rejected BEFORE inference/warping.
 This corrects a planar grid's perspective, not calibrated radial lens distortion.
@@ -196,9 +196,15 @@ def stats(v, h):
     result = {}
     for axis, lines in [('vertical', v), ('horizontal', h)]:
         a = angles(lines, 'v' if axis == 'vertical' else 'h')
+        length = np.linalg.norm(lines[:, 2:] - lines[:, :2], axis=1)
+        order = np.argsort(np.abs(a))
+        cumulative = (np.cumsum(length[order]) - .5 * length[order]) / length.sum()
+        weighted = np.interp([.5, .9], cumulative, np.abs(a)[order])
         result[axis] = {'n': len(a), 'signed_median_deg': float(np.median(a)),
                         'median_deg': float(np.median(np.abs(a))),
-                        'p90_deg': float(np.percentile(np.abs(a), 90))}
+                        'p90_deg': float(np.percentile(np.abs(a), 90)),
+                        'length_weighted_median_deg': float(weighted[0]),
+                        'length_weighted_p90_deg': float(weighted[1])}
     return result
 
 
@@ -228,8 +234,16 @@ def bounded_canvas(H, shape, box):
     singular = np.array(singular)
     anisotropy = float(np.max(singular[:, 0] / singular[:, 1]))
     scale_variation = float(np.max(singular) / np.min(singular))
-    if anisotropy > 1.18 or scale_variation > 1.4:
-        raise UncertainGrid('excessive_subject_deformation')
+    # Perspective correction naturally changes scale from head to feet. A person
+    # close to the reference board follows that plane approximately; scale spread
+    # alone is not proof of a bad correction. Preserve diagnostics, reject extremes.
+    if anisotropy > 2.0 or scale_variation > 2.5:
+        raise UncertainGrid('extreme_transform_deformation')
+    warnings = []
+    if anisotropy > 1.18:
+        warnings.append('local_anisotropy_notice')
+    if scale_variation > 1.4:
+        warnings.append('perspective_scale_variation_notice')
     mapped = transform(corners, H)
     low, high = np.floor(mapped.min(0)) - 2, np.ceil(mapped.max(0)) + 2
     ow, oh = np.ceil(high - low + 1).astype(int)
@@ -237,7 +251,8 @@ def bounded_canvas(H, shape, box):
         raise UncertainGrid('excessive_canvas_growth')
     T = np.array([[1., 0, -low[0]], [0, 1, -low[1]], [0, 0, 1]])
     return T @ H, (int(ow), int(oh)), {'max_local_anisotropy': anisotropy,
-                                    'local_scale_variation': scale_variation}
+                                    'local_scale_variation': scale_variation,
+                                    'warnings': warnings}
 
 
 def line_overlay(img, v, h):
@@ -248,16 +263,16 @@ def line_overlay(img, v, h):
     return canvas
 
 
-def save_comparison(out):
+def save_comparison(out, result_name='corrected.png', result_label='AFTER v2.1'):
     from PIL import Image, ImageDraw
     out = Path(out)
-    images = [Image.open(out / name).convert('RGB') for name in ('original.png', 'corrected.png')]
+    images = [Image.open(out / name).convert('RGB') for name in ('original.png', result_name)]
     scale = min(850 / max(im.height for im in images), 1.)
     widths = [round(im.width * scale) for im in images]
     canvas = Image.new('RGB', (sum(widths) + 60, 900), '#eeeae3')
     draw = ImageDraw.Draw(canvas)
     x = 20
-    for label, im, width in zip(('BEFORE', 'AFTER v2'), images, widths):
+    for label, im, width in zip(('BEFORE', result_label), images, widths):
         draw.text((x, 15), out.name + '   ' + label, fill='#26352c')
         im = im.resize((width, round(im.height * scale)), Image.Resampling.LANCZOS)
         canvas.paste(im, (x, 40))
@@ -288,19 +303,35 @@ def measure_grid(img, exclude, H, v, h):
 
 
 def validate_angles(before, after):
+    """Separate usable residuals from an unreliable / visibly worsening warp.
+
+    Thresholds are product tolerances, not a claim of calibrated camera accuracy.
+    Keep raw segment statistics, but use length support for acceptance decisions.
+    """
+    warnings = []
     for axis in ('vertical', 'horizontal'):
         b, a = before[axis], after[axis]
-        if a['median_deg'] > .3 or a['p90_deg'] > .8:
+        bm = b.get('length_weighted_median_deg', b['median_deg'])
+        bp = b.get('length_weighted_p90_deg', b['p90_deg'])
+        am = a.get('length_weighted_median_deg', a['median_deg'])
+        ap = a.get('length_weighted_p90_deg', a['p90_deg'])
+        if am > 2.0 or ap > 4.0:
             raise UncertainGrid('residual_' + axis + '_angle_too_large')
-        if a['median_deg'] > b['median_deg'] + .12:
+        if am > bm + .5 and ap > bp + .8:
             raise UncertainGrid(axis + '_became_worse')
+        if a['median_deg'] > .3 or a['p90_deg'] > .8:
+            warnings.append(axis + '_residual_notice')
+        if ap > bp + .5:
+            warnings.append(axis + '_tail_residual_increased')
+    return warnings
 
 
 def process(src, classification, out, detector=None):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=False)
     report = {'source': str(src), 'classification': classification, 'status': 'skipped',
-              'method': 'single-square-grid-joint-homography-v2'}
+              'method': 'single-square-grid-joint-homography-v2.1',
+              'quality_policy': 'grid_first', 'warnings': []}
     reason = eligibility(classification)
     if reason:
         report['reason'] = reason
@@ -355,18 +386,23 @@ def process(src, classification, out, detector=None):
             report.update({'after': after, 'guard': guard,
                            'H_source_to_output': H.tolist(), 'output_size': list(size),
                            'blank_fraction': float((valid == 0).mean())})
-            validate_angles(before, after)
-            report['status'] = 'corrected'
-            cv2.imwrite(str(out / 'corrected.png'), result)
+            # Keep a reviewable candidate even when QA rejects it, without
+            # confusing it with an accepted corrected.png in downstream readers.
+            cv2.imwrite(str(out / 'candidate.png'), result)
+            cv2.imwrite(str(out / 'original.png'), img)
             cv2.imwrite(str(out / 'valid_mask.png'), valid)
             cv2.imwrite(str(out / 'lines_before.jpg'), line_overlay(img, sv, sh))
             cv2.imwrite(str(out / 'lines_after.jpg'), line_overlay(result, rv, rh))
-            # Original is a lossless decoded preview, not a rewritten source file.
-            cv2.imwrite(str(out / 'original.png'), img)
+            report['warnings'] = guard['warnings'] + validate_angles(before, after)
+            report['status'] = 'corrected'
+            report['quality'] = 'usable_with_notes' if report['warnings'] else 'pass'
+            (out / 'candidate.png').rename(out / 'corrected.png')
             save_comparison(out)
         except UncertainGrid as e:
             report['status'] = 'needs_review'
             report['reason'] = str(e)
+            if (out / 'candidate.png').exists():
+                save_comparison(out, 'candidate.png', 'CANDIDATE / NEEDS REVIEW')
     (out / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))
     return report
 

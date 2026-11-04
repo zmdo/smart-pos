@@ -8,6 +8,8 @@ rows = json.load(open(sys.argv[1]))
 print(dict(Counter(row['status'] for row in rows)))
 for row in rows:
     print(row['asset_id'], row['status'], row.get('reason', ''))
+    if row.get('warnings'):
+        print('  quality notes:', ', '.join(row['warnings']))
     if row['status'] == 'corrected':
         for axis in ('vertical', 'horizontal'):
             b, a = row['before'][axis], row['after'][axis]

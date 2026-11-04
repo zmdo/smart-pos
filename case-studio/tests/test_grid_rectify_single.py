@@ -57,9 +57,47 @@ class GridRectificationTests(unittest.TestCase):
         self.assertTrue((corners[:, 0] < w).all() and (corners[:, 1] < h).all())
 
     def test_extreme_transform_rejected(self):
-        for H in (np.diag([1.7, 1., 1.]), np.array([[1., 0., 0.], [0., 1., 0.], [-.002, 0., 1.]])):
+        for H in (np.diag([3., 1., 1.]), np.array([[1., 0., 0.], [0., 1., 0.], [-.002, 0., 1.]])):
             with self.assertRaises(grid.UncertainGrid):
                 grid.bounded_canvas(H, (1600, 1200, 3), [430, 180, 770, 1480])
+
+    def test_grid_perspective_scale_change_is_a_notice(self):
+        H = np.array([[1., 0., 0.], [0., 1., 0.], [0., .00015, 1.]])
+        _, _, guard = grid.bounded_canvas(H, (1700, 1280, 3), [360, 100, 900, 1450])
+        self.assertGreater(guard['local_scale_variation'], 1.4)
+        self.assertIn('perspective_scale_variation_notice', guard['warnings'])
+
+    def test_improved_grid_with_minor_residuals_is_usable(self):
+        before = {'vertical': {'median_deg': .6, 'p90_deg': 2.1},
+                  'horizontal': {'median_deg': 1.1, 'p90_deg': 1.65}}
+        after = {'vertical': {'median_deg': 0., 'p90_deg': .48},
+                 'horizontal': {'median_deg': 0., 'p90_deg': 1.14}}
+        warnings = grid.validate_angles(before, after)
+        self.assertEqual(warnings, ['horizontal_residual_notice'])
+
+    def test_residual_tail_increase_is_reported(self):
+        before = {'vertical': {'median_deg': .95, 'p90_deg': 2.29},
+                  'horizontal': {'median_deg': .43, 'p90_deg': 1.80}}
+        after = {'vertical': {'median_deg': .90, 'p90_deg': 2.95},
+                 'horizontal': {'median_deg': 0., 'p90_deg': 1.06}}
+        self.assertIn('vertical_tail_residual_increased', grid.validate_angles(before, after))
+
+    def test_grid_deterioration_rejected_below_absolute_limit(self):
+        before = {'vertical': {'median_deg': .1, 'p90_deg': .3},
+                  'horizontal': {'median_deg': .1, 'p90_deg': .3}}
+        after = {'vertical': {'median_deg': .1, 'p90_deg': .3},
+                 'horizontal': {'median_deg': .9, 'p90_deg': 1.8}}
+        with self.assertRaisesRegex(grid.UncertainGrid, 'horizontal_became_worse'):
+            grid.validate_angles(before, after)
+
+    def test_long_line_support_is_not_swamped_by_short_fragments(self):
+        short = np.array([[0, y, 35, y + 2] for y in range(20)], float)
+        long = np.array([[0, 50, 1000, 50], [0, 100, 1000, 100]], float)
+        horizontal = np.r_[short, long]
+        vertical = horizontal[:, [1, 0, 3, 2]]
+        stat = grid.stats(vertical, horizontal)['horizontal']
+        self.assertGreater(stat['median_deg'], 3.)
+        self.assertEqual(stat['length_weighted_median_deg'], 0.)
 
     def test_horizontal_regression_cannot_pass_with_good_verticals(self):
         before = {'vertical': {'median_deg': 1.5, 'p90_deg': 2.5},
