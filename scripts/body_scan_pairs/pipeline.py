@@ -16,6 +16,7 @@ from scripts.body_scan.localization import (YoloDetector, clean_candidates, merg
                                            overlap, expanded_roi, map_roi_candidates, mask_quality)
 from scripts.body_scan.segmentation import SamSegmenter
 from scripts.body_scan.pipeline import save_json
+from scripts.body_scan_phase.policy import panel_phase
 
 from . import VERSION
 from .boundaries import (hard_candidates, rectangles, slice_image,
@@ -148,25 +149,29 @@ def split_asset(asset, input_dir, out, evidence, subjects):
                        'rectangles_parent_xyxy': rects})
         for i, (rect, crop, panel) in enumerate(zip(rects, crops, layout['panels']), 1):
             child_id = f'{aid}__p{i:02d}'
+            phase, phase_evidence = panel_phase(layout['layout'], i, panel)
             path = out/'dataset/input'/(child_id+'.png')
             write_image(path, crop)
             child = {'asset_id': child_id, 'parent_asset_id': aid, 'panel_index': i,
                      'source': str(path), 'source_sha256': sha(path), 'crop_parent_xyxy': rect,
                      'H_parent_to_child': translation(rect).tolist(),
                      'H_child_to_parent': np.linalg.inv(translation(rect)).tolist(),
-                     'phase': panel['phase'], 'label_text': panel['label_text'],
+                     'phase': phase, 'phase_evidence': phase_evidence,
+                     'layout': layout['layout'], 'label_text': panel['label_text'],
                      'status': 'needs_review'}
             record['children'].append(child)
             try:
                 classification, child['classification_evidence'] = evidence.classify(crop)
-                classification['phase'] = panel['phase']
+                classification['phase'] = phase
                 child.update({'status': 'ready', 'classification': classification})
                 accepted_assets.append({'id': child_id, 'path': child_id+'.png',
                     'store': asset.get('store'), 'member': asset.get('member'), 'class': classification,
+                    'phase_evidence': phase_evidence,
                     'classification_evidence': {'source': 'independent_pair_child_vlm',
                         'source_sha256': child['source_sha256'], 'prompt_version': 'pair-child-class-v1'},
                     'pair_source': {k: child[k] for k in ('parent_asset_id', 'panel_index', 'crop_parent_xyxy',
-                                                        'H_parent_to_child', 'label_text')}})
+                                                        'H_parent_to_child', 'label_text', 'layout',
+                                                        'source_sha256', 'phase_evidence')}})
             except (ValueError, OSError) as error:
                 child['reason'] = str(error)
         if len(accepted_assets) != 2:

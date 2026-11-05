@@ -81,6 +81,9 @@ def process(asset, input_dir, out, localizer, pose_estimator, config, non_grid_t
               'classification': classification, 'status': 'skipped'}
     if 'classification_evidence' in asset:
         report['classification_evidence'] = asset['classification_evidence']
+    for key in ('pair_source', 'phase_evidence'):
+        if key in asset:
+            report[key] = asset[key]
     reason = eligibility(classification)
     if reason:
         return {**report, 'reason': reason,

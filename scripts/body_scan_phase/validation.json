@@ -1,0 +1,59 @@
+{
+  "version": "body-scan-phase-v1",
+  "date": "2026-11-05",
+  "remote_output": "/root/autodl-fs/case-studio/experiments/body-scan-phase-v1-final-20261105",
+  "input": "/root/autodl-fs/case-studio/experiments/body-scan-poster-filter-v1-20261105/display",
+  "scope": "Historical 46-image test subset plus two split children; not full uploaded dataset",
+  "tests": {
+    "phase": 20,
+    "pairs": 18,
+    "standardization": 47,
+    "total": 85,
+    "passed": true
+  },
+  "counts": {
+    "total": 42,
+    "phases": {
+      "unknown": 40,
+      "before": 1,
+      "after": 1
+    },
+    "sources": {
+      "unresolved": 40,
+      "comparison_position_rule": 2
+    },
+    "upstream_excluded": 6,
+    "comparisons": 12,
+    "model_requests": 0,
+    "failed_model_calls": 0,
+    "tentative_suggestions": 22
+  },
+  "groups": 11,
+  "unknown_reasons": {
+    "insufficient_visual_evidence": 22,
+    "no_same_view_counterpart": 16,
+    "swapped_review_insufficient": 2
+  },
+  "verified_source_files": 93,
+  "approved_png_jpg_byte_identical": 137,
+  "new_split": {
+    "output": "/root/autodl-fs/case-studio/experiments/body-scan-pairs-v2-phase-20261105",
+    "children_pixel_identical": 2,
+    "position_labels": {
+      "a0018__p01": "before",
+      "a0018__p02": "after"
+    },
+    "review_sheet_changed_only_for_labels": true
+  },
+  "models": {
+    "fresh_successful_requests_over_initial_and_retry": 13,
+    "initial_failed_request_recovered": 1,
+    "final_run_all_cached": true
+  },
+  "phase_slot_integrity": true,
+  "no_inputs_dropped": true,
+  "no_frozen_best_practice_changes": true,
+  "summary_sha256": "dc3eda1c45eade44b7278fe46ed5240ed31bfc85d0700c6e814a7f572aab30cc",
+  "comparisons_sha256": "49c179d1862e9d0820ff97e817b72738740a3cd96ffff94adf9fbfe8b5d1e16e",
+  "limitation": "Model phase suggestions are not accepted labels or verified chronology; no semantic accuracy ground truth."
+}

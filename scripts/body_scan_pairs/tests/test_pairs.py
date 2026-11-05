@@ -213,6 +213,11 @@ class PairTests(unittest.TestCase):
             rows = prepare(job, out, evidence=evidence, subjects=FakeSubjects())
             self.assertEqual(evidence.classify_calls, 2)
             self.assertEqual(rows[0]['status'], 'split_ready')
+            self.assertEqual([c['phase'] for c in rows[0]['children']], ['before', 'after'])
+            dataset = json.loads((out/'dataset/job.json').read_text())
+            self.assertEqual([a['class']['phase'] for a in dataset['assets']], ['before', 'after'])
+            self.assertEqual(dataset['assets'][0]['pair_source']['layout'], 'left_right')
+            self.assertEqual(dataset['assets'][0]['phase_evidence']['source'], 'comparison_position_rule')
             self.assertEqual(verify(out)['verified_lossless_children'], 2)
             with self.assertRaises(FileExistsError):
                 prepare(job, out, evidence=evidence, subjects=FakeSubjects())
