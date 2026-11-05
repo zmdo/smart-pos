@@ -1,0 +1,237 @@
+{
+  "authority": "user-approved wall-reference and group-scale body scan v3",
+  "source_commit": "c3ce38966da8d39cf702778858e8e5881f9744ff",
+  "entrypoint": "scripts/run_body_scan_refined.sh",
+  "input_contract": "classified job.json + original input images; optional SHA-bound cls-v3-wall audit. Refinement-only entry also accepts source-bound v2 pinhole outputs.",
+  "files": [
+    {
+      "path": "scripts/body_scan/__init__.py",
+      "source": "scripts/body_scan/__init__.py",
+      "role": "frozen_dependency",
+      "sha256": "1010b10ef4c9b710a9127cb3df7b2f924196a1b011b0842739bb2f50efacdddf"
+    },
+    {
+      "path": "scripts/body_scan/__main__.py",
+      "source": "scripts/body_scan/__main__.py",
+      "role": "frozen_dependency",
+      "sha256": "6ec6263fe37920c13e8c8f5fd819fc6fb9c19e7e38364aa9e99aa79da3e99d64"
+    },
+    {
+      "path": "scripts/body_scan/classification.py",
+      "source": "scripts/body_scan/classification.py",
+      "role": "frozen_dependency",
+      "sha256": "135aa57778eda1353320b021c11c76aa1670b9ac9016c7f113324c48b0cc3097"
+    },
+    {
+      "path": "scripts/body_scan/framing.py",
+      "source": "scripts/body_scan/framing.py",
+      "role": "frozen_dependency",
+      "sha256": "c2ca4df507bdce53310cad48f2136463910148d1547da9ac9a0e1d0f10fb6e19"
+    },
+    {
+      "path": "scripts/body_scan/geometry.py",
+      "source": "scripts/body_scan/geometry.py",
+      "role": "frozen_dependency",
+      "sha256": "b52b9985e99817d2886d1fdab5af760bdbc5aa8c52fdb333cda147953b55cce8"
+    },
+    {
+      "path": "scripts/body_scan/grid.py",
+      "source": "scripts/body_scan/grid.py",
+      "role": "frozen_dependency",
+      "sha256": "36cc9c921cc0024cec20155698f49a935720703752668e476dc6cf6ba7a1ba5f"
+    },
+    {
+      "path": "scripts/body_scan/group_scale.py",
+      "source": "scripts/body_scan/group_scale.py",
+      "role": "frozen_dependency",
+      "sha256": "905131493e2c8af7de476a2e4df697b5e634ee56358d370e5822839f3ee60f13"
+    },
+    {
+      "path": "scripts/body_scan/landmarks.py",
+      "source": "scripts/body_scan/landmarks.py",
+      "role": "frozen_dependency",
+      "sha256": "dfa66b0043e9cccab25c63eedfb1a9af016cfb5c2d090c6e6cb490013e293947"
+    },
+    {
+      "path": "scripts/body_scan/localization.py",
+      "source": "scripts/body_scan/localization.py",
+      "role": "frozen_dependency",
+      "sha256": "4627b29df98926ccbe7a17795269bdf26605c5b93e67eac4403cfcf9046f5a5b"
+    },
+    {
+      "path": "scripts/body_scan/non_grid.py",
+      "source": "scripts/body_scan/non_grid.py",
+      "role": "frozen_dependency",
+      "sha256": "2b0ad901fc33ec6b702490b6b25d5deef98e83ac8a3319353ecec4a6c441dcbd"
+    },
+    {
+      "path": "scripts/body_scan/pipeline.py",
+      "source": "scripts/body_scan/pipeline.py",
+      "role": "frozen_dependency",
+      "sha256": "142afe70606907093ac599cf0ee7fa880233c8db8059b02910c63fd40df6cf08"
+    },
+    {
+      "path": "scripts/body_scan/pose.py",
+      "source": "scripts/body_scan/pose.py",
+      "role": "frozen_dependency",
+      "sha256": "6b182af9f366911d69b88a07d12662d6f371e803c4b83a7e53495544b95c34b5"
+    },
+    {
+      "path": "scripts/body_scan/preview.py",
+      "source": "scripts/body_scan/preview.py",
+      "role": "frozen_dependency",
+      "sha256": "c80fd30227266edc63ce4ac741f5e8a9d9f798d01b663572977b8b6b9ac5efb4"
+    },
+    {
+      "path": "scripts/body_scan/reference.py",
+      "source": "scripts/body_scan/reference.py",
+      "role": "frozen_dependency",
+      "sha256": "81383ef74127c04a354169d63495c57f55921f6bee329a6403eac2895c2b41a2"
+    },
+    {
+      "path": "scripts/body_scan/refinement.py",
+      "source": "scripts/body_scan/refinement.py",
+      "role": "frozen_dependency",
+      "sha256": "5e4ff685735d323cea7d7dc2915c3b126b6ff6bd3da7794ae33cf8863dd56701"
+    },
+    {
+      "path": "scripts/body_scan/segmentation.py",
+      "source": "scripts/body_scan/segmentation.py",
+      "role": "frozen_dependency",
+      "sha256": "57878b3f6d1910a5a310e96f30df233213e303a0db0332855b304bde371f7784"
+    },
+    {
+      "path": "scripts/body_scan/tests/__init__.py",
+      "source": "scripts/body_scan/tests/__init__.py",
+      "role": "unchanged_tests",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "scripts/body_scan/tests/test_camera_integration.py",
+      "source": "scripts/body_scan/tests/test_camera_integration.py",
+      "role": "unchanged_tests",
+      "sha256": "2ec70595a533325ab03afa68950c156acee2b2acc950004d1757a770658cfe1a"
+    },
+    {
+      "path": "scripts/body_scan/tests/test_pipeline.py",
+      "source": "scripts/body_scan/tests/test_pipeline.py",
+      "role": "unchanged_tests",
+      "sha256": "0126302d86432ea41f6569cbfe12bd14076c3f361c2819ce679b3a747ddc8c9c"
+    },
+    {
+      "path": "scripts/body_scan/tests/test_rectangle.py",
+      "source": "scripts/body_scan/tests/test_rectangle.py",
+      "role": "unchanged_tests",
+      "sha256": "d90d7b8f55a30153fa25ee08a45a30e1c145d333c4618c6d1086049bac539925"
+    },
+    {
+      "path": "scripts/body_scan/tests/test_wall_refinement.py",
+      "source": "scripts/body_scan/tests/test_wall_refinement.py",
+      "role": "unchanged_tests",
+      "sha256": "0b973074ff6f133f54d454e79350c56a628c2f7ca8db4a32ab1650d6dce53173"
+    },
+    {
+      "path": "scripts/body_scan/verify_refinement.py",
+      "source": "scripts/body_scan/verify_refinement.py",
+      "role": "frozen_dependency",
+      "sha256": "9979d8ab209a39e024f9c826cc6f4492bf9b40a53348e23ec444e4cae538ceb0"
+    },
+    {
+      "path": "scripts/body_scan/verify_run.py",
+      "source": "scripts/body_scan/verify_run.py",
+      "role": "frozen_dependency",
+      "sha256": "997d2cb56d1ce6eeb9185afb7d06be9df7f29110ca672a94765141183f77e420"
+    },
+    {
+      "path": "scripts/body_scan/wall_geometry.py",
+      "source": "scripts/body_scan/wall_geometry.py",
+      "role": "frozen_dependency",
+      "sha256": "a7f57872f39b1333a98be6fe362920b6f65d7388bd41d2118b0b4e677f85558f"
+    },
+    {
+      "path": "scripts/non_grid_camera/__init__.py",
+      "source": "scripts/non_grid_camera/__init__.py",
+      "role": "frozen_dependency",
+      "sha256": "05c247515e26db2f33bcc94a8c369078e8d6b29dbe1bc2c2e7e72bbc92f12cf8"
+    },
+    {
+      "path": "scripts/non_grid_camera/calibration.py",
+      "source": "scripts/non_grid_camera/calibration.py",
+      "role": "frozen_dependency",
+      "sha256": "92a0c12cf6adf6f7b1b0915aad99c1f6fb6b5c4662117fd8f96e26ab2dbb0330"
+    },
+    {
+      "path": "scripts/non_grid_camera/geometry.py",
+      "source": "scripts/non_grid_camera/geometry.py",
+      "role": "frozen_dependency",
+      "sha256": "fd85562f2734a31eccddffd3feac73f3d990d153dd7e12dd51382ea4da3948dd"
+    },
+    {
+      "path": "scripts/run_body_scan.sh",
+      "source": "scripts/run_body_scan.sh",
+      "role": "frozen_dependency",
+      "sha256": "125edc6a70d30fb78ecd852714c8b180b9d63c8e532efb632a846fa2c260118b"
+    },
+    {
+      "path": "scripts/run_body_scan_refined.sh",
+      "source": "scripts/run_body_scan_refined.sh",
+      "role": "approved_entrypoint",
+      "sha256": "7a131ac28786ab89c988511d58fb6ebcb3eb3951c2ebfd50e23dedf1282cc23d"
+    },
+    {
+      "path": "source-validation.json",
+      "source": "scripts/body_scan/validation-wall-v3.json",
+      "role": "approved_source_record",
+      "sha256": "a1b37c22dcf9373f49575f9280015c0a5027e192f2e751418125d6856e1aeb32"
+    },
+    {
+      "path": "source-provenance.json",
+      "source": "scripts/body_scan/provenance.json",
+      "role": "approved_source_record",
+      "sha256": "e2d724c75d72e05d990cf56d9f4c3f0783ce5ab9bedfb42f464cb412470259c4"
+    },
+    {
+      "path": "DESIGN.md",
+      "source": "docs/solutions/会员案例素材生产方案/23-墙面参照与同组尺度修正.md",
+      "source_sha256": "a74db7565562694b0c234326432e2dd78e5743b10121fea7086db609ede1c74a",
+      "role": "design_document",
+      "modification": "Only README link adapted to archive location.",
+      "sha256": "40b98729f46eff717a56b2c6b6171004e79929138fafd3a4dbf9b5f282da7b84"
+    },
+    {
+      "path": "scripts/__init__.py",
+      "role": "archive_support",
+      "sha256": "7b8721139ff3a947bd623819cb2a507681b986b710b159f45fc4c69d5803385f"
+    },
+    {
+      "path": "scripts/run_refinement.sh",
+      "role": "archive_support",
+      "sha256": "c7d0743e3f383a1bffbb29cb706e772100d0642877459f3da44b06a165a04eb6"
+    },
+    {
+      "path": "scripts/run_tests.sh",
+      "role": "archive_support",
+      "sha256": "223205d5826d6a42ea196f5776aae9d3315b01a688cad74fa19894d6b46f2aa6"
+    },
+    {
+      "path": "verify_snapshot.py",
+      "role": "archive_support",
+      "sha256": "cb8db13b53aac11dcc2921737d02c2822abbbdfdae13d5530a4d982f775b3ebe"
+    },
+    {
+      "path": "requirements.verified.txt",
+      "role": "archive_support",
+      "sha256": "2b4c491fee0f9bad4b211786cabfaa0483d530a10e506edb9928673eef452c0b"
+    },
+    {
+      "path": "external-resources.json",
+      "role": "archive_support",
+      "sha256": "18509ada584e3d455b148c2ecf3cb92d0ed9e8c396fb991903511caeef11bc8f"
+    },
+    {
+      "path": "README.md",
+      "role": "archive_support",
+      "sha256": "b65624654b8154ed1249e49605c5da0835526964b3cc312bd60fc0eb217ec40c"
+    }
+  ]
+}
