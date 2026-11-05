@@ -124,5 +124,13 @@
         "sha256": "fd85562f2734a31eccddffd3feac73f3d990d153dd7e12dd51382ea4da3948dd"
       }
     ]
+  },
+  "wall_refinement": {
+    "base_commit": "08b9f29a43bd17178cf1a702ccd67510bd28d9e5",
+    "version": "body-scan-wall-v3",
+    "note": "New opt-in stage uses measured physical wall lines and source-bound pinhole calibration, plus SIFT/MAGSAC wall registration for group scale. No member/id-specific logic. Frozen grid package, independent camera experiment and prior outputs retained.",
+    "entrypoint": "scripts/run_body_scan_refined.sh",
+    "existing_baseline_entrypoint": "python -m scripts.body_scan.refinement",
+    "new_model_dependencies": []
   }
 }

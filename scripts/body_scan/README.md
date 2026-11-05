@@ -1,6 +1,43 @@
 # 单人体测图统一处理
 
-从 `best-practices/grid-portrait` 的权威代码复制、提取的共用实现，当前版本 `body-scan-unified-v2-pinhole`。第二阶段已接入用户批准的 **pinhole 非网格相机校正**。权威副本、独立相机实验和旧成品保留；来源见 `provenance.json`。本入口直接读取已分类的原图，不依赖旧实验的中间图片。
+从 `best-practices/grid-portrait` 的权威代码复制、提取的共用实现。基础阶段为 `body-scan-unified-v2-pinhole`；新增 **`body-scan-wall-v3` 墙面参照与同组尺度修正**，推荐通过 `scripts/run_body_scan_refined.sh` 运行。权威副本、独立相机实验和旧成品保留；来源见 `provenance.json`。成品始终由原图生成。
+
+## 墙面参照修正 v3
+
+v3 在批准的 pinhole 基础上按证据增加修正，不按会员名、组号或素材ID设置特殊参数：
+
+1. 大模型审查主体是否靠近同一平面墙、哪些结构可以作为参照；印刷木纹、器械、海报纸张边缘不能直接作墙线。
+2. SAM 排除人物；LSD/Hough 检测真实线段并编号，大模型再选择属于墙面的横竖线。模型粗坐标仅用来划定搜索区域。
+3. 按校准重力方向和真实水平线估计墙面 yaw。长度加权的几何共识剔除模型误选；检查横线残差、竖线退步、画布增长和人物局部变形，再做原成品/候选视觉复核。没有可靠证据时保留 pinhole 成品并记录原因。
+4. 对同店同名照片，在墙面区域提取 SIFT，排除人物，以双向匹配和 MAGSAC 估计相对尺度。至少两张中立肩部姿势的正/背面参考给出一致估计，才调整抬臂图中明显偏小的取景；不以人体宽度或头部决定尺度。
+5. 抬臂图采用同组背景确定的等比缩放，并以髋部及中立躯干参照定位；实际肩点和真实姿势不改动，因此不再强制抬起的肩点也位于23%高度。其余图片继续原有肩髋27%、肩部23%的规则。组图复核可否决尺度候选。
+
+参考不足、无明显改善、几何/视觉检查未通过时，该张沿用批准的成品。网格不执行上述新分支。所有候选保存在诊断文件中，**`aligned.png` 才是采用的成品**；候选不等于通过验收。
+
+从原job一次运行完整流程：
+
+```bash
+bash scripts/run_body_scan_refined.sh \
+  --job /root/autodl-fs/case-studio/batches/287a8a82df2f2fca2c22299b/job.json \
+  --classification-audit /root/autodl-fs/case-studio/experiments/body-scan-camera-v2-wall-audit/classification.json \
+  --out /root/autodl-fs/case-studio/experiments/body-scan-refined-new
+```
+
+该命令相当于基础入口加 `--refine-background`，自动保留相邻 `<输出目录>-pinhole` 基线。两个目录都必须不存在；历史job中未被上述audit覆盖的旧体测标签仍须复核。
+
+已有批准的v2成品可直接运行新阶段，无须重做人物检测：
+
+```bash
+PYTHONUTF8=1 OMP_NUM_THREADS=4 /root/apps/non-grid-calibration/.venv/bin/python -m scripts.body_scan.refinement \
+  --baseline /root/autodl-fs/case-studio/experiments/body-scan-unified-v2-camera-20261105 \
+  --out /root/autodl-fs/case-studio/experiments/body-scan-refined-new
+```
+
+只有通过原图SHA检查的v2 pinhole基线可以输入，避免叠加校正；新成品重用原图关键点并从原图采样，绝不对旧成品再次变形。`--group g010` 只用于指定验证子集；不传则遍历所有组。`--no-group-scale` 可单独观察墙面修正。
+
+模型审查使用已有服务配置和独立 `cache/wall-reference`，缓存绑定模型服务、提示词版本和图片。新增依赖为现有OpenCV的SIFT/MAGSAC功能，无需额外安装模型。
+
+全流程46张验证结果见 `validation-wall-v3.json`：41张成品中4张采用墙面修正，含1张同组尺度修正；另外37张成品及其遮罩与v2逐字节相同。40项单测通过。细节见 [方案23](../../docs/solutions/会员案例素材生产方案/23-墙面参照与同组尺度修正.md)。
 
 ## 流程
 

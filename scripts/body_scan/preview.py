@@ -7,7 +7,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 
-def make_previews(out, records, groups, font_path, previous=None):
+def make_previews(out, records, groups, font_path, previous=None, stage_label=None):
     out = Path(out)
     font = ImageFont.truetype(str(font_path), 22) if Path(font_path).exists() else ImageFont.load_default()
     small = ImageFont.truetype(str(font_path), 17) if Path(font_path).exists() else ImageFont.load_default()
@@ -44,7 +44,7 @@ def make_previews(out, records, groups, font_path, previous=None):
             with Image.open(out / aid / 'aligned.png') as aligned:
                 thumb = ImageOps.contain(aligned.convert('RGB'), (230, 537), Image.Resampling.LANCZOS)
                 sheet.paste(thumb, (x + (230-thumb.width)//2, output_y))
-            action = '网格校正' if row['route'] == 'grid' else ('非网格：相机校正' if row['geometry']['action'] == 'camera_pinhole' else '非网格：几何不变')
+            action = '网格校正' if row['route'] == 'grid' else {'camera_pinhole':'非网格：相机校正', 'wall_pinhole':'非网格：墙面校正'}.get(row['geometry']['action'], '非网格：几何不变')
             draw.text((x, output_y - 40), action, font=small, fill='#26352c')
         if group['excluded_asset_ids']:
             draw.text((15, sheet_height - 35), '待复核：' + ', '.join(group['excluded_asset_ids']), font=small, fill='#9d513d')
@@ -63,7 +63,7 @@ def make_previews(out, records, groups, font_path, previous=None):
             upgrade = Image.new('RGB', (max(660, 250*len(ids)+20), 1250), '#eeeae3')
             ud = ImageDraw.Draw(upgrade)
             ud.text((15, 10), title, font=font, fill='#26352c')
-            ud.text((15, 48), '上：上一版成品    下：接入相机校正后的成品', font=small, fill='#26352c')
+            ud.text((15, 48), '上：上一版成品    下：'+(stage_label or '接入相机校正后的成品'), font=small, fill='#26352c')
             for index, aid in enumerate(ids):
                 x = 15+index*250
                 ud.text((x, 80), labels.get(lookup[aid]['classification'].get('view'), '?')+' / '+aid, font=small, fill='#26352c')
@@ -83,6 +83,8 @@ def make_previews(out, records, groups, font_path, previous=None):
     pending = [r for r in records if r['status'] == 'needs_review']
     links.append('<h2>待复核</h2><ul>' + ''.join('<li>' + html.escape(r['asset_id'] + ': ' + r['reason']) + '</li>' for r in pending) + '</ul>')
     mode_title = '非网格相机校正' if any(r.get('geometry', {}).get('action') == 'camera_pinhole' for r in records) else '非网格几何保持原样'
+    if stage_label:
+        mode_title=stage_label
     (out / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>体测图取景预览</title>'
                                   '<style>body{background:#eeeae3;color:#26352c;font:16px sans-serif;margin:32px}img{max-width:100%}</style>'
                                   '<h1>体测图统一取景 · '+mode_title+'</h1>' + ''.join(links), encoding='utf-8')
