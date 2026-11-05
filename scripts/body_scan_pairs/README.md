@@ -2,6 +2,8 @@
 
 独立实验方案 `body-scan-pairs-v1`。先识别两张照片的真实接缝，输出无损单图，再调用已批准的 [body-scan-wall](../../best-practices/body-scan-wall/README.md) 完成独立校正、比例统一和矩形取景。原始素材、单图开发模块和最佳实践均不改动；尚未接入网站。
 
+用户已确认本方案，来源提交 `5dec62c3b96eedd84c8159d071dbb289957815c4` 已冻结到 [best-practices/body-scan-pairs](../../best-practices/body-scan-pairs/README.md)。复现批准版请使用归档入口；本目录继续作为后续开发副本。
+
 ## 接受和淘汰规则
 
 用户最新规则：**只处理硬拼接，渐变拼接直接淘汰并说明原因。**

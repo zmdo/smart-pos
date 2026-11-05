@@ -1,0 +1,123 @@
+{
+  "authority": "user-approved two-photo hard-join splitting v1",
+  "source_commit": "5dec62c3b96eedd84c8159d071dbb289957815c4",
+  "entrypoint": "scripts/body_scan_pairs/run.sh",
+  "dependency": {
+    "path": "../body-scan-wall",
+    "source_commit": "c3ce38966da8d39cf702778858e8e5881f9744ff",
+    "manifest_sha256": "1e2be20aedd12b1d7db195b92faad61b5fc733f9fb69238c037d11d0291f11a9"
+  },
+  "files": [
+    {
+      "path": "DESIGN.md",
+      "sha256": "ac733bef40ff91497dfa518abbacaeaf4c8f916d08e1a4e742faa654e07c23d2",
+      "source": "scripts/body_scan_pairs/README.md",
+      "source_sha256": "a7e45b0c3887715d4527e01f70b096d779ba3a65c6ab19fdc2d718a95642e31e",
+      "role": "adapted_source",
+      "adaptation": "Adjust links for archive location"
+    },
+    {
+      "path": "README.md",
+      "sha256": "67d3d559ce3b06afd4d391965e2516a7c774e91c8c24ac50ef782ab7f965bdd1",
+      "role": "archive_support"
+    },
+    {
+      "path": "run_tests.sh",
+      "sha256": "0c29a92c7cb11eadde19c73ce68f862b82a79d97fd082754b1395a9f196628de",
+      "role": "archive_support"
+    },
+    {
+      "path": "scripts/__init__.py",
+      "sha256": "6f27add376ceabf991e9cf35f00a148f66644420ed6c1cff21a16530b93e69e1",
+      "role": "archive_support"
+    },
+    {
+      "path": "scripts/body_scan_pairs/__init__.py",
+      "sha256": "f7e63f5475f42e2672d98bbc75323c5cbabe8d3e492d16e8f15b88d92fa286ed",
+      "source": "scripts/body_scan_pairs/__init__.py",
+      "source_sha256": "f7e63f5475f42e2672d98bbc75323c5cbabe8d3e492d16e8f15b88d92fa286ed",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "scripts/body_scan_pairs/__main__.py",
+      "sha256": "bdfae7469881ad684ecec0863dd70abb7482f5c1cdae107b88cb67cb05e6feb6",
+      "source": "scripts/body_scan_pairs/__main__.py",
+      "source_sha256": "bdfae7469881ad684ecec0863dd70abb7482f5c1cdae107b88cb67cb05e6feb6",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "scripts/body_scan_pairs/boundaries.py",
+      "sha256": "9d793f951498f9ffdd2f9de15f1298bdd66913281b5bbaa8a9fd44097cb821e1",
+      "source": "scripts/body_scan_pairs/boundaries.py",
+      "source_sha256": "9d793f951498f9ffdd2f9de15f1298bdd66913281b5bbaa8a9fd44097cb821e1",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "scripts/body_scan_pairs/evidence.py",
+      "sha256": "7ab7bca6fc0b205ad07f6eb7fa5f868941147fc5c91ae24862a7de7208e021d4",
+      "source": "scripts/body_scan_pairs/evidence.py",
+      "source_sha256": "7ab7bca6fc0b205ad07f6eb7fa5f868941147fc5c91ae24862a7de7208e021d4",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "scripts/body_scan_pairs/pipeline.py",
+      "sha256": "22b2593cd2d37f75ab1c9a91cf63de93b2f0512b1bc654ff01bf8552da59fdfd",
+      "source": "scripts/body_scan_pairs/pipeline.py",
+      "source_sha256": "4671acf3f3ac856ce34819ffd2a2cdf0d7a84cf689672e5baf6727ffe086af4a",
+      "role": "adapted_source",
+      "adaptation": "Only change single-photo archive lookup to sibling body-scan-wall"
+    },
+    {
+      "path": "scripts/body_scan_pairs/preview.py",
+      "sha256": "91e3b22e43cef3eb76f8351773a6951000a7b3c6e2034e0f243b7fbc12bad74f",
+      "source": "scripts/body_scan_pairs/preview.py",
+      "source_sha256": "91e3b22e43cef3eb76f8351773a6951000a7b3c6e2034e0f243b7fbc12bad74f",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "scripts/body_scan_pairs/run.sh",
+      "sha256": "7c7c0a4f9f933c49234aec1c3054805b10efaddfe7b747dde5a8dbf4bcdcd500",
+      "source": "scripts/body_scan_pairs/run.sh",
+      "source_sha256": "7c7c0a4f9f933c49234aec1c3054805b10efaddfe7b747dde5a8dbf4bcdcd500",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "scripts/body_scan_pairs/tests/__init__.py",
+      "sha256": "bc0a7bf36d89e80b54885c064c37a9e13e9866c351c9231517fface70f4aec17",
+      "source": "scripts/body_scan_pairs/tests/__init__.py",
+      "source_sha256": "bc0a7bf36d89e80b54885c064c37a9e13e9866c351c9231517fface70f4aec17",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "scripts/body_scan_pairs/tests/test_pairs.py",
+      "sha256": "92a1961b9a8ddff260514d856423f90363dc88167004a44a018111fee79120ec",
+      "source": "scripts/body_scan_pairs/tests/test_pairs.py",
+      "source_sha256": "92a1961b9a8ddff260514d856423f90363dc88167004a44a018111fee79120ec",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "scripts/body_scan_pairs/verify.py",
+      "sha256": "376e16243262f35100bd866f6bfd904c43f1adb74bf9a1951833538783a8c9e0",
+      "source": "scripts/body_scan_pairs/verify.py",
+      "source_sha256": "376e16243262f35100bd866f6bfd904c43f1adb74bf9a1951833538783a8c9e0",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "snapshot.py",
+      "sha256": "1cf65d66543fec073966755eebce67a6a0118d1dd57649a3a9b9a33abffa5db6",
+      "role": "archive_support"
+    },
+    {
+      "path": "source-validation.json",
+      "sha256": "e991a04a1e709cf81d063162643f5248a16926ea42f0b45d512784cb90645643",
+      "source": "scripts/body_scan_pairs/validation.json",
+      "source_sha256": "e991a04a1e709cf81d063162643f5248a16926ea42f0b45d512784cb90645643",
+      "role": "unchanged_source"
+    },
+    {
+      "path": "verify_snapshot.py",
+      "sha256": "e31c8bd927be2c3771bda811241835b2b377bd5a6eb9552653437d352918233a",
+      "role": "archive_support"
+    }
+  ]
+}

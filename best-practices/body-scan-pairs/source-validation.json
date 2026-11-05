@@ -1,0 +1,75 @@
+{
+  "version": "body-scan-pairs-v1",
+  "output": "/root/autodl-fs/case-studio/experiments/body-scan-pairs-hard-v1-20261105-final",
+  "verified": true,
+  "pair_counts": {
+    "split_ready": 1,
+    "needs_review": 1
+  },
+  "verified_lossless_children": 2,
+  "ready_children": 2,
+  "pairs": [
+    {
+      "asset_id": "a0018",
+      "rectangles_parent_xyxy": [
+        [
+          0,
+          0,
+          540,
+          1350
+        ],
+        [
+          540,
+          0,
+          1080,
+          1350
+        ]
+      ],
+      "source_sha256": "5bcebeb2a1a95767276723ac24363dac130125926132bec0b7bb24a87dc7f944"
+    }
+  ],
+  "excluded_pairs": [],
+  "needs_review_pairs": [
+    {
+      "asset_id": "a0180",
+      "reason": "seam_detail_uncertain",
+      "reason_zh": "整图与接缝局部判断不一致，未能确认硬拼接，已拦截待复核。"
+    }
+  ],
+  "alignment_checks": [
+    {
+      "asset_id": "a0018__p01",
+      "status": "verified",
+      "output_size": [
+        768,
+        1792
+      ],
+      "parent_coordinate_roundtrip": true,
+      "valid_rectangle": true,
+      "aligned_sha256": "51485158c9307da2efc311d300c43b6253bfa2623c2db1fcded9da0808dcce87"
+    },
+    {
+      "asset_id": "a0018__p02",
+      "status": "verified",
+      "output_size": [
+        768,
+        1792
+      ],
+      "parent_coordinate_roundtrip": true,
+      "valid_rectangle": true,
+      "aligned_sha256": "2e7eab4f925dd316e6a6a3096377008896d8638143bfe79f754f5735577fea07"
+    }
+  ],
+  "code_sha256": {
+    "__init__.py": "f7e63f5475f42e2672d98bbc75323c5cbabe8d3e492d16e8f15b88d92fa286ed",
+    "__main__.py": "bdfae7469881ad684ecec0863dd70abb7482f5c1cdae107b88cb67cb05e6feb6",
+    "boundaries.py": "9d793f951498f9ffdd2f9de15f1298bdd66913281b5bbaa8a9fd44097cb821e1",
+    "evidence.py": "7ab7bca6fc0b205ad07f6eb7fa5f868941147fc5c91ae24862a7de7208e021d4",
+    "pipeline.py": "4671acf3f3ac856ce34819ffd2a2cdf0d7a84cf689672e5baf6727ffe086af4a",
+    "preview.py": "91e3b22e43cef3eb76f8351773a6951000a7b3c6e2034e0f243b7fbc12bad74f",
+    "tests/__init__.py": "bc0a7bf36d89e80b54885c064c37a9e13e9866c351c9231517fface70f4aec17",
+    "tests/test_pairs.py": "92a1961b9a8ddff260514d856423f90363dc88167004a44a018111fee79120ec",
+    "verify.py": "376e16243262f35100bd866f6bfd904c43f1adb74bf9a1951833538783a8c9e0"
+  },
+  "scope": "pixel-exact crops and coordinate invariants; semantic judgments are model-reviewed, not ground truth"
+}

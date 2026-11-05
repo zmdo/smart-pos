@@ -1,0 +1,171 @@
+{
+  "source_commit": "5dec62c3b96eedd84c8159d071dbb289957815c4",
+  "snapshot_integrity": {
+    "source_commit": "5dec62c3b96eedd84c8159d071dbb289957815c4",
+    "snapshot_root": "/root/apps/case-studio/best-practices/body-scan-pairs",
+    "verified_files": 17,
+    "dependency_root": "/root/apps/case-studio/best-practices/body-scan-wall",
+    "dependency_source_commit": "c3ce38966da8d39cf702778858e8e5881f9744ff",
+    "dependency_manifest_sha256": "1e2be20aedd12b1d7db195b92faad61b5fc733f9fb69238c037d11d0291f11a9",
+    "verified_dependency_files": 39,
+    "verified_project_imports": 21
+  },
+  "module_origins": {
+    "scripts": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/__init__.py",
+    "scripts.body_scan_pairs": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/__init__.py",
+    "scripts.body_scan": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/__init__.py",
+    "scripts.body_scan.localization": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/localization.py",
+    "scripts.body_scan.reference": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/reference.py",
+    "scripts.body_scan_pairs.evidence": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/evidence.py",
+    "scripts.body_scan.segmentation": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/segmentation.py",
+    "scripts.body_scan.geometry": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/geometry.py",
+    "scripts.body_scan.landmarks": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/landmarks.py",
+    "scripts.body_scan.framing": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/framing.py",
+    "scripts.body_scan.grid": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/grid.py",
+    "scripts.body_scan.classification": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/classification.py",
+    "scripts.body_scan.non_grid": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/non_grid.py",
+    "scripts.body_scan.pipeline": "/root/apps/case-studio/best-practices/body-scan-wall/scripts/body_scan/pipeline.py",
+    "scripts.body_scan_pairs.boundaries": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/boundaries.py",
+    "scripts.body_scan_pairs.pipeline": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/pipeline.py",
+    "scripts.body_scan_pairs.preview": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/preview.py",
+    "scripts.body_scan_pairs.verify": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/verify.py",
+    "scripts.body_scan_pairs.__main__": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/__main__.py",
+    "scripts.body_scan_pairs.tests": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/tests/__init__.py",
+    "scripts.body_scan_pairs.tests.test_pairs": "/root/apps/case-studio/best-practices/body-scan-pairs/scripts/body_scan_pairs/tests/test_pairs.py"
+  },
+  "manifest_sha256": "168c38cf1a59fac96bce3b4260bb92a60958043c456d7c2da62578099769b53a",
+  "tests": {
+    "count": 18,
+    "passed": true
+  },
+  "execution": {
+    "cwd": "/tmp",
+    "PYTHONPATH": "unset"
+  },
+  "baseline": "/root/autodl-fs/case-studio/experiments/body-scan-pairs-hard-v1-20261105-final",
+  "output": "/root/autodl-fs/case-studio/experiments/best-practices-body-scan-pairs-v1-verification",
+  "counts": {
+    "pairs": {
+      "split_ready": 1,
+      "needs_review": 1
+    },
+    "ready_children": 2
+  },
+  "byte_identical_image_files": 27,
+  "image_sha256": {
+    "a0018-review.jpg": "11c6ee9eb03b3e18ca4d62b8165b03df0f5a6a6b39667a66b08314da7b53700e",
+    "a0180-review.jpg": "8811bafc8c9fa4ce9f0089e7745d1114f34b8afc45f72ee9119d41f71125b5e5",
+    "dataset/input/a0018__p01.png": "3b182b51e7809dccafcabbfac42f6a7dc9aac98eac804f15ae0d2c347a6c001b",
+    "dataset/input/a0018__p02.png": "9b05a7ec1beb55a3e56596555a864e194f7bc1cc4610f6d0f84b507279b18efc",
+    "splits/a0018/candidate-01.jpg": "5ae5ae9d2c1480a5d77e3a179329f91cdd0b44f0cf443f98dd5f1a2e9e153499",
+    "splits/a0018/boundaries.jpg": "5ae5ae9d2c1480a5d77e3a179329f91cdd0b44f0cf443f98dd5f1a2e9e153499",
+    "aligned-pinhole/g001-comparison.jpg": "81f47376c1d241e9c6073597d0c35030b12a6ecfcc195e91aefbcc1b58fd0b3a",
+    "aligned-pinhole/g001-aligned.jpg": "796a425fe98ec9d2a56c56585380e322a77d657cfab064c428eda15a60e879f5",
+    "aligned-pinhole/a0018__p01/original.png": "3b182b51e7809dccafcabbfac42f6a7dc9aac98eac804f15ae0d2c347a6c001b",
+    "aligned-pinhole/a0018__p01/aligned.png": "51485158c9307da2efc311d300c43b6253bfa2623c2db1fcded9da0808dcce87",
+    "aligned-pinhole/a0018__p01/available_mask.png": "4d64c5c16ee0a17e403526b3bcc6c8fe3ed0aec63d7cc45ad037fd45b12156b3",
+    "aligned-pinhole/a0018__p01/content_mask.png": "4d64c5c16ee0a17e403526b3bcc6c8fe3ed0aec63d7cc45ad037fd45b12156b3",
+    "aligned-pinhole/a0018__p02/original.png": "9b05a7ec1beb55a3e56596555a864e194f7bc1cc4610f6d0f84b507279b18efc",
+    "aligned-pinhole/a0018__p02/aligned.png": "2e7eab4f925dd316e6a6a3096377008896d8638143bfe79f754f5735577fea07",
+    "aligned-pinhole/a0018__p02/available_mask.png": "b46da44268c1518c0b5868ee5cb081fa90aa59200ea656e75759b53db3fdb048",
+    "aligned-pinhole/a0018__p02/content_mask.png": "dd225f2bcc68fffd489371d01986e71488c82e3c350242a0288f75989ef091ef",
+    "aligned/g001-comparison.jpg": "81f47376c1d241e9c6073597d0c35030b12a6ecfcc195e91aefbcc1b58fd0b3a",
+    "aligned/g001-aligned.jpg": "796a425fe98ec9d2a56c56585380e322a77d657cfab064c428eda15a60e879f5",
+    "aligned/g001-upgrade.jpg": "e8d37a37738984a0254660928de6b30914a72747d2e452154de96b9a14dd1397",
+    "aligned/a0018__p01/original.png": "3b182b51e7809dccafcabbfac42f6a7dc9aac98eac804f15ae0d2c347a6c001b",
+    "aligned/a0018__p01/aligned.png": "51485158c9307da2efc311d300c43b6253bfa2623c2db1fcded9da0808dcce87",
+    "aligned/a0018__p01/available_mask.png": "4d64c5c16ee0a17e403526b3bcc6c8fe3ed0aec63d7cc45ad037fd45b12156b3",
+    "aligned/a0018__p01/content_mask.png": "4d64c5c16ee0a17e403526b3bcc6c8fe3ed0aec63d7cc45ad037fd45b12156b3",
+    "aligned/a0018__p02/original.png": "9b05a7ec1beb55a3e56596555a864e194f7bc1cc4610f6d0f84b507279b18efc",
+    "aligned/a0018__p02/aligned.png": "2e7eab4f925dd316e6a6a3096377008896d8638143bfe79f754f5735577fea07",
+    "aligned/a0018__p02/available_mask.png": "b46da44268c1518c0b5868ee5cb081fa90aa59200ea656e75759b53db3fdb048",
+    "aligned/a0018__p02/content_mask.png": "dd225f2bcc68fffd489371d01986e71488c82e3c350242a0288f75989ef091ef"
+  },
+  "semantics_identical": [
+    "pair status/reason/layout",
+    "split coordinates",
+    "child classification",
+    "source hashes",
+    "geometry",
+    "pose",
+    "framing",
+    "parent-coordinate mappings"
+  ],
+  "new_vlm_requests": 0,
+  "verification": {
+    "version": "body-scan-pairs-v1",
+    "output": "/autodl-fs/data/case-studio/experiments/best-practices-body-scan-pairs-v1-verification",
+    "verified": true,
+    "pair_counts": {
+      "split_ready": 1,
+      "needs_review": 1
+    },
+    "verified_lossless_children": 2,
+    "ready_children": 2,
+    "pairs": [
+      {
+        "asset_id": "a0018",
+        "rectangles_parent_xyxy": [
+          [
+            0,
+            0,
+            540,
+            1350
+          ],
+          [
+            540,
+            0,
+            1080,
+            1350
+          ]
+        ],
+        "source_sha256": "5bcebeb2a1a95767276723ac24363dac130125926132bec0b7bb24a87dc7f944"
+      }
+    ],
+    "excluded_pairs": [],
+    "needs_review_pairs": [
+      {
+        "asset_id": "a0180",
+        "reason": "seam_detail_uncertain",
+        "reason_zh": "整图与接缝局部判断不一致，未能确认硬拼接，已拦截待复核。"
+      }
+    ],
+    "alignment_checks": [
+      {
+        "asset_id": "a0018__p01",
+        "status": "verified",
+        "output_size": [
+          768,
+          1792
+        ],
+        "parent_coordinate_roundtrip": true,
+        "valid_rectangle": true,
+        "aligned_sha256": "51485158c9307da2efc311d300c43b6253bfa2623c2db1fcded9da0808dcce87"
+      },
+      {
+        "asset_id": "a0018__p02",
+        "status": "verified",
+        "output_size": [
+          768,
+          1792
+        ],
+        "parent_coordinate_roundtrip": true,
+        "valid_rectangle": true,
+        "aligned_sha256": "2e7eab4f925dd316e6a6a3096377008896d8638143bfe79f754f5735577fea07"
+      }
+    ],
+    "code_sha256": {
+      "__init__.py": "f7e63f5475f42e2672d98bbc75323c5cbabe8d3e492d16e8f15b88d92fa286ed",
+      "__main__.py": "bdfae7469881ad684ecec0863dd70abb7482f5c1cdae107b88cb67cb05e6feb6",
+      "boundaries.py": "9d793f951498f9ffdd2f9de15f1298bdd66913281b5bbaa8a9fd44097cb821e1",
+      "evidence.py": "7ab7bca6fc0b205ad07f6eb7fa5f868941147fc5c91ae24862a7de7208e021d4",
+      "pipeline.py": "22b2593cd2d37f75ab1c9a91cf63de93b2f0512b1bc654ff01bf8552da59fdfd",
+      "preview.py": "91e3b22e43cef3eb76f8351773a6951000a7b3c6e2034e0f243b7fbc12bad74f",
+      "tests/__init__.py": "bc0a7bf36d89e80b54885c064c37a9e13e9866c351c9231517fface70f4aec17",
+      "tests/test_pairs.py": "92a1961b9a8ddff260514d856423f90363dc88167004a44a018111fee79120ec",
+      "verify.py": "376e16243262f35100bd866f6bfd904c43f1adb74bf9a1951833538783a8c9e0"
+    },
+    "scope": "pixel-exact crops and coordinate invariants; semantic judgments are model-reviewed, not ground truth"
+  },
+  "scope": "Copies approved behavior, including uncertainty blocking; does not claim universal seam classification accuracy."
+}
