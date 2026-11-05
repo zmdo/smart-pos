@@ -1,8 +1,11 @@
 """Common shoulder-relative framing, with a bounded vertical display stretch."""
 import math
+from collections import Counter
 from dataclasses import dataclass
 
 import numpy as np
+
+from .visibility import profile_name
 
 PROFILES = {
     'full_body': {'label': '全身', 'height': 1920, 'shoulder_y': .23},
@@ -23,6 +26,7 @@ class Config:
     max_crop_loss: float = .25
     crop_step: float = .02
     max_steps: int = 80
+    adaptive_group_ratio: bool = True
 
     def __post_init__(self):
         if not 256 <= self.width <= 2048:
@@ -81,14 +85,15 @@ def crop_steps(common, final, config):
     raise ValueError('crop_iteration_limit')
 
 
-def plan_group(items, profile, config=None, profiles=None):
+def plan_group(items, profile, config=None, profiles=None, output_height=None):
     config = config or Config(); profiles = profiles or PROFILES
     if profile not in profiles or not items:
         raise ValueError('unknown_or_empty_profile')
     state = profiles[profile]
     if not isinstance(state['label'], str) or not 0 <= state['shoulder_y'] <= .5 or not math.isfinite(state['height']):
         raise ValueError('invalid_profile_configuration')
-    width = config.width; height = round(state['height']*width/768)
+    width = config.width
+    height = round(state['height']*width/768) if output_height is None else output_height
     if not 256 <= height <= 6144 or not .5 <= height/width <= 4:
         raise ValueError('invalid_profile_dimensions')
     common = intersection([r['normalized_bounds'] for r in items])
@@ -96,15 +101,27 @@ def plan_group(items, profile, config=None, profiles=None):
     required = np.r_[required[:, :2].min(axis=0), required[:, 2:].max(axis=0)]
     required[:2] = np.minimum(required[:2], [-.5, -.5])
     required[2:] = np.maximum(required[2:], [.5, .5])
-    # Preserve complete head/feet whenever they were actually confirmed visible.
+    # Retain the visible vertical body span that fits inside the common frame.
+    # A single sticker touching the top must not make a short-frame preference
+    # crop every other head; mixed full/partial photos already share the minimum
+    # available extent before this extra aspect-ratio adjustment.
+    bodies = np.asarray([r['visible_bounds_normalized'] for r in items])
+    required[1] = min(required[1], max(common[1], bodies[:, 1].min()))
+    required[3] = max(required[3], min(common[3], bodies[:, 3].max()))
+    # A mixed full/partial group shares its available body extent. Never create
+    # a second frame to retain a body part absent from other photos of the person.
+    protect_head = all(r['visibility']['head'] == 'complete' for r in items)
+    protect_feet = all(r['visibility']['lower_extent'] == 'feet_complete' for r in items)
     for item in items:
-        body = item['visible_bounds_normalized']; value = item['visibility']
-        if value['head'] == 'complete':
+        body = item['visible_bounds_normalized']
+        if protect_head:
             required[1] = min(required[1], body[1])
-        if value['lower_extent'] == 'feet_complete':
+        if protect_feet:
             required[3] = max(required[3], body[3])
     detail = {'profile': profile, 'common_rectangle': common.tolist(), 'required_rectangle': required.tolist(),
-              'member_ids': [r['asset_id'] for r in items]}
+              'member_ids': [r['asset_id'] for r in items],
+              'protected_parts': {'shoulders_hips': True, 'head': protect_head, 'feet': protect_feet,
+                                  'shared_visible_vertical_extent': True}}
     if not contains(common, required):
         raise PlanUnavailable('common_frame_would_cut_confirmed_head_feet_or_torso', detail)
     w0, h0 = common[2:]-common[:2]
@@ -144,4 +161,52 @@ def plan_group(items, profile, config=None, profiles=None):
             'uniform_content_edges': [float(offset[0]-.5), float(offset[1]-.5),
                                       float(offset[0]+uniform_scale*w-.5), float(offset[1]+uniform_scale*h-.5)],
             'presentation_only': True,
-            'note': 'Display applies the same bounded vertical aspect change to the whole cohort; not a measurement image.'}
+            'note': 'One person uses one common crop, output size and bounded aspect change; presentation only.'}
+
+
+def plan_person(items, config=None, profiles=None):
+    """Choose ONE preferred frame from collective visibility, then fit the whole person group."""
+    config = config or Config(); profiles = profiles or PROFILES
+    if not items:
+        raise ValueError('empty_person_group')
+    lower_order = {'feet_complete': 0, 'feet_cut': 1, 'feet_touching_border': 1,
+                   'calves_cut': 2, 'knees_cut': 3, 'thighs_cut': 4, 'hips_cut': 5}
+    lower = max((r['visibility']['lower_extent'] for r in items), key=lambda name: (lower_order[name], name))
+    all_heads = all(r['visibility']['head'] == 'complete' for r in items)
+    profile = profile_name({'head': 'complete' if all_heads else 'cut', 'lower_extent': lower})
+    preferred_height = round(profiles[profile]['height']*config.width/768)
+    selection = {'group_policy': 'one_frame_per_store_member',
+                 'input_coverage_counts': dict(sorted(Counter(profile_name(r['visibility']) for r in items).items())),
+                 'group_head_complete_in_all_photos': all_heads, 'group_lower_extent': lower,
+                 'preferred_output_size': [config.width, preferred_height], 'ratio_adjusted': False}
+    try:
+        plan = plan_group(items, profile, config, profiles)
+    except PlanUnavailable as error:
+        adaptable = ('target_ratio_requires_excessive_group_crop',
+                     'target_aspect_would_cut_required_body', 'crop_iteration_limit')
+        if not config.adaptive_group_ratio or str(error) not in adaptable:
+            raise
+        common = np.asarray(error.detail['common_rectangle'])
+        required = np.asarray(error.detail['required_rectangle'])
+        w, h = common[2:]-common[:2]; rw, rh = required[2:]-required[:2]
+        # Only one dimension is cropped. This interval enforces both area loss
+        # and the number of small crop steps without relaxing either threshold.
+        loss = min(config.max_crop_loss, 1-(1-config.crop_step)**config.max_steps)
+        low_ratio = max(.5, rh/w, (1-loss)*h/w)
+        high_ratio = min(4., config.max_stretch*h/max(rw, (1-loss)*w))
+        low = max(256, math.ceil(config.width*low_ratio-1e-7))
+        high = min(6144, math.floor(config.width*high_ratio+1e-7))
+        if low > high:
+            raise PlanUnavailable('no_single_group_ratio_satisfies_constraints', error.detail) from None
+        height = max(low, min(preferred_height, high))
+        plan = plan_group(items, profile, config, profiles, output_height=height)
+        selection.update({'ratio_adjusted': height != preferred_height, 'ratio_adjustment_reason': str(error),
+                          'feasible_height_range': [low, high]})
+    plan.update(selection)
+    crop = plan['crop_rectangle']
+    plan['originally_complete_parts_cropped'] = [
+        {'asset_id': r['asset_id'],
+         'head': r['visibility']['head'] == 'complete' and crop[1] > r['visible_bounds_normalized'][1]+1e-6,
+         'feet': r['visibility']['lower_extent'] == 'feet_complete' and crop[3] < r['visible_bounds_normalized'][3]-1e-6}
+        for r in items]
+    return plan

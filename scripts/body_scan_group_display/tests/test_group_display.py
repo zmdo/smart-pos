@@ -2,6 +2,7 @@
 import tempfile
 import unittest
 import json
+import copy
 from pathlib import Path
 from unittest.mock import patch
 
@@ -10,8 +11,8 @@ import numpy as np
 
 from scripts.body_scan_group_display.inputs import digest
 from scripts.body_scan_group_display.pipeline import render, reuse_audit, run
-from scripts.body_scan_group_display.verify import verify
-from scripts.body_scan_group_display.planning import Config, PlanUnavailable, contains, intersection, plan_group
+from scripts.body_scan_group_display.verify import verify, verify_person_groups
+from scripts.body_scan_group_display.planning import Config, PlanUnavailable, contains, intersection, plan_group, plan_person
 from scripts.body_scan_group_display.visibility import profile_name, validate
 from scripts.body_scan_group_display.audit import boundary_guards
 from scripts.body_scan_group_display.boundary import BoundarySegmenter
@@ -167,6 +168,93 @@ class SourceRenderingTests(unittest.TestCase):
             self.assertTrue(result['passed'])
             self.assertEqual(result['displayed_asset_ids'], [])
             self.assertEqual(json.loads((root/'out/upstream-excluded.json').read_text()), excluded)
+
+
+class OneFramePerPersonTests(unittest.TestCase):
+    def test_full_and_partial_photos_share_the_partial_available_range(self):
+        full = item(lower='feet_complete'); full['asset_id'] = 'full'
+        partial = item((-384, -412, 384, 800), lower='thighs_cut'); partial['asset_id'] = 'partial'
+        partial['visible_bounds_normalized'][3] = 780
+        plan = plan_person([full, partial])
+        self.assertEqual(plan['profile'], 'upper_body')
+        self.assertEqual(plan['output_size'], [768, 1152])
+        self.assertEqual(plan['member_ids'], ['full', 'partial'])
+        self.assertTrue(plan['protected_parts']['head'])
+        self.assertFalse(plan['protected_parts']['feet'])
+        self.assertTrue(plan['originally_complete_parts_cropped'][0]['feet'])
+        self.assertEqual(full['visibility']['lower_extent'], 'feet_complete')
+
+    def test_missing_head_and_legs_do_not_create_a_second_frame(self):
+        full = item(lower='feet_complete')
+        partial = item((-384, -100, 384, 700), head='cut', lower='thighs_cut')
+        plan = plan_person([full, partial])
+        self.assertEqual(plan['profile'], 'torso')
+        self.assertFalse(plan['protected_parts']['head'])
+        self.assertFalse(plan['protected_parts']['feet'])
+        self.assertTrue(contains(plan['crop_rectangle'], full['required_core']))
+        self.assertTrue(plan['originally_complete_parts_cropped'][0]['head'])
+
+    def test_adjusts_whole_group_ratio_without_relaxing_body_or_stretch_limits(self):
+        first = item((-250, -400, 250, 1300), lower='feet_complete')
+        first['visible_bounds_normalized'] = [-220, -350, 220, 1290]
+        second = copy.deepcopy(first); second['asset_id'] = 'second'
+        plan = plan_person([first, second])
+        self.assertTrue(plan['ratio_adjusted'])
+        self.assertGreater(plan['output_size'][1], 1920)
+        self.assertEqual(plan['preferred_output_size'], [768, 1920])
+        self.assertTrue(contains(plan['crop_rectangle'], plan['required_rectangle']))
+        self.assertLessEqual(plan['vertical_stretch'], 1.1+1e-9)
+        self.assertLessEqual(plan['additional_crop_fraction'], .25)
+        self.assertEqual(plan['member_ids'], ['test', 'second'])
+
+    def test_fixed_group_ratio_stops_whole_group_instead_of_splitting(self):
+        first = item((-250, -400, 250, 1300), lower='feet_complete')
+        first['visible_bounds_normalized'] = [-220, -350, 220, 1290]
+        with self.assertRaisesRegex(PlanUnavailable, 'target_(aspect_would_cut_required_body|ratio_requires_excessive_group_crop)'):
+            plan_person([first], Config(adaptive_group_ratio=False))
+
+    def test_one_border_touching_head_does_not_crop_other_heads_for_the_template(self):
+        complete = item(lower='feet_touching_border'); complete['asset_id'] = 'complete'
+        border = item(head='touching_border', lower='feet_touching_border'); border['asset_id'] = 'border'
+        border['visible_bounds_normalized'][1] = -412
+        plan = plan_person([complete, border])
+        self.assertTrue(plan['ratio_adjusted'])
+        self.assertLessEqual(plan['crop_rectangle'][1], -412)
+        self.assertGreaterEqual(plan['crop_rectangle'][3], 1330)
+        self.assertFalse(plan['originally_complete_parts_cropped'][0]['head'])
+
+    def test_verifier_rejects_multiple_frames_for_one_person(self):
+        group = {'store': 'store', 'member': 'person', 'cohorts': [{}, {}]}
+        with self.assertRaisesRegex(ValueError, 'person_split_into_multiple_frames'):
+            verify_person_groups([], [group])
+
+    def test_verifier_rejects_same_person_split_across_group_ids(self):
+        group = {'store': 'store', 'member': 'person', 'cohorts': []}
+        with self.assertRaisesRegex(ValueError, 'person_split_into_multiple_groups'):
+            verify_person_groups([], [group, copy.deepcopy(group)])
+
+    def test_pipeline_groups_by_person_not_completeness_and_keeps_stores_distinct(self):
+        full = item(lower='feet_complete')
+        partial = item((-384, -412, 384, 800), lower='thighs_cut')
+        partial['visible_bounds_normalized'][3] = 780
+        other_store = copy.deepcopy(full)
+        rows = [full, partial, other_store]
+        for number, row in enumerate(rows):
+            row.update({'asset_id': f'a{number}', 'store': 'store2' if number == 2 else 'store1', 'member': 'person',
+                        'status': 'classified', 'profile': profile_name(row['visibility']),
+                        'upstream_report': {'classification': {'view': 'front'}}})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); audit = root/'audit'; audit.mkdir()
+            (audit/'items.json').write_text('[]')
+            with patch('scripts.body_scan_group_display.pipeline.reuse_audit', return_value=(rows, [], [])), \
+                    patch('scripts.body_scan_group_display.pipeline.render', return_value={}):
+                results, groups = run([], root/'out', audit=audit)
+            formats = verify_person_groups(results, groups)
+        self.assertEqual(len(groups), 2)
+        self.assertTrue(all(len(group['cohorts']) == 1 for group in groups))
+        self.assertEqual(results[0]['group_plan'], results[1]['group_plan'])
+        self.assertNotEqual(results[0]['group_id'], results[2]['group_id'])
+        self.assertEqual(formats[0]['displayed_images'], 2)
 
 
 class BoundaryReviewTests(unittest.TestCase):

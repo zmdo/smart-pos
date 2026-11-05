@@ -1,4 +1,4 @@
-"""Approved outputs → body-coverage cohorts → common crop → separate derivatives."""
+"""Approved outputs → one frame per person → separate reference/display derivatives."""
 import copy
 import json
 import shutil
@@ -14,7 +14,7 @@ from scripts.body_scan.pipeline import save_json, VIEW_ORDER
 from . import VERSION
 from .audit import run as classify
 from .inputs import digest, load_inputs
-from .planning import Config, PROFILES, PlanUnavailable, plan_group
+from .planning import Config, PROFILES, PlanUnavailable, plan_person
 from .visibility import profile_name
 
 
@@ -118,7 +118,7 @@ def run(inputs, out, audit=None, config=None, profiles=None, workers=3):
         audit = out/'visibility'
     save_json(out/'config.json', {'version': VERSION, **asdict(config), 'profiles': profiles, 'inputs': sources,
         'visibility_audit': str(Path(audit).resolve()), 'audit_items_sha256': digest(Path(audit)/'items.json'),
-        'group_policy': 'same_store_member_then_body_coverage', 'presentation_only': True,
+        'group_policy': 'one_frame_per_store_member', 'presentation_only': True,
         'resampling': 'compose approved geometry with display matrix, sample original once',
         'threshold_meaning': 'vertical_scale / horizontal_scale; not absolute pixel enlargement'})
     grouped = defaultdict(list)
@@ -129,22 +129,24 @@ def run(inputs, out, audit=None, config=None, profiles=None, workers=3):
         gid = f'g{number:03d}'
         group = {'group_id': gid, 'store': store, 'member': member, 'cohorts': []}
         groups.append(group)
-        buckets = defaultdict(list)
+        cohort = []
         for item in members:
             item['group_id'] = gid
             if item['status'] == 'classified':
-                buckets[item['profile']].append(item)
-        for profile, cohort in sorted(buckets.items()):
+                cohort.append(item)
+        if cohort:
             cohort.sort(key=lambda r: (VIEW_ORDER.get(r['upstream_report']['classification'].get('view'), 5), r['asset_id']))
-            cid = gid+'__'+profile
-            row = {'cohort_id': cid, 'profile': profile, 'asset_ids': [r['asset_id'] for r in cohort]}
+            cid = gid+'__shared'
+            row = {'cohort_id': cid, 'asset_ids': [r['asset_id'] for r in cohort]}
             group['cohorts'].append(row)
             for item in cohort:
                 item['cohort_id'] = cid
             try:
-                plan = plan_group(cohort, profile, config, profiles)
-                row.update({'status': 'planned', 'plan': plan})
+                plan = plan_person(cohort, config, profiles)
+                row.update({'status': 'planned', 'profile': plan['profile'], 'plan': plan})
+                group.update({'output_size': plan['output_size'], 'display_profile': plan['profile']})
                 for item in cohort:
+                    item['display_profile'] = plan['profile']
                     try:
                         item['output'] = render(item, plan, out/'images'/item['asset_id'])
                         item.update({'status': 'displayed', 'group_plan': plan})
@@ -169,6 +171,7 @@ def run(inputs, out, audit=None, config=None, profiles=None, workers=3):
         dest = out/'reports'; dest.mkdir(exist_ok=True)
         save_json(dest/(item['asset_id']+'.json'), item)
     save_json(out/'counts.json', {'items': dict(Counter(r['status'] for r in items)),
-        'profiles': dict(Counter(r.get('profile', 'uncertain') for r in items)), 'groups': len(groups),
+        'coverage_profiles': dict(Counter(r.get('profile', 'uncertain') for r in items)), 'groups': len(groups),
+        'group_policy': 'one_frame_per_store_member',
         'cohorts': sum(len(g['cohorts']) for g in groups), 'upstream_excluded': len(excluded)})
     return items, groups

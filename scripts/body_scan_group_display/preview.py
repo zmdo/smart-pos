@@ -29,8 +29,8 @@ def make_previews(out):
                 sections.append('<p class="review">'+html.escape(cohort['cohort_id']+' · 待复核 · '+cohort.get('reason', ''))+'</p>')
                 continue
             plan = cohort['plan']
-            caption = (f"{plan['label']} · {len(accepted)} 张 · {plan['output_size'][0]}×{plan['output_size'][1]}"
-                       f" · 纵向相对缩放 {plan['vertical_stretch']:.3f} · 同一肩部基准 / 同一取景框")
+            caption = (f"整组统一 · {len(accepted)} 张 · {plan['output_size'][0]}×{plan['output_size'][1]}"
+                       f" · 纵向相对缩放 {plan['vertical_stretch']:.3f} · 同一肩部 / 同一取景框")
             sections.append('<h3>'+html.escape(caption)+'</h3>')
             # Split large cohorts into readable sheets; all pages use the same plan.
             for start in range(0, len(accepted), 6):
@@ -69,7 +69,8 @@ def make_previews(out):
         '<style>body{max-width:1500px;margin:32px auto;padding:0 20px;background:#eeece5;color:#26352c;font:16px sans-serif}'
         'section{border-top:1px solid #ccd0c2;margin-top:36px;padding:20px 0}.photos{display:flex;gap:12px;overflow:auto}'
         'figure{margin:18px 0}img{height:400px;width:auto}summary{cursor:pointer;padding:12px 0}.review{color:#884a32}'
-        'a{color:#405f43}</style><h1>同组统一取景与展示版</h1><p>同店同名 → 当前可见身体范围分组 → 肩部共同矩形 → 有限纵向调整。</p>'
+        'a{color:#405f43}</style><h1>同组统一取景与展示版</h1><p>同店同名只生成一套画幅 → 整组共同可见范围 → 肩部共同矩形 → 统一缩放。</p>'
+        '<p>完整度只用于选择整组取景范围；同一人的全身与半身照片不再拆分画幅。各图输出尺寸、肩部位置和缩放一致，可直接拼接。</p>'
         '<p>原标准化保留；等比参考不额外改变体形比例。展示版采用轻微非等比缩放，仅用于展示，不能用作真实体形测量。</p>'
         '<p>'+html.escape(str(counts['items']))+' · 上游未放行 '+str(counts['upstream_excluded'])+' 张</p>'
         '<p><a href="body-scan-group-display-results.zip">下载全部图片、对照图与记录</a> · <a href="verification.json">查看验证</a></p>'

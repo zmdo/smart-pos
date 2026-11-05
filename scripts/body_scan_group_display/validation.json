@@ -1,18 +1,17 @@
 {
-  "version": "body-scan-group-display-v1",
+  "version": "body-scan-group-display-v2",
   "date": "2026-11-05",
   "environment": "remote GPU server /root/apps/non-grid-calibration/.venv",
   "tests": {
     "command": "python -m unittest discover -s scripts/body_scan_group_display/tests -v",
-    "passed": 24
+    "passed": 32
   },
-  "experiment_directory": "/root/autodl-fs/case-studio/experiments/body-scan-group-display-v1-validated-20261105",
+  "experiment_directory": "/root/autodl-fs/case-studio/experiments/body-scan-group-display-v2-validated-20261105",
   "counts": {
     "items": {
-      "displayed": 42,
-      "needs_review": 1
+      "displayed": 43
     },
-    "profiles": {
+    "coverage_profiles": {
       "upper_body": 10,
       "head_feet_cropped": 2,
       "head_cropped": 1,
@@ -22,20 +21,145 @@
       "full_body": 1
     },
     "groups": 11,
-    "cohorts": 16,
+    "group_policy": "one_frame_per_store_member",
+    "cohorts": 11,
     "upstream_excluded": 5
   },
   "verification": {
     "passed": true,
     "source_hashes_checked": 43,
-    "baseline_copies_checked": 42,
-    "derivative_images_checked": 84,
+    "baseline_copies_checked": 43,
+    "person_formats": [
+      {
+        "group_id": "g001",
+        "store": "景田店",
+        "member": "关文博",
+        "output_size": [
+          768,
+          1152
+        ],
+        "displayed_images": 4,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g002",
+        "store": "景田店",
+        "member": "董彦琦",
+        "output_size": [
+          768,
+          1846
+        ],
+        "displayed_images": 2,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g003",
+        "store": "景田店",
+        "member": "蒲小东",
+        "output_size": [
+          768,
+          2167
+        ],
+        "displayed_images": 2,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g004",
+        "store": "景田店",
+        "member": "黄海丽",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 3,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g005",
+        "store": "石厦店",
+        "member": "何彦霖",
+        "output_size": [
+          768,
+          1024
+        ],
+        "displayed_images": 4,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g006",
+        "store": "石厦店",
+        "member": "冯雪奕",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g007",
+        "store": "石厦店",
+        "member": "吴显昉",
+        "output_size": [
+          768,
+          1131
+        ],
+        "displayed_images": 4,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g008",
+        "store": "石厦店",
+        "member": "李禹衡",
+        "output_size": [
+          768,
+          1194
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g009",
+        "store": "石厦店",
+        "member": "潘艺文",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g010",
+        "store": "石厦店",
+        "member": "郑远晨",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 3,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g011",
+        "store": "石厦店",
+        "member": "黎国萍",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 3,
+        "single_crop_scale_and_shoulder": true
+      }
+    ],
+    "derivative_images_checked": 86,
     "displayed_asset_ids": [
       "a0005",
       "a0008",
       "a0009",
       "a0015",
       "a0025",
+      "a0034",
       "a0070",
       "a0072",
       "a0079",
@@ -74,13 +198,11 @@
       "a0018__p01",
       "a0018__p02"
     ],
-    "needs_review_asset_ids": [
-      "a0034"
-    ],
+    "needs_review_asset_ids": [],
     "max_observed_vertical_stretch": 1.0835978835978837,
     "checks": [
       "unchanged original and approved output",
-      "shared cohort crop and shoulder origin",
+      "one output size, crop, scale and shoulder origin per person",
       "complete rectangular source coverage",
       "bounded per-step crop and vertical stretch",
       "isotropic uniform reference",
@@ -89,224 +211,245 @@
     ],
     "presentation_only": true
   },
+  "group_policy": "one_frame_per_store_member",
   "visibility_evidence": {
+    "reused_audit": "/autodl-fs/data/case-studio/experiments/body-scan-group-display-v1-validated-20261105/visibility",
+    "audit_items_sha256": "1700bc94be422549956d0370868e5ca706d85820bde507a02f78edefd250970e",
     "initial_classifications": 43,
     "edge_reviews": 19,
-    "requests_in_final_cached_run": 0,
-    "note": "Real VLM responses were obtained during preceding audits; final validation reuses image-and-prompt-keyed cache."
+    "new_model_requests": 0
   },
-  "cohorts": [
+  "group_plans": [
     {
-      "cohort_id": "g001__upper_body",
-      "assets": 4,
+      "group_id": "g001",
+      "member": "关文博",
+      "frame_count": 1,
       "status": "complete",
+      "assets": 4,
+      "preferred_output_size": [
+        768,
+        1152
+      ],
       "output_size": [
         768,
         1152
       ],
+      "ratio_adjusted": false,
+      "ratio_adjustment_reason": null,
       "vertical_stretch": 1.0559120073327222,
-      "additional_crop_fraction": 0.0,
-      "reason": null
+      "additional_crop_fraction": 0.0
     },
     {
-      "cohort_id": "g002__feet_cropped",
-      "assets": 2,
+      "group_id": "g002",
+      "member": "董彦琦",
+      "frame_count": 1,
       "status": "complete",
-      "output_size": [
+      "assets": 2,
+      "preferred_output_size": [
         768,
         1792
       ],
-      "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.0485305491105954,
-      "reason": null
-    },
-    {
-      "cohort_id": "g003__head_cropped",
-      "assets": 1,
-      "status": "needs_review",
-      "output_size": null,
-      "vertical_stretch": null,
-      "additional_crop_fraction": null,
-      "reason": "target_aspect_would_cut_required_body"
-    },
-    {
-      "cohort_id": "g003__head_feet_cropped",
-      "assets": 1,
-      "status": "complete",
       "output_size": [
+        768,
+        1846
+      ],
+      "ratio_adjusted": true,
+      "ratio_adjustment_reason": "target_aspect_would_cut_required_body",
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.01985903663959776
+    },
+    {
+      "group_id": "g003",
+      "member": "蒲小东",
+      "frame_count": 1,
+      "status": "complete",
+      "assets": 2,
+      "preferred_output_size": [
         768,
         1536
       ],
-      "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.10610551274451674,
-      "reason": null
+      "output_size": [
+        768,
+        2167
+      ],
+      "ratio_adjusted": true,
+      "ratio_adjustment_reason": "target_ratio_requires_excessive_group_crop",
+      "vertical_stretch": 0.9999999999999999,
+      "additional_crop_fraction": 0.0049904815529815405
     },
     {
-      "cohort_id": "g004__feet_cropped",
-      "assets": 3,
+      "group_id": "g004",
+      "member": "黄海丽",
+      "frame_count": 1,
       "status": "complete",
+      "assets": 3,
+      "preferred_output_size": [
+        768,
+        1792
+      ],
       "output_size": [
         768,
         1792
       ],
+      "ratio_adjusted": false,
+      "ratio_adjustment_reason": null,
       "vertical_stretch": 1.0724117295032916,
-      "additional_crop_fraction": 0.0,
-      "reason": null
+      "additional_crop_fraction": 0.0
     },
     {
-      "cohort_id": "g005__head_legs_cropped",
-      "assets": 1,
+      "group_id": "g005",
+      "member": "何彦霖",
+      "frame_count": 1,
       "status": "complete",
-      "output_size": [
+      "assets": 4,
+      "preferred_output_size": [
         768,
-        1184
+        1024
       ],
-      "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.10506424792139069,
-      "reason": null
-    },
-    {
-      "cohort_id": "g005__torso",
-      "assets": 3,
-      "status": "complete",
       "output_size": [
         768,
         1024
       ],
+      "ratio_adjusted": false,
+      "ratio_adjustment_reason": null,
       "vertical_stretch": 1.0835978835978837,
-      "additional_crop_fraction": 0.0,
-      "reason": null
+      "additional_crop_fraction": 0.0
     },
     {
-      "cohort_id": "g006__feet_cropped",
-      "assets": 6,
+      "group_id": "g006",
+      "member": "冯雪奕",
+      "frame_count": 1,
       "status": "complete",
+      "assets": 6,
+      "preferred_output_size": [
+        768,
+        1792
+      ],
       "output_size": [
         768,
         1792
       ],
+      "ratio_adjusted": false,
+      "ratio_adjustment_reason": null,
       "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.0,
-      "reason": null
+      "additional_crop_fraction": 0.0
     },
     {
-      "cohort_id": "g007__head_legs_cropped",
-      "assets": 3,
+      "group_id": "g007",
+      "member": "吴显昉",
+      "frame_count": 1,
       "status": "complete",
-      "output_size": [
-        768,
-        1184
-      ],
-      "vertical_stretch": 1.0468611847922193,
-      "additional_crop_fraction": 0.0,
-      "reason": null
-    },
-    {
-      "cohort_id": "g007__torso",
-      "assets": 1,
-      "status": "complete",
-      "output_size": [
+      "assets": 4,
+      "preferred_output_size": [
         768,
         1024
       ],
+      "output_size": [
+        768,
+        1131
+      ],
+      "ratio_adjusted": true,
+      "ratio_adjustment_reason": "target_aspect_would_cut_required_body",
       "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.1599671862182116,
-      "reason": null
+      "additional_crop_fraction": 0.0
     },
     {
-      "cohort_id": "g008__upper_body",
-      "assets": 6,
+      "group_id": "g008",
+      "member": "李禹衡",
+      "frame_count": 1,
       "status": "complete",
-      "output_size": [
+      "assets": 6,
+      "preferred_output_size": [
         768,
         1152
       ],
-      "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.035175879396984966,
-      "reason": null
-    },
-    {
-      "cohort_id": "g009__feet_cropped",
-      "assets": 4,
-      "status": "complete",
       "output_size": [
         768,
-        1792
+        1194
       ],
+      "ratio_adjusted": true,
+      "ratio_adjustment_reason": "target_aspect_would_cut_required_body",
       "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.0,
-      "reason": null
+      "additional_crop_fraction": 0.0
     },
     {
-      "cohort_id": "g009__full_body",
-      "assets": 1,
+      "group_id": "g009",
+      "member": "潘艺文",
+      "frame_count": 1,
       "status": "complete",
-      "output_size": [
-        768,
-        1920
-      ],
-      "vertical_stretch": 1.0714285714285714,
-      "additional_crop_fraction": 0.0,
-      "reason": null
-    },
-    {
-      "cohort_id": "g009__head_feet_cropped",
-      "assets": 1,
-      "status": "complete",
-      "output_size": [
+      "assets": 6,
+      "preferred_output_size": [
         768,
         1536
       ],
-      "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.14285714285714268,
-      "reason": null
-    },
-    {
-      "cohort_id": "g010__feet_cropped",
-      "assets": 3,
-      "status": "complete",
       "output_size": [
         768,
         1792
       ],
+      "ratio_adjusted": true,
+      "ratio_adjustment_reason": "target_aspect_would_cut_required_body",
       "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.0,
-      "reason": null
+      "additional_crop_fraction": 0.0
     },
     {
-      "cohort_id": "g011__feet_cropped",
-      "assets": 3,
+      "group_id": "g010",
+      "member": "郑远晨",
+      "frame_count": 1,
       "status": "complete",
+      "assets": 3,
+      "preferred_output_size": [
+        768,
+        1792
+      ],
       "output_size": [
         768,
         1792
       ],
+      "ratio_adjusted": false,
+      "ratio_adjustment_reason": null,
       "vertical_stretch": 1.0,
-      "additional_crop_fraction": 0.0,
-      "reason": null
-    }
-  ],
-  "needs_review": [
+      "additional_crop_fraction": 0.0
+    },
     {
-      "asset_id": "a0034",
-      "member": "蒲小东",
-      "reason": "target_aspect_would_cut_required_body"
+      "group_id": "g011",
+      "member": "黎国萍",
+      "frame_count": 1,
+      "status": "complete",
+      "assets": 3,
+      "preferred_output_size": [
+        768,
+        1792
+      ],
+      "output_size": [
+        768,
+        1792
+      ],
+      "ratio_adjusted": false,
+      "ratio_adjustment_reason": null,
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.0
     }
   ],
   "raised_arm_anchor_preserved": [
     "a0101"
   ],
   "artifact_sha256": {
-    "config.json": "92df696bbf8cf96b5c646ff1dcd26446055a430650891f6d91274bbf0b54cee0",
-    "summary.json": "e2eecc63cd8b921b4c348a2e86e52c836bfda1cbd45eeb8f45c98271fc298e20",
-    "groups.json": "753988bd566302558e289adfd695788cb53962dfde748b2a490363e40888bb89",
-    "verification.json": "53aee5502a38df195175b573ac895aeddad5da42950fc1443b9cb413898363ac",
-    "body-scan-group-display-results.zip": "76658a3d7aa46ba50581ddb5081820e04c29c138f70f1c72d768ec250798e1ca"
+    "config.json": "a24de08d8c59d6153167871019cf8179f32b977813185f19101172f544d0093b",
+    "summary.json": "60211f3eb3b507fa0ee7f3ea67d8a77e27d6ff0389aadfec4e89b7674c419060",
+    "groups.json": "75e3bcb6bc269095f6071b1e9c7dcbc0645c871e7d6844f16f3c179354b34432",
+    "verification.json": "9f8b92d6073bc875a753ddde72219488c54d2b6f856193ea837742e4e46f8b99",
+    "body-scan-group-display-results.zip": "c35572a7eb83e5e0ccc5a4589dd6f8c79e43b5d8724183c31d5662560cba6c3a"
   },
   "scope": {
     "frozen_best_practices_changed": false,
     "website_connected": false,
     "workflow_orchestrator_implemented": false,
     "presentation_only": true
+  },
+  "previous_version": {
+    "version": "body-scan-group-display-v1",
+    "source_commit": "b1e5fa8b08708bbfc67b00f07901d77874841461",
+    "experimental_outputs_preserved": true,
+    "superseded_policy": "same_store_member_then_body_coverage"
   }
 }

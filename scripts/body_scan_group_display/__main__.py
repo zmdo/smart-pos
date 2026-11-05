@@ -25,7 +25,8 @@ def main():
     parser.add_argument('--max-crop-loss', type=float, default=.25, help='Additional area removed AFTER common intersection')
     parser.add_argument('--crop-step', type=float, default=.02)
     parser.add_argument('--max-steps', type=int, default=80)
-    parser.add_argument('--profiles', type=Path, help='JSON overriding height (at width 768), shoulder_y and label by profile')
+    parser.add_argument('--fixed-group-ratio', action='store_true', help='Stop the whole group if its preferred ratio cannot fit')
+    parser.add_argument('--profiles', type=Path, help='Preferred group frames: height (at width 768), shoulder_y and label by collective coverage')
     args = parser.parse_args()
     if args.settings:
         os.environ['CASE_SETTINGS'] = str(args.settings.resolve())
@@ -38,7 +39,8 @@ def main():
             if not isinstance(value, dict) or set(value)-{'height', 'shoulder_y', 'label'}:
                 parser.error('invalid profile fields')
             profiles[key].update(value)
-    config = Config(args.width, args.max_stretch, args.max_crop_loss, args.crop_step, args.max_steps)
+    config = Config(args.width, args.max_stretch, args.max_crop_loss, args.crop_step, args.max_steps,
+                    adaptive_group_ratio=not args.fixed_group_ratio)
     cv2.setNumThreads(4)
     run(args.input, args.out, args.audit, config, profiles, args.workers)
     verify(args.out)

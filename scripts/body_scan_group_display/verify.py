@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 
 from scripts.body_scan.pipeline import save_json
+from scripts.body_scan.landmarks import member_key
 from .inputs import digest
 from .planning import contains
 
@@ -16,11 +17,39 @@ def require(value, reason):
         raise ValueError(reason)
 
 
+def verify_person_groups(rows, groups):
+    """Reject multiple formats for a person even if each old-style cohort is valid."""
+    keys = set(); seen = set(); formats = []
+    for group in groups:
+        key = member_key(group)
+        require(key not in keys, 'person_split_into_multiple_groups')
+        keys.add(key)
+        cohorts = group['cohorts']
+        require(len(cohorts) <= 1, 'person_split_into_multiple_frames')
+        members = [r for r in rows if member_key(r) == key and r['status'] == 'displayed']
+        if not members:
+            continue
+        require(len(cohorts) == 1 and 'plan' in cohorts[0], 'missing_shared_person_plan')
+        cohort = cohorts[0]; plan = cohort['plan']
+        require(group.get('output_size') == plan['output_size'], 'group_output_size_mismatch')
+        for item in members:
+            require(item['group_id'] == group['group_id'] and item['cohort_id'] == cohort['cohort_id'], 'person_frame_assignment_mismatch')
+            require(item['asset_id'] in cohort['asset_ids'], 'image_not_in_shared_person_plan')
+            require(item['group_plan'] == plan, 'person_uses_multiple_crop_or_scale_parameters')
+            seen.add(item['asset_id'])
+        formats.append({'group_id': group['group_id'], 'store': group['store'], 'member': group['member'],
+                        'output_size': plan['output_size'], 'displayed_images': len(members),
+                        'single_crop_scale_and_shoulder': True})
+    require(seen == {r['asset_id'] for r in rows if r['status'] == 'displayed'}, 'displayed_image_missing_person_group')
+    return formats
+
+
 def verify(out):
     out = Path(out)
     rows = json.loads((out/'summary.json').read_text(encoding='utf-8'))
     groups = json.loads((out/'groups.json').read_text(encoding='utf-8'))
     config = json.loads((out/'config.json').read_text(encoding='utf-8'))
+    person_formats = verify_person_groups(rows, groups)
     plans = {c['cohort_id']: c['plan'] for g in groups for c in g['cohorts'] if 'plan' in c}
     accepted = []
     for row in rows:
@@ -67,10 +96,11 @@ def verify(out):
                 require((valid[use] == 255).all(), 'reference_has_missing_photo_pixels')
         accepted.append(row['asset_id'])
     result = {'passed': True, 'source_hashes_checked': len(rows), 'baseline_copies_checked': len(accepted),
+              'person_formats': person_formats,
               'derivative_images_checked': 2*len(accepted), 'displayed_asset_ids': accepted,
               'needs_review_asset_ids': [r['asset_id'] for r in rows if r['status'] != 'displayed'],
               'max_observed_vertical_stretch': max((r['group_plan']['vertical_stretch'] for r in rows if r['status'] == 'displayed'), default=None),
-              'checks': ['unchanged original and approved output', 'shared cohort crop and shoulder origin',
+              'checks': ['unchanged original and approved output', 'one output size, crop, scale and shoulder origin per person',
                          'complete rectangular source coverage', 'bounded per-step crop and vertical stretch',
                          'isotropic uniform reference', 'single composed source transform', 'output dimensions and hashes'],
               'presentation_only': True}
