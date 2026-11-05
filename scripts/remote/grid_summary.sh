@@ -15,6 +15,11 @@ for row in rows:
         print('  localization:', loc.get('route', 'unresolved'),
               'VLM requests:', loc.get('vlm', {}).get('request_count', 0))
     if row['status'] == 'corrected':
+        crop = row.get('crop', {})
+        if crop:
+            print('  crop:', crop['status'], crop.get('output_size', crop.get('reason')),
+                  'subject mask retained:', crop.get('subject_mask_retained_fraction'),
+                  'presentation:', row.get('presentation_file'))
         for axis in ('vertical', 'horizontal'):
             b, a = row['before'][axis], row['after'][axis]
             print(f"  {axis}: median {b['median_deg']:.3f} -> {a['median_deg']:.3f}; "

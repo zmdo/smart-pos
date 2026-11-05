@@ -13,6 +13,7 @@ import cv2
 import numpy as np
 
 from subject_localization import LocalizationError, SubjectLocalizer
+from grid_crop import CropUnavailable, crop_rectified, save_crop_preview
 
 
 class UncertainGrid(ValueError):
@@ -265,7 +266,7 @@ def line_overlay(img, v, h):
     return canvas
 
 
-def save_comparison(out, result_name='corrected.png', result_label='AFTER v2.2'):
+def save_comparison(out, result_name='corrected.png', result_label='AFTER v2.3'):
     from PIL import Image, ImageDraw
     out = Path(out)
     images = [Image.open(out / name).convert('RGB') for name in ('original.png', result_name)]
@@ -332,7 +333,7 @@ def process(src, classification, out, detector=None, localizer=None):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=False)
     report = {'source': str(src), 'classification': classification, 'status': 'skipped',
-              'method': 'single-square-grid-joint-homography-v2.2',
+              'method': 'single-square-grid-joint-homography-v2.3',
               'quality_policy': 'grid_first', 'warnings': []}
     reason = eligibility(classification)
     if reason:
@@ -403,6 +404,21 @@ def process(src, classification, out, detector=None, localizer=None):
             report['quality'] = 'usable_with_notes' if report['warnings'] else 'pass'
             (out / 'candidate.png').rename(out / 'corrected.png')
             save_comparison(out)
+            report['presentation_file'] = 'corrected.png'
+            # Cropping cannot alter rectification acceptance or its full canvas.
+            # Only the primary subject guides framing, never a poster's mask.
+            try:
+                primary_mask = masks[next(i for i, b in enumerate(boxes) if b == box)]
+                cropped, crop_report = crop_rectified(result, valid, img, primary_mask, box, H, sv, sh,
+                                                      extent_lines=(v, u))
+                cv2.imwrite(str(out / 'cropped.png'), cropped)
+                save_crop_preview(out, result, cropped, crop_report['bounds_xyxy'])
+                report['crop'] = crop_report
+                report['presentation_file'] = 'cropped.png'
+            except CropUnavailable as e:
+                report['crop'] = {'status': 'needs_review', 'reason': str(e)}
+                report['warnings'].append('crop_needs_review')
+                report['quality'] = 'usable_with_notes'
         except LocalizationError as e:
             report.update({'status': 'needs_review', 'reason': str(e), 'localization': e.trace})
         except UncertainGrid as e:
