@@ -1,0 +1,312 @@
+{
+  "version": "body-scan-group-display-v1",
+  "date": "2026-11-05",
+  "environment": "remote GPU server /root/apps/non-grid-calibration/.venv",
+  "tests": {
+    "command": "python -m unittest discover -s scripts/body_scan_group_display/tests -v",
+    "passed": 24
+  },
+  "experiment_directory": "/root/autodl-fs/case-studio/experiments/body-scan-group-display-v1-validated-20261105",
+  "counts": {
+    "items": {
+      "displayed": 42,
+      "needs_review": 1
+    },
+    "profiles": {
+      "upper_body": 10,
+      "head_feet_cropped": 2,
+      "head_cropped": 1,
+      "feet_cropped": 21,
+      "head_legs_cropped": 4,
+      "torso": 4,
+      "full_body": 1
+    },
+    "groups": 11,
+    "cohorts": 16,
+    "upstream_excluded": 5
+  },
+  "verification": {
+    "passed": true,
+    "source_hashes_checked": 43,
+    "baseline_copies_checked": 42,
+    "derivative_images_checked": 84,
+    "displayed_asset_ids": [
+      "a0005",
+      "a0008",
+      "a0009",
+      "a0015",
+      "a0025",
+      "a0070",
+      "a0072",
+      "a0079",
+      "a0090",
+      "a0091",
+      "a0093",
+      "a0094",
+      "a0101",
+      "a0103",
+      "a0104",
+      "a0109",
+      "a0111",
+      "a0113",
+      "a0130",
+      "a0132",
+      "a0133",
+      "a0134",
+      "a0140",
+      "a0141",
+      "a0142",
+      "a0146",
+      "a0148",
+      "a0149",
+      "a0151",
+      "a0153",
+      "a0156",
+      "a0158",
+      "a0159",
+      "a0160",
+      "a0161",
+      "a0162",
+      "a0163",
+      "a0166",
+      "a0167",
+      "a0168",
+      "a0018__p01",
+      "a0018__p02"
+    ],
+    "needs_review_asset_ids": [
+      "a0034"
+    ],
+    "max_observed_vertical_stretch": 1.0835978835978837,
+    "checks": [
+      "unchanged original and approved output",
+      "shared cohort crop and shoulder origin",
+      "complete rectangular source coverage",
+      "bounded per-step crop and vertical stretch",
+      "isotropic uniform reference",
+      "single composed source transform",
+      "output dimensions and hashes"
+    ],
+    "presentation_only": true
+  },
+  "visibility_evidence": {
+    "initial_classifications": 43,
+    "edge_reviews": 19,
+    "requests_in_final_cached_run": 0,
+    "note": "Real VLM responses were obtained during preceding audits; final validation reuses image-and-prompt-keyed cache."
+  },
+  "cohorts": [
+    {
+      "cohort_id": "g001__upper_body",
+      "assets": 4,
+      "status": "complete",
+      "output_size": [
+        768,
+        1152
+      ],
+      "vertical_stretch": 1.0559120073327222,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    },
+    {
+      "cohort_id": "g002__feet_cropped",
+      "assets": 2,
+      "status": "complete",
+      "output_size": [
+        768,
+        1792
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.0485305491105954,
+      "reason": null
+    },
+    {
+      "cohort_id": "g003__head_cropped",
+      "assets": 1,
+      "status": "needs_review",
+      "output_size": null,
+      "vertical_stretch": null,
+      "additional_crop_fraction": null,
+      "reason": "target_aspect_would_cut_required_body"
+    },
+    {
+      "cohort_id": "g003__head_feet_cropped",
+      "assets": 1,
+      "status": "complete",
+      "output_size": [
+        768,
+        1536
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.10610551274451674,
+      "reason": null
+    },
+    {
+      "cohort_id": "g004__feet_cropped",
+      "assets": 3,
+      "status": "complete",
+      "output_size": [
+        768,
+        1792
+      ],
+      "vertical_stretch": 1.0724117295032916,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    },
+    {
+      "cohort_id": "g005__head_legs_cropped",
+      "assets": 1,
+      "status": "complete",
+      "output_size": [
+        768,
+        1184
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.10506424792139069,
+      "reason": null
+    },
+    {
+      "cohort_id": "g005__torso",
+      "assets": 3,
+      "status": "complete",
+      "output_size": [
+        768,
+        1024
+      ],
+      "vertical_stretch": 1.0835978835978837,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    },
+    {
+      "cohort_id": "g006__feet_cropped",
+      "assets": 6,
+      "status": "complete",
+      "output_size": [
+        768,
+        1792
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    },
+    {
+      "cohort_id": "g007__head_legs_cropped",
+      "assets": 3,
+      "status": "complete",
+      "output_size": [
+        768,
+        1184
+      ],
+      "vertical_stretch": 1.0468611847922193,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    },
+    {
+      "cohort_id": "g007__torso",
+      "assets": 1,
+      "status": "complete",
+      "output_size": [
+        768,
+        1024
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.1599671862182116,
+      "reason": null
+    },
+    {
+      "cohort_id": "g008__upper_body",
+      "assets": 6,
+      "status": "complete",
+      "output_size": [
+        768,
+        1152
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.035175879396984966,
+      "reason": null
+    },
+    {
+      "cohort_id": "g009__feet_cropped",
+      "assets": 4,
+      "status": "complete",
+      "output_size": [
+        768,
+        1792
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    },
+    {
+      "cohort_id": "g009__full_body",
+      "assets": 1,
+      "status": "complete",
+      "output_size": [
+        768,
+        1920
+      ],
+      "vertical_stretch": 1.0714285714285714,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    },
+    {
+      "cohort_id": "g009__head_feet_cropped",
+      "assets": 1,
+      "status": "complete",
+      "output_size": [
+        768,
+        1536
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.14285714285714268,
+      "reason": null
+    },
+    {
+      "cohort_id": "g010__feet_cropped",
+      "assets": 3,
+      "status": "complete",
+      "output_size": [
+        768,
+        1792
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    },
+    {
+      "cohort_id": "g011__feet_cropped",
+      "assets": 3,
+      "status": "complete",
+      "output_size": [
+        768,
+        1792
+      ],
+      "vertical_stretch": 1.0,
+      "additional_crop_fraction": 0.0,
+      "reason": null
+    }
+  ],
+  "needs_review": [
+    {
+      "asset_id": "a0034",
+      "member": "蒲小东",
+      "reason": "target_aspect_would_cut_required_body"
+    }
+  ],
+  "raised_arm_anchor_preserved": [
+    "a0101"
+  ],
+  "artifact_sha256": {
+    "config.json": "92df696bbf8cf96b5c646ff1dcd26446055a430650891f6d91274bbf0b54cee0",
+    "summary.json": "e2eecc63cd8b921b4c348a2e86e52c836bfda1cbd45eeb8f45c98271fc298e20",
+    "groups.json": "753988bd566302558e289adfd695788cb53962dfde748b2a490363e40888bb89",
+    "verification.json": "53aee5502a38df195175b573ac895aeddad5da42950fc1443b9cb413898363ac",
+    "body-scan-group-display-results.zip": "76658a3d7aa46ba50581ddb5081820e04c29c138f70f1c72d768ec250798e1ca"
+  },
+  "scope": {
+    "frozen_best_practices_changed": false,
+    "website_connected": false,
+    "workflow_orchestrator_implemented": false,
+    "presentation_only": true
+  }
+}
