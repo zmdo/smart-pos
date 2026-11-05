@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--shoulder-y', type=float, default=.23)
     parser.add_argument('--pose-weights', type=Path, default=Path('/root/autodl-fs/portrait-studio/models/yolo11m-pose.pt'))
     parser.add_argument('--pose-cache', type=Path, default=Path('/root/autodl-fs/case-studio/cache/shoulder-pose'))
-    parser.add_argument('--settings', type=Path, help='Read-only VLM settings; only used if YOLO needs a coarse-box fallback')
+    parser.add_argument('--settings', type=Path, help='Read-only VLM settings for standardization background screening and optional localization fallback')
     parser.add_argument('--font', type=Path, default=Path('/root/autodl-fs/case-studio/fonts/NotoSansSC.ttf'))
     args = parser.parse_args()
     if args.refine_background and args.non_grid_mode != 'pinhole':

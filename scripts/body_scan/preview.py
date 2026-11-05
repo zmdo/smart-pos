@@ -47,7 +47,7 @@ def make_previews(out, records, groups, font_path, previous=None, stage_label=No
             action = '网格校正' if row['route'] == 'grid' else {'camera_pinhole':'非网格：相机校正', 'wall_pinhole':'非网格：墙面校正'}.get(row['geometry']['action'], '非网格：几何不变')
             draw.text((x, output_y - 40), action, font=small, fill='#26352c')
         if group['excluded_asset_ids']:
-            draw.text((15, sheet_height - 35), '待复核：' + ', '.join(group['excluded_asset_ids']), font=small, fill='#9d513d')
+            draw.text((15, sheet_height - 35), '未进入成品：' + ', '.join(group['excluded_asset_ids']), font=small, fill='#9d513d')
         name = group['group_id'] + '-comparison.jpg'
         sheet.save(out / name, quality=92)
         links.append('<h2>' + html.escape(title) + '</h2><img src="' + name + '" loading="lazy">')
@@ -80,8 +80,11 @@ def make_previews(out, records, groups, font_path, previous=None, stage_label=No
             upgrade_name = group['group_id']+'-upgrade.jpg'
             upgrade.save(out/upgrade_name, quality=92)
             links.append('<h3>接入前后</h3><img src="'+upgrade_name+'" loading="lazy">')
-    pending = [r for r in records if r['status'] == 'needs_review']
-    links.append('<h2>待复核</h2><ul>' + ''.join('<li>' + html.escape(r['asset_id'] + ': ' + r['reason']) + '</li>' for r in pending) + '</ul>')
+    for status, title in [('skipped', '已跳过'), ('needs_review', '待复核')]:
+        rows = [r for r in records if r['status'] == status]
+        links.append('<h2>' + title + '</h2><ul>' + ''.join(
+            '<li>' + html.escape(' / '.join(str(r.get(k) or '') for k in ('store', 'member', 'asset_id'))
+                + '：' + (r.get('reason_detail') or r['reason'])) + '</li>' for r in rows) + '</ul>')
     mode_title = '非网格相机校正' if any(r.get('geometry', {}).get('action') == 'camera_pinhole' for r in records) else '非网格几何保持原样'
     if stage_label:
         mode_title=stage_label

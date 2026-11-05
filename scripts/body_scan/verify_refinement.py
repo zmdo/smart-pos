@@ -11,6 +11,7 @@ import numpy as np
 from .geometry import project
 from .pipeline import save_json
 from .wall_geometry import residual
+from .background_screening import VERSION as BACKGROUND_SCREENING_VERSION
 
 
 def digest(path):
@@ -28,12 +29,20 @@ def verify(out):
     changed=[];retained=[];grids=[];scales=[];angles={};new_requests=0
     for row in rows:
         aid=row['asset_id'];prior=old[aid]
-        assert row['status']==prior['status'],aid
+        screening=row.get('background_screening',{})
+        if row['status']!=prior['status']:
+            assert prior['status']=='rectangular' and screening.get('version')==BACKGROUND_SCREENING_VERSION,aid
+            assert screening.get('source_sha256')==prior['source_sha256'],aid
+            assert row['reason']==screening['reason'],aid
+            assert (row['status'],screening['status']) in (('skipped','excluded'),('needs_review','needs_review')),aid
+            assert not (out/aid/'aligned.png').exists(),aid
         audit=row.get('refinement',{})
         for key in ('scene_trace','selection_trace','quality_review','scale_review'):
             new_requests+=audit.get(key,{}).get('request_count',0)
         if row['status']!='rectangular':
             continue
+        if config.get('background_screening_version')==BACKGROUND_SCREENING_VERSION:
+            assert screening.get('status')=='allowed' and screening.get('source_sha256')==row['source_sha256'],aid
         assert digest(Path(row['source']))==row['source_sha256']==prior['source_sha256'],aid
         assert digest(out/aid/'original.png')==digest(baseline/aid/'original.png'),aid
         image=cv2.imread(str(out/aid/'aligned.png'))

@@ -13,6 +13,7 @@ from .framing import (UniformConfig, uniform_plan, compose_full_source,
                       required_subject_rectangle, select_rectangle, rectangular_image)
 from .grid import grid_transform
 from .classification import apply_audit
+from .background_screening import BackgroundScreening, VERSION as BACKGROUND_SCREENING_VERSION, apply_screening
 from .landmarks import member_key
 from .localization import LocalizationError
 from .non_grid import NonGridTransform
@@ -73,7 +74,8 @@ def render(source, subject, classification, pose_estimator, config, non_grid_tra
     return output, available, used, report
 
 
-def process(asset, input_dir, out, localizer, pose_estimator, config, non_grid_transform=None):
+def process(asset, input_dir, out, localizer, pose_estimator, config, non_grid_transform=None,
+            background_screening=None):
     classification = asset.get('class') or {}
     report = {'asset_id': asset['id'], 'store': asset.get('store'), 'member': asset.get('member'),
               'classification': classification, 'status': 'skipped'}
@@ -97,6 +99,11 @@ def process(asset, input_dir, out, localizer, pose_estimator, config, non_grid_t
             raise ValueError('unreadable_image')
         report.update({'source': str(source_path), 'size': [source.shape[1], source.shape[0]],
                        'source_sha256': hashlib.sha256(source_path.read_bytes()).hexdigest()})
+        if not apply_screening(report, source, background_screening or BackgroundScreening()):
+            dest = out / asset['id']
+            dest.mkdir()
+            save_json(dest / 'report.json', report)
+            return report
         subject = localizer.localize(source, classification)
         report.update({'subject_box': subject.box, 'localization': subject.trace})
         image, available, used, measurements = render(source, subject, classification, pose_estimator, config,
@@ -139,7 +146,7 @@ def group_records(records):
 
 
 def run(job_path, out, localizer, pose_estimator, config=None, asset_ids=None, background='all',
-        non_grid_transform=None, classification_audit=None):
+        non_grid_transform=None, classification_audit=None, background_screening=None):
     config = config or UniformConfig()
     job_path, out = Path(job_path), Path(out)
     assets = json.loads(job_path.read_text(encoding='utf-8'))['assets']
@@ -160,14 +167,17 @@ def run(job_path, out, localizer, pose_estimator, config=None, asset_ids=None, b
         assets = [a for a in assets if ((a.get('class') or {}).get('background') == 'grid_board') == (background == 'grid')]
     out.mkdir(parents=True, exist_ok=False)
     non_grid_transform = non_grid_transform or NonGridTransform()
+    background_screening = background_screening or BackgroundScreening()
     save_json(out / 'config.json', {'version': VERSION, **asdict(config), 'job': str(job_path),
                                   'background_filter': background, 'asset_ids': [a['id'] for a in assets],
                                   'classification_source': 'verified_wall_audit' if audit_info else 'existing_job_vlm_labels',
-                                  'classification_audit': audit_info, 'non_grid_transform': non_grid_transform.mode})
+                                  'classification_audit': audit_info, 'non_grid_transform': non_grid_transform.mode,
+                                  'background_screening_version': BACKGROUND_SCREENING_VERSION})
     records = []
     save_json(out / 'summary.json', records)
     for asset in assets:
-        row = process(asset, job_path.parent / 'input', out, localizer, pose_estimator, config, non_grid_transform)
+        row = process(asset, job_path.parent / 'input', out, localizer, pose_estimator, config, non_grid_transform,
+                      background_screening)
         records.append(row)
         save_json(out / 'summary.json', records)
         print(asset['id'], row['status'], row.get('reason', row.get('route', '')), flush=True)

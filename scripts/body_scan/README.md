@@ -41,10 +41,24 @@ PYTHONUTF8=1 OMP_NUM_THREADS=4 /root/apps/non-grid-calibration/.venv/bin/python 
 
 全流程46张验证结果见 `validation-wall-v3.json`：41张成品中4张采用墙面修正，含1张同组尺度修正；另外37张成品及其遮罩与v2逐字节相同。40项单测通过。细节见 [方案23](../../docs/solutions/会员案例素材生产方案/23-墙面参照与同组尺度修正.md)。
 
+## 标准化入口：海报背景排除
+
+标准化开始时，对原图单独进行 `standardization-background-v1` 背景审查，在主体定位、相机/网格校正和肩髋检测之前执行。该规则不改变上游 `body_scan` 分类，也不放在 `body_scan_group_display` 展示节点中。
+
+- 主体紧邻的主要背景为海报、大幅广告、人物照片墙或印刷拼贴：`skipped`，原因码 `poster_background_excluded`。中文原因：主体以海报或广告印刷画面为主要背景，背景人物及复杂图案易干扰人物定位与几何校正，按规则跳过标准化。
+- 普通网格、身高刻度、白墙、木纹墙继续原有流程；网格上的数字、少量说明文字，以及画面边缘的小海报不因此淘汰。
+- 模型结论不确定、置信度低于0.8、响应不合规或请求失败：`needs_review`，不会静默放行或假装已确认海报。
+- 结果保存到 `background_screening`，包含原图SHA、模型依据、版本及缓存轨迹；跳过原因写入 `summary.json`、单图 `report.json` 和预览的“已跳过”清单。被排除的图片不生成新的 `aligned.png`。
+- 审查缓存位于 `cache/standardization-background`，绑定图片像素、提示词、版本和模型服务；旧的 `cls-v3-wall` 标签不能代替这项检查。独立 `refinement` 入口处理历史基线时也会审查原图，防止旧成品绕过规则。
+
+当前规则位于可迭代的 `scripts/body_scan`，冻结的 `best-practices` 副本保留历史版本及其哈希。调用当前标准化节点请使用 `scripts/run_body_scan_refined.sh`。既有展示页是历史产物，需接收新的标准化结果后再生成，不会原地删除图片。
+
+2026-11-05远程验证：沿用历史46张输入及2张拆分子图，45张通过基础体测条件的候选接受背景审查；仅蒲小东的 `a0034` 被确认为海报并排除。其余44张通过背景审查，其中原有2张继续因相机/肩髋问题待复核。单图结果40张成功、4张跳过、2张待复核；拆分子图2张成功。42张标准化成品及两种遮罩共126个文件与旧结果逐字节一致，47项单测通过。按原展示算法重建后为42张/11组；只有 `a0025` 的派生取景随同组海报移除而变化，顶部不再额外裁切。详见 [validation-background-v1.json](validation-background-v1.json)。这是验证子集，仍非整个上传包的全量结果。
+
 ## 流程
 
 1. 接收上游 `job.json` 的大模型标签，只处理单人、静态站立、主体紧邻墙面的体测图。过滤对比图、训练图、镜面/户外和人数不明确/多人图片。旧标签缺少墙面或体测姿态证据时进入待复核，可通过带原图SHA的 `--classification-audit` 补充分类，不改写历史job；不把 YOLO 框数量当成人数标签。
-2. 共用主体定位：YOLO → 尺寸重试/重复框合并 → 大模型粗框 + ROI YOLO → SAM 兜底。大模型粗框提示词已适配不同背景，并升级缓存版本；SAM 与 API 配置读取不再依赖旧实验脚本。
+2. 标准化入口先执行上述海报背景审查；放行后共用主体定位：YOLO → 尺寸重试/重复框合并 → 大模型粗框 + ROI YOLO → SAM 兜底。大模型粗框提示词已适配不同背景，并升级缓存版本；SAM 与 API 配置读取不再依赖旧实验脚本。
 3. 按背景选择几何变换：网格沿用批准的双轴拟合及质量验收；非网格使用 `non_grid.NonGridTransform`，复用独立实验的 GeoCalib **pinhole** 相机侧倾/俯仰估计和画布约束。只返回校正矩阵和诊断，不渲染中间图片；不启用 radial。
 4. 共用肩髋定位：在原图检测关键点，映射至校正坐标后进行全图/局部一致性核验，并重新计算取景比例。正背面使用双侧肩髋，侧面使用可信一侧。不使用头部、发型或肩宽确定比例，不把真实高低肩强制转平。
 5. 共用取景：肩髋长度统一为画布高度的 27%，肩部锚点置于高度 23%、水平中心；默认画布 768×1792。将背景变换和取景缩放/平移合并，最终图从原图采样一次。尽量使用整个原图范围，排除明确的原图黑边；在真实有效像素内求包含肩髋的最大矩形，矩形之外保留浅色画布。
@@ -59,6 +73,7 @@ PYTHONUTF8=1 OMP_NUM_THREADS=4 /root/apps/non-grid-calibration/.venv/bin/python 
 | 模块 | 职责 |
 | --- | --- |
 | `pipeline.py` / `classification.py` | 过滤、旧job复核合并、路由、报告及分组 |
+| `background_screening.py` | 标准化前审查原图背景，排除海报并记录原因 |
 | `grid.py` / `non_grid.py` | 返回背景几何矩阵和诊断 |
 | `../non_grid_camera/calibration.py` / `geometry.py` | 复用批准的相机估计、缓存和画布约束 |
 | `localization.py` / `segmentation.py` | 主体定位和 SAM 分割 |
@@ -90,9 +105,9 @@ bash scripts/run_body_scan.sh \
 
 上述audit覆盖本批46张；其他历史素材先用 `scripts.non_grid_camera.audit` 复核并传入新audit。新 `cls-v3-wall` job 已有必要证据时可省略此参数。审计版本不符、重复ID或原图SHA不匹配会在创建输出目录前报错；未覆盖且证据不足的历史标签进入待复核。
 
-`--job` 中每项素材需要 `id/path/store/member/class`，原图路径相对 `job.json` 同级 `input/`。归一化、去重和 VLM 分类仍由现有网站的上游流程负责，本脚本不重新解压或分类。
+`--job` 中每项素材需要 `id/path/store/member/class`，原图路径相对 `job.json` 同级 `input/`。归一化、去重和七类素材分类仍由上游流程负责，本脚本不重新解压或重判素材类别；新增背景审查仅决定是否进入标准化。
 
-VLM 兜底按需只读服务器 `settings.json`，也可传 `--settings`；密钥不会写入输出或代码。支持 `CASE_YOLO`、`CASE_SAM`、`CASE_SAM_CONFIG` 覆盖模型，`--pose-weights` 和 `--pose-cache` 覆盖姿态模型及缓存。
+标准化背景审查及VLM定位兜底只读服务器 `settings.json`，也可传 `--settings`；密钥不会写入输出或代码。支持 `CASE_YOLO`、`CASE_SAM`、`CASE_SAM_CONFIG` 覆盖模型，`--pose-weights` 和 `--pose-cache` 覆盖姿态模型及缓存。
 
 主要产物：`summary.json`、`groups.json`、`counts.json`、`config.json`，每张成功图片的 `original.png`、`aligned.png`、`available_mask.png`、`content_mask.png`、`report.json`，每组 `gXXX-comparison.jpg` / `gXXX-aligned.jpg` 和可选 `gXXX-upgrade.jpg`，以及可离线打开的 `index.html`、完整 `body-scan-results.zip`。
 

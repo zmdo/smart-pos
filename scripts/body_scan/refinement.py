@@ -17,6 +17,7 @@ from .reference import VisualEvidence,SELECT,SELECT_VERSION,SCALE,SCALE_VERSION
 from .segmentation import SamSegmenter
 from . import wall_geometry as wall
 from . import group_scale
+from .background_screening import BackgroundScreening, VERSION as BACKGROUND_SCREENING_VERSION, apply_screening
 
 
 def compose(source,row,H,config,scale_plan=None):
@@ -83,7 +84,7 @@ def apply_group_scale(out,target,plan,members,config,evidence):
     save_json(out/aid/'report.json',row)
 
 
-def run(baseline,out,evidence=None,group_ids=None,enable_group_scale=True):
+def run(baseline,out,evidence=None,group_ids=None,enable_group_scale=True,background_screening=None):
     baseline,out=Path(baseline),Path(out)
     rows=json.loads((baseline/'summary.json').read_text(encoding='utf-8'))
     config_data=json.loads((baseline/'config.json').read_text(encoding='utf-8'))
@@ -100,16 +101,29 @@ def run(baseline,out,evidence=None,group_ids=None,enable_group_scale=True):
     out.mkdir(parents=True,exist_ok=False)
     config=UniformConfig(**{k:config_data[k] for k in ('width','height','torso_fraction','shoulder_y','background_rgb')})
     save_json(out/'config.json',{**config_data,'version':'body-scan-wall-v3','baseline':str(baseline),
+                              'background_screening_version':BACKGROUND_SCREENING_VERSION,
                               'baseline_summary_sha256':hashlib.sha256((baseline/'summary.json').read_bytes()).hexdigest()})
     evidence=evidence or VisualEvidence();segmenter=SamSegmenter();contexts=[]
+    background_screening=background_screening or BackgroundScreening()
     for row in rows:
         aid=row['asset_id']
         if row['status']!='rectangular':
+            if row.get('background_screening'):
+                (out/aid).mkdir()
+                save_json(out/aid/'report.json',row)
+            continue
+        # Recheck originals even for a legacy baseline or a non-selected refinement group.
+        source=cv2.imread(row['source'])
+        if not apply_screening(row,source,background_screening):
+            (out/aid).mkdir()
+            save_json(out/aid/'report.json',row)
+            print(aid,row['status'],row['reason'],flush=True)
             continue
         shutil.copytree(baseline/aid,out/aid)
+        save_json(out/aid/'report.json',row)
         if row['route']!='non_grid' or aid not in selected:
             continue
-        source=cv2.imread(row['source']);audit={'status':'retained_pinhole'};row['refinement']=audit
+        audit={'status':'retained_pinhole'};row['refinement']=audit
         try:
             scene,trace=evidence.scene(source);audit.update({'scene':scene,'scene_trace':trace})
             if not wall.scene_valid(scene):

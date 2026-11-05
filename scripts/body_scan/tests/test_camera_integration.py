@@ -101,9 +101,10 @@ class CameraIntegrationTests(unittest.TestCase):
             root = Path(tmp); cv2.imwrite(str(root/'source.png'), self.source)
             localizer = Mock(); localizer.localize.return_value = self.subject
             pose = Mock(); pose.locate.side_effect = AlignmentUnavailable('pose_failed')
+            screening = Mock(); screening.check.return_value = {'status': 'allowed'}
             row = pipeline.process({'id': 'a', 'path': 'source.png', 'class': LABELS, 'store': '店', 'member': '人'},
                                    root, root/'out', localizer, pose, UniformConfig(),
-                                   NonGridTransform(calibrator=Mock(return_value=estimate())))
+                                   NonGridTransform(calibrator=Mock(return_value=estimate())), screening)
             self.assertEqual(row['status'], 'needs_review')
             self.assertEqual(row['reason'], 'pose_failed')
             self.assertTrue(row['geometry']['correction_applied'])

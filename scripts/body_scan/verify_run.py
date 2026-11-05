@@ -10,6 +10,7 @@ import numpy as np
 
 from .geometry import project
 from .pipeline import save_json
+from .background_screening import VERSION as BACKGROUND_SCREENING_VERSION
 
 
 def sha256(path):
@@ -28,6 +29,9 @@ def verify(out, grid_baseline=None, camera_baseline=None):
             assert sha256(Path(row['source'])) == row['source_sha256'], (row['asset_id'], 'source changed')
     for row in accepted:
         aid = row['asset_id']
+        if config.get('background_screening_version') == BACKGROUND_SCREENING_VERSION:
+            screening = row.get('background_screening', {})
+            assert screening.get('status') == 'allowed' and screening.get('source_sha256') == row['source_sha256'], aid
         image = cv2.imread(str(out / aid / 'aligned.png'))
         used = cv2.imread(str(out / aid / 'content_mask.png'), 0)
         available = cv2.imread(str(out / aid / 'available_mask.png'), 0)
