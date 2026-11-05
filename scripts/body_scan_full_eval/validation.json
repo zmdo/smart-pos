@@ -1,0 +1,614 @@
+{
+  "version": "body-scan-full-eval-stores-v1",
+  "date": "2026-11-06",
+  "source_commit": "ba798b70f71de1d4e502f3536f1d20f9faa49d29",
+  "remote_result": "/root/autodl-fs/case-studio/experiments/body-scan-full-model-eval-stores-v1-20261106",
+  "local_report": "/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-full-model-eval-stores-v1/index.html",
+  "scope": {
+    "all_files": 231,
+    "matching_local_remote_files": 231,
+    "store_files": 194,
+    "excluded_reference_files": 37,
+    "store_still_images": 179,
+    "store_non_images": 15,
+    "original_file_statuses": {
+      "excluded": 111,
+      "needs_review": 9,
+      "skipped": 3,
+      "displayed": 53,
+      "split_ready": 18
+    },
+    "generated_child_images": 36,
+    "displayed_images": 82,
+    "display_review_images": 6,
+    "standardization_statuses": {
+      "rectangular": 88,
+      "skipped": 3,
+      "needs_review": 7
+    },
+    "all_files_accounted_for": true,
+    "no_reference_in_results": true
+  },
+  "models": {
+    "deepseek": "deepseek-flash",
+    "qwen": "qwen3.8-max"
+  },
+  "classification": {
+    "all_images": 179,
+    "real_source_images": 179,
+    "kind_agreement_all": 172,
+    "body_binary_agreement_real_sources": 179,
+    "body_inputs_by_provider": {
+      "deepseek": 83,
+      "qwen": 83
+    },
+    "anatomical_side_label_disagreements": 17
+  },
+  "model_metrics": {
+    "deepseek": {
+      "timing_tokens_cost": {
+        "capture-session-clusters-v1": {
+          "logical_calls": 20,
+          "http_attempts": 20,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 0,
+          "failed_logical_calls": 0,
+          "failed_attempts": 0,
+          "latency_p50_seconds": 1.984,
+          "latency_p95_seconds": 2.624,
+          "latency_mean_seconds": 1.998,
+          "input_tokens": 90524,
+          "output_tokens": 4181,
+          "cached_input_tokens": 46208,
+          "returned_models": {
+            "deepseek-flash": 20
+          },
+          "cost_estimate": {
+            "currency": "USD",
+            "offpeak": 0.009295,
+            "peak": 0.018589
+          }
+        },
+        "cls-v3-wall-full-eval": {
+          "logical_calls": 179,
+          "http_attempts": 179,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 0,
+          "failed_logical_calls": 0,
+          "failed_attempts": 0,
+          "latency_p50_seconds": 1.439,
+          "latency_p95_seconds": 1.826,
+          "latency_mean_seconds": 1.42,
+          "input_tokens": 276546,
+          "output_tokens": 17755,
+          "cached_input_tokens": 114560,
+          "returned_models": {
+            "deepseek-flash": 179
+          },
+          "cost_estimate": {
+            "currency": "USD",
+            "offpeak": 0.035295,
+            "peak": 0.070589
+          }
+        },
+        "phase-observations-v2": {
+          "logical_calls": 91,
+          "http_attempts": 110,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 19,
+          "failed_logical_calls": 13,
+          "failed_attempts": 32,
+          "latency_p50_seconds": 1.789,
+          "latency_p95_seconds": 3.568,
+          "latency_mean_seconds": 2.069,
+          "input_tokens": 312004,
+          "output_tokens": 17176,
+          "cached_input_tokens": 166400,
+          "returned_models": {
+            "deepseek-flash": 110
+          },
+          "cost_estimate": {
+            "currency": "USD",
+            "offpeak": 0.032645,
+            "peak": 0.065291
+          }
+        },
+        "standardization-background-v1": {
+          "logical_calls": 120,
+          "http_attempts": 120,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 0,
+          "failed_logical_calls": 0,
+          "failed_attempts": 0,
+          "latency_p50_seconds": 1.175,
+          "latency_p95_seconds": 1.586,
+          "latency_mean_seconds": 1.191,
+          "input_tokens": 118177,
+          "output_tokens": 4798,
+          "cached_input_tokens": 49664,
+          "returned_models": {
+            "deepseek-flash": 120
+          },
+          "cost_estimate": {
+            "currency": "USD",
+            "offpeak": 0.013305,
+            "peak": 0.026609
+          }
+        },
+        "all": {
+          "logical_calls": 410,
+          "http_attempts": 429,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 19,
+          "failed_logical_calls": 13,
+          "failed_attempts": 32,
+          "latency_p50_seconds": 1.439,
+          "latency_p95_seconds": 2.567,
+          "latency_mean_seconds": 1.525,
+          "input_tokens": 797251,
+          "output_tokens": 43910,
+          "cached_input_tokens": 376832,
+          "returned_models": {
+            "deepseek-flash": 429
+          },
+          "cost_estimate": {
+            "currency": "USD",
+            "offpeak": 0.090539,
+            "peak": 0.181079
+          }
+        }
+      },
+      "single_background": {
+        "total": 62,
+        "classes": {
+          "grid_wall": 31,
+          "plain_wall": 6,
+          "wood_wall": 24,
+          "poster_wall": 1
+        },
+        "poster_ids": [
+          "a0034"
+        ]
+      },
+      "child_background": {
+        "total": 36,
+        "classes": {
+          "grid_wall": 32,
+          "poster_wall": 2,
+          "plain_wall": 2
+        },
+        "poster_ids": [
+          "a0024__p01",
+          "a0028__p01"
+        ]
+      },
+      "fixed_observations": {
+        "fixed_pairs": 39,
+        "all_pairs_asked_in_both_orders": true,
+        "invalid_response_pairs": 10,
+        "validated_response_stages": 66,
+        "response_stages": 78,
+        "response_errors": {
+          "invalid_json_or_response_structure": 9,
+          "invalid_observation_confidence": 2,
+          "invalid_observation_fields": 1
+        },
+        "primary_directional_pairs": 19,
+        "stable_direction_after_swap": 6,
+        "opposite_direction_after_swap": 7,
+        "direction_lost_after_swap": 3,
+        "no_primary_direction": 14,
+        "primary_response_unavailable_pairs": 6,
+        "directional_primary_but_swap_unavailable": 3,
+        "pair_policy_retained_directions": 6,
+        "policy_reasons": {
+          "model_response_unavailable": 10,
+          "observation_directions_conflict": 1,
+          "swapped_direction_conflict": 7,
+          "not_comparable": 6,
+          "no_usable_difference": 7,
+          "swapped_evidence_insufficient": 2
+        },
+        "direction_stability_fraction": 0.3158,
+        "controls": 6,
+        "controls_without_invented_direction_both_orders": 6,
+        "scope": "Repeated-order consistency and identical-image controls; no historical chronology gold labels."
+      },
+      "phase": {
+        "total": 82,
+        "groups": 16,
+        "phases": {
+          "unknown": 51,
+          "before": 14,
+          "after": 17
+        },
+        "phase_sources": {
+          "unresolved": 51,
+          "comparison_position_rule": 29,
+          "paired_clear_observation": 2
+        },
+        "unknown_reasons": {
+          "session_assignment_conflict": 4,
+          "model_response_unavailable": 8,
+          "swapped_direction_conflict": 8,
+          "swapped_response_unavailable": 4,
+          "no_usable_difference": 8,
+          "single_subtle_view": 13,
+          "not_comparable": 2,
+          "swapped_evidence_insufficient": 4
+        },
+        "tentative_suggestions": 13,
+        "reviewed_multi_image_sessions": 5,
+        "comparisons": 27,
+        "model": {
+          "recorded_new_requests": 31,
+          "cached_responses": 37,
+          "failed_stages": 7
+        },
+        "upstream_excluded": 16
+      }
+    },
+    "qwen": {
+      "timing_tokens_cost": {
+        "capture-session-clusters-v1": {
+          "logical_calls": 20,
+          "http_attempts": 20,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 0,
+          "failed_logical_calls": 0,
+          "failed_attempts": 0,
+          "latency_p50_seconds": 8.378,
+          "latency_p95_seconds": 9.835,
+          "latency_mean_seconds": 8.045,
+          "input_tokens": 140256,
+          "output_tokens": 7119,
+          "cached_input_tokens": 0,
+          "returned_models": {
+            "qwen3.8-max": 20
+          },
+          "cost_estimate": {
+            "currency": "CNY",
+            "amount": 1.939356
+          }
+        },
+        "cls-v3-wall-full-eval": {
+          "logical_calls": 179,
+          "http_attempts": 179,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 0,
+          "failed_logical_calls": 0,
+          "failed_attempts": 0,
+          "latency_p50_seconds": 4.211,
+          "latency_p95_seconds": 4.947,
+          "latency_mean_seconds": 4.233,
+          "input_tokens": 348951,
+          "output_tokens": 24442,
+          "cached_input_tokens": 0,
+          "returned_models": {
+            "qwen3.8-max": 179
+          },
+          "cost_estimate": {
+            "currency": "CNY",
+            "amount": 5.067324
+          }
+        },
+        "phase-observations-v2": {
+          "logical_calls": 84,
+          "http_attempts": 84,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 0,
+          "failed_logical_calls": 0,
+          "failed_attempts": 0,
+          "latency_p50_seconds": 6.603,
+          "latency_p95_seconds": 7.68,
+          "latency_mean_seconds": 6.702,
+          "input_tokens": 336172,
+          "output_tokens": 23447,
+          "cached_input_tokens": 6144,
+          "returned_models": {
+            "qwen3.8-max": 84
+          },
+          "cost_estimate": {
+            "currency": "CNY",
+            "amount": 4.813644
+          }
+        },
+        "standardization-background-v1": {
+          "logical_calls": 120,
+          "http_attempts": 120,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 0,
+          "failed_logical_calls": 0,
+          "failed_attempts": 0,
+          "latency_p50_seconds": 2.696,
+          "latency_p95_seconds": 3.418,
+          "latency_mean_seconds": 2.727,
+          "input_tokens": 163512,
+          "output_tokens": 5231,
+          "cached_input_tokens": 0,
+          "returned_models": {
+            "qwen3.8-max": 120
+          },
+          "cost_estimate": {
+            "currency": "CNY",
+            "amount": 2.15046
+          }
+        },
+        "all": {
+          "logical_calls": 403,
+          "http_attempts": 403,
+          "timing_scope": "Sum of HTTP attempt wall times; excludes image encoding, cache replay and retry backoff.",
+          "retries": 0,
+          "failed_logical_calls": 0,
+          "failed_attempts": 0,
+          "latency_p50_seconds": 4.187,
+          "latency_p95_seconds": 7.604,
+          "latency_mean_seconds": 4.488,
+          "input_tokens": 988891,
+          "output_tokens": 60239,
+          "cached_input_tokens": 6144,
+          "returned_models": {
+            "qwen3.8-max": 403
+          },
+          "cost_estimate": {
+            "currency": "CNY",
+            "amount": 13.970784
+          }
+        }
+      },
+      "single_background": {
+        "total": 62,
+        "classes": {
+          "grid_wall": 31,
+          "plain_wall": 4,
+          "other_wall": 2,
+          "wood_wall": 24,
+          "poster_wall": 1
+        },
+        "poster_ids": [
+          "a0034"
+        ]
+      },
+      "child_background": {
+        "total": 36,
+        "classes": {
+          "grid_wall": 32,
+          "poster_wall": 2,
+          "plain_wall": 2
+        },
+        "poster_ids": [
+          "a0024__p01",
+          "a0028__p01"
+        ]
+      },
+      "fixed_observations": {
+        "fixed_pairs": 39,
+        "all_pairs_asked_in_both_orders": true,
+        "invalid_response_pairs": 0,
+        "validated_response_stages": 78,
+        "response_stages": 78,
+        "response_errors": {},
+        "primary_directional_pairs": 30,
+        "stable_direction_after_swap": 24,
+        "opposite_direction_after_swap": 3,
+        "direction_lost_after_swap": 3,
+        "no_primary_direction": 9,
+        "primary_response_unavailable_pairs": 0,
+        "directional_primary_but_swap_unavailable": 0,
+        "pair_policy_retained_directions": 24,
+        "policy_reasons": {
+          "no_usable_difference": 2,
+          "not_comparable": 7,
+          "swapped_direction_conflict": 3,
+          "observation_directions_conflict": 1,
+          "swapped_evidence_insufficient": 2
+        },
+        "direction_stability_fraction": 0.8,
+        "controls": 6,
+        "controls_without_invented_direction_both_orders": 5,
+        "scope": "Repeated-order consistency and identical-image controls; no historical chronology gold labels."
+      },
+      "phase": {
+        "total": 82,
+        "groups": 16,
+        "phases": {
+          "unknown": 36,
+          "before": 22,
+          "after": 24
+        },
+        "phase_sources": {
+          "unresolved": 36,
+          "comparison_position_rule": 29,
+          "paired_clear_observation": 16,
+          "session_visual_propagation": 1
+        },
+        "unknown_reasons": {
+          "not_comparable": 8,
+          "no_usable_difference": 4,
+          "single_subtle_view": 15,
+          "session_assignment_conflict": 7,
+          "swapped_evidence_insufficient": 2
+        },
+        "tentative_suggestions": 15,
+        "reviewed_multi_image_sessions": 4,
+        "comparisons": 27,
+        "model": {
+          "recorded_new_requests": 20,
+          "cached_responses": 48,
+          "failed_stages": 0
+        },
+        "upstream_excluded": 16
+      }
+    }
+  },
+  "phase_comparison": {
+    "same_input_ids_and_pixels": true,
+    "images": 82,
+    "phase_agreement": 67
+  },
+  "old_subset": {
+    "old_images": 42,
+    "new_images": 82,
+    "common_images": 39,
+    "added_ids": [
+      "a0010",
+      "a0014",
+      "a0020__p01",
+      "a0020__p02",
+      "a0023__p01",
+      "a0023__p02",
+      "a0024__p02",
+      "a0036__p01",
+      "a0036__p02",
+      "a0038__p01",
+      "a0038__p02",
+      "a0049__p01",
+      "a0049__p02",
+      "a0050__p01",
+      "a0050__p02",
+      "a0051__p02",
+      "a0058__p01",
+      "a0058__p02",
+      "a0059__p01",
+      "a0059__p02",
+      "a0064__p02",
+      "a0066__p01",
+      "a0066__p02",
+      "a0068__p02",
+      "a0081__p01",
+      "a0081__p02",
+      "a0085__p01",
+      "a0088__p01",
+      "a0088__p02",
+      "a0092",
+      "a0098",
+      "a0102",
+      "a0105",
+      "a0107",
+      "a0108",
+      "a0110",
+      "a0112",
+      "a0118",
+      "a0120",
+      "a0122",
+      "a0123",
+      "a0126",
+      "a0127"
+    ],
+    "removed_ids": [
+      "a0070",
+      "a0072",
+      "a0079"
+    ],
+    "common_phase_changes": [
+      {
+        "asset_id": "a0090",
+        "old": "unknown",
+        "new": "after"
+      },
+      {
+        "asset_id": "a0130",
+        "old": "after",
+        "new": "unknown"
+      },
+      {
+        "asset_id": "a0132",
+        "old": "before",
+        "new": "unknown"
+      },
+      {
+        "asset_id": "a0133",
+        "old": "after",
+        "new": "unknown"
+      },
+      {
+        "asset_id": "a0134",
+        "old": "before",
+        "new": "unknown"
+      }
+    ],
+    "common_source_hashes_match": true,
+    "common_uniform_unchanged_ids": [
+      "a0005",
+      "a0008",
+      "a0009",
+      "a0015",
+      "a0109",
+      "a0111",
+      "a0113",
+      "a0130",
+      "a0132",
+      "a0133",
+      "a0134",
+      "a0140",
+      "a0141",
+      "a0142",
+      "a0146",
+      "a0148",
+      "a0149",
+      "a0151",
+      "a0153",
+      "a0156",
+      "a0158",
+      "a0159",
+      "a0160",
+      "a0161",
+      "a0162",
+      "a0163",
+      "a0166",
+      "a0167",
+      "a0168"
+    ]
+  },
+  "checks": {
+    "tests": {
+      "new_evaluation": 8,
+      "phase_sessions_v2": 33,
+      "phase_v1": 20
+    },
+    "old_phase_inputs_unchanged": 94,
+    "old_display_images_unchanged": 137,
+    "all_231_files_match_local": true,
+    "display_passed": true,
+    "derivative_images_verified": 164,
+    "phase": {
+      "deepseek": {
+        "input_files_unchanged": 210,
+        "complete_input_coverage": true,
+        "fixed_phase_labels_preserved": true,
+        "no_display_stretch_used_for_inference": true,
+        "verified_chronology": false,
+        "scope": "Input integrity and policy checks, not semantic ground truth."
+      },
+      "qwen": {
+        "input_files_unchanged": 210,
+        "complete_input_coverage": true,
+        "fixed_phase_labels_preserved": true,
+        "no_display_stretch_used_for_inference": true,
+        "verified_chronology": false,
+        "scope": "Input integrity and policy checks, not semantic ground truth."
+      }
+    },
+    "local_links_checked": 1493,
+    "broken_local_links": 0,
+    "downloaded_derivative_hashes_verified": 164,
+    "browser_render_check": "Not performed: the in-app browser URL policy rejects file://. Static links and rendered image artifacts verified instead."
+  },
+  "result_fingerprints": {
+    "coverage.json": "9589ce3ead87597414a6fac0adc77415ccad25a5ca69411bd4797d83a5898527",
+    "coverage-counts.json": "c2ace43f817e121caa19a2713590d37c449e8e96b905ac43ad4b603c40972478",
+    "model-comparison.json": "7dad45b679abfed68c5ddf7ff337b8ad6203eee0e79a80ba4823cffec5236b68",
+    "intake-audit.json": "966bb186d9fa95bbb901fe6d9c6be9bb2f3955a3f08b3b4bcf93aa9f0980cbdb",
+    "display/summary.json": "98cce4f4475698c548df3becc2adefb0688541dc2777ae2fd7aa88328bc8bb96",
+    "display/verification.json": "df902ab2f82e367cce943ffb110a4c206a0fe6b674c33db1e2e049f620f9c8d1",
+    "phase-deepseek/summary.json": "e4875be98074a68ac31773e94328362b8d461b8bc6a2c7271eeba2a4a2c70d79",
+    "phase-qwen/summary.json": "f5b85bab1c0c8ae790ff085c64c85f37c282941df4a8642ae3c1fefea36d3749"
+  },
+  "limits": [
+    "未取得独立的真实拍摄时间或人工前后标签，不能把采用数量和自报置信度称为准确率。",
+    "几何校正、取景和标签决策规则固定；两模型独立比较分类、背景、照片外观和拍摄批次，不是两套不同裁剪结果的对比。",
+    "费用按公开标准价和接口 usage 估算，未包含账户折扣或失败请求未返回的计费用量；人民币和美元不做未经核实的汇率换算。",
+    "费用仅统计门店范围的双模型评测调用；共同几何管线、此前范围收窄前的参考目录调用及连通性探测不计入模型差额统计。",
+    "原样重复照片控制仅证明该小样本未虚构变化，不代表全部场景的准确率。"
+  ]
+}
