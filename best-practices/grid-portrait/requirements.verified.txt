@@ -1,0 +1,4 @@
+# Verified remote environment; no installation is needed on the existing server.
+numpy==1.26.4
+opencv-python==4.11.0.86
+Pillow==13.0.0
