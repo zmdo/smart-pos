@@ -1,0 +1,279 @@
+{
+  "counts": {
+    "skipped": 6,
+    "candidate": 30,
+    "needs_review": 1
+  },
+  "variants": {
+    "pinhole": {
+      "candidate": 30,
+      "needs_review": 1
+    },
+    "radial": {
+      "candidate": 30,
+      "needs_review": 1
+    }
+  },
+  "model_disagreement": [
+    "a0034",
+    "a0134",
+    "a0136"
+  ],
+  "needs_review": [
+    "a0136"
+  ],
+  "all_candidates_have_uncertainty_notes": true,
+  "wrong_training_sample_excluded": true,
+  "geometry_tests_passed": 10,
+  "classification_and_core_tests_passed": 29,
+  "originals_unchanged": true,
+  "valid_masks_and_rotations_checked": true,
+  "pipeline_integration": false,
+  "model_source_commit": "1dedb29f94fc11b896c5f572005978aeebccd67f",
+  "weights": {
+    "geocalib-distorted.tar": "13cc505928e3ff4eb26c00bff73861ab2b11b804a546323456cf5462e1f8f447",
+    "geocalib-pinhole.tar": "86d6aeacd8bbd974c59ce39f61854e00d36911c732ad89be471476fd708722ac"
+  },
+  "candidate_images": [
+    {
+      "path": "a0034/pinhole.png",
+      "sha256": "eddb7f6b2fc4d38bcf5111f94f532b06e94532c228280ad96752eb106f851bfd"
+    },
+    {
+      "path": "a0034/radial.png",
+      "sha256": "f3cf64b34c1d9f48dc64f7d6e050b3d68d8c1d7c9d127c3e783cf3c831db3f87"
+    },
+    {
+      "path": "a0101/pinhole.png",
+      "sha256": "d9044099ddc12e64cbcd37dd04ecda21474329c091918b4914e6bde29e05f40e"
+    },
+    {
+      "path": "a0101/radial.png",
+      "sha256": "b751850eaedde27791b2463a68b1950d8b2c4304444dd9acaf0963ad4c015b12"
+    },
+    {
+      "path": "a0103/pinhole.png",
+      "sha256": "7fd8a409b9f4bece1d70fa64134a49b1fde4aa216a504b19a1195e6b01021bb7"
+    },
+    {
+      "path": "a0103/radial.png",
+      "sha256": "a4ddc6faef3b3ffeea937196d8062cfee2d36b167465e6ad9de2c2e1bcc1c706"
+    },
+    {
+      "path": "a0104/pinhole.png",
+      "sha256": "94231b0a7d7f2ecbf0c3d90370b09b8a5dac0de2f7bab97a6e4dc0bcd360affe"
+    },
+    {
+      "path": "a0104/radial.png",
+      "sha256": "97acdfc466514e3ad6a9081353b152943a28a0a980d572e1d8ed530a7f1ac96b"
+    },
+    {
+      "path": "a0109/pinhole.png",
+      "sha256": "b7bfeb2db566fd01e34f0e80d0636b795401b8f03a3e22041a9cd3bb3aa429c4"
+    },
+    {
+      "path": "a0109/radial.png",
+      "sha256": "6ddceaedfb2d9bde963e86369de23f7d9fb4d6685dbf4fcaf7b6785b93cad408"
+    },
+    {
+      "path": "a0111/pinhole.png",
+      "sha256": "f5ab42f5794a072250271df8d8b75fd09bf6841ee44abb885692b5cf73928c22"
+    },
+    {
+      "path": "a0111/radial.png",
+      "sha256": "fd2dcb45b63dff1111a6ddb3cfa61ce82a2ca6c2a9dd9b1666f56768f40c1410"
+    },
+    {
+      "path": "a0113/pinhole.png",
+      "sha256": "45598b33440ffaf68cb30255c13bfc1dc1c2dbe38062ec7b06abf2812d68556c"
+    },
+    {
+      "path": "a0113/radial.png",
+      "sha256": "1166168871e2a88b7fb98d54d2fbe2e12044f550d5be2355a33019d274dd5a32"
+    },
+    {
+      "path": "a0130/pinhole.png",
+      "sha256": "497b78ad5e55345c5b23455fded456b6436893cc0a240e289c473c6977266b3a"
+    },
+    {
+      "path": "a0130/radial.png",
+      "sha256": "a2c06deaa0974c0c8b5d870f2a893d29231f3a69df69356689a141dd57537286"
+    },
+    {
+      "path": "a0132/pinhole.png",
+      "sha256": "7a86cde1d5ba331330bebd515df2c4bb2af00ff7ce0c21e2ddc74f224f22406d"
+    },
+    {
+      "path": "a0132/radial.png",
+      "sha256": "749514d0db149dfb76c2fd7ad59ee3180a393ae7f061c9f6e76daa1281978ba9"
+    },
+    {
+      "path": "a0133/pinhole.png",
+      "sha256": "d4e625c04a7fa390c3fb15f3fa37048faf7c4e30595158ef72265de8f6989f15"
+    },
+    {
+      "path": "a0133/radial.png",
+      "sha256": "2f2b2393d0624eb8b052aea95a28702ea4a1f0c3d96ab289a740cc0714638b48"
+    },
+    {
+      "path": "a0134/pinhole.png",
+      "sha256": "ed223486c36fe3c164af255c947301af6e2bda92ed742bb6484790867bbf01b3"
+    },
+    {
+      "path": "a0134/radial.png",
+      "sha256": "b368479d88e461a5e7614fbd422b6999ba1125b9b3c2f8db8bf0ae54cc320fe9"
+    },
+    {
+      "path": "a0137/pinhole.png",
+      "sha256": "1a8230461e960711033dcc252a08b1856614db6566251ad9f8ddbb6f2b41a143"
+    },
+    {
+      "path": "a0137/radial.png",
+      "sha256": "dc213486955d0978190ecdce533a26f7a4cb72072571c531f686781b1762cae6"
+    },
+    {
+      "path": "a0140/pinhole.png",
+      "sha256": "5b80cfeb64aa36dd043193edeef974ff3d15b4a7230f9be2444641e5b13de842"
+    },
+    {
+      "path": "a0140/radial.png",
+      "sha256": "bcd6bae76af8a7f5c74bc5da9bbec25d9d6b91b423708297f17d3237a78eec07"
+    },
+    {
+      "path": "a0141/pinhole.png",
+      "sha256": "2f6eb2763f428b3119d581bc0827f0b902e55cb5238a998c5ac44a375b5ab903"
+    },
+    {
+      "path": "a0141/radial.png",
+      "sha256": "a2508de46ca83398a424b6240430b450fa652d34580235a0f3bab6df199d5121"
+    },
+    {
+      "path": "a0142/pinhole.png",
+      "sha256": "db6a19ed1d183c97551c48578dc8d404bf2a2a66f30f00dea25fc1d5e647f68e"
+    },
+    {
+      "path": "a0142/radial.png",
+      "sha256": "3e55e351dac2e6a6907ccbbcf92aa92d083018abafe657762dbcd3317b025459"
+    },
+    {
+      "path": "a0146/pinhole.png",
+      "sha256": "8e5e15945080f9474e9da8d6573be04c09d6613574c4f9d30c496d881bd733e4"
+    },
+    {
+      "path": "a0146/radial.png",
+      "sha256": "cc47ff4578783b3cbaa4001f7f2752e3a56951ea4d28b30785b587bcbef1ea82"
+    },
+    {
+      "path": "a0148/pinhole.png",
+      "sha256": "f0da84d69e09e7fcc27a9e60a1a8a74113add90151ccdd1a671fb849c1be29a6"
+    },
+    {
+      "path": "a0148/radial.png",
+      "sha256": "7a4be099340ba9103a0fca845d156649cfdddd8b5a186a24b4f037209c42e92d"
+    },
+    {
+      "path": "a0149/pinhole.png",
+      "sha256": "0ee9b8b1c0b824de754bdb76986b058f915c14e99129be372b275874354a30fd"
+    },
+    {
+      "path": "a0149/radial.png",
+      "sha256": "ab35d584d33b932d932fdfef81777dcf0cfa25704688be3ac787076840c72aba"
+    },
+    {
+      "path": "a0151/pinhole.png",
+      "sha256": "1efc4747db98301053f1f94fa615d68f20bed1be1ff2c7696d095283fee671e7"
+    },
+    {
+      "path": "a0151/radial.png",
+      "sha256": "9c9dacbfd63921b012f1746ab6afffa2b0c0f588485017ed01bb53d00ef742dd"
+    },
+    {
+      "path": "a0153/pinhole.png",
+      "sha256": "d9536db2bbe6ca515b5112259cef0ec42945d96bb2d9ac17a700ae6a894e3ac5"
+    },
+    {
+      "path": "a0153/radial.png",
+      "sha256": "4474842ac3542005f74c7dc5c2a71061a393a26a4ee83ffb8952d6975244b4e7"
+    },
+    {
+      "path": "a0156/pinhole.png",
+      "sha256": "6453ddb8a81eca2e5451267186dc6ff8016b938f10be2ef2cbb299afa161bbe4"
+    },
+    {
+      "path": "a0156/radial.png",
+      "sha256": "3c5d23bcebf1c93c015e0f676713bd583c777c01ac0a56baefd4376eccf2d30f"
+    },
+    {
+      "path": "a0158/pinhole.png",
+      "sha256": "cc7c3fbceacba97976ce06e1200d025b3fb37143caa7b4543ffb9a93b61ebe33"
+    },
+    {
+      "path": "a0158/radial.png",
+      "sha256": "c74ecaf03374dca1c0c19d6acf50dbbdfc011e153cd8c88a6956fd506df576e1"
+    },
+    {
+      "path": "a0159/pinhole.png",
+      "sha256": "2497d9fc467880a9783c5220d2752896b69f35688714e8e468569087b5b205e5"
+    },
+    {
+      "path": "a0159/radial.png",
+      "sha256": "bcf4735149d93e6b6478b26a28edf62a3fc59a8608ff4ae0896016bd984c01dd"
+    },
+    {
+      "path": "a0160/pinhole.png",
+      "sha256": "eb2b18b384e7ff7b066d6a7f2c426b95ed351dce8ceafede784f95a57f4baf3f"
+    },
+    {
+      "path": "a0160/radial.png",
+      "sha256": "9886e4b375480d2391966e072cd9e9b92721b5c0cef6542c64e104e3b9e13c40"
+    },
+    {
+      "path": "a0161/pinhole.png",
+      "sha256": "c3aa963da33cedc23e4ce84654d214586dfc3eae193a439deca646ffcfda5cc4"
+    },
+    {
+      "path": "a0161/radial.png",
+      "sha256": "2e206564c00c4b5b1d225ff941e8231c5ae4465697d7754aec5d14d2d597d8d0"
+    },
+    {
+      "path": "a0162/pinhole.png",
+      "sha256": "4fafe91160373977a44f3758513b63499fee851f26ce5f7721fb822e3009c4c3"
+    },
+    {
+      "path": "a0162/radial.png",
+      "sha256": "3137258d8b9357dd24455bd221ae3b10f5c1c70a71359cc5a875174a2a48274c"
+    },
+    {
+      "path": "a0163/pinhole.png",
+      "sha256": "bbdf55cca54151f1558eb53d69b0a82a89b1f717514583685c3899cacbec160e"
+    },
+    {
+      "path": "a0163/radial.png",
+      "sha256": "eb1329737b8f07b9b87840189885d656d39b4746623ee186c55f2474f4c2a7f5"
+    },
+    {
+      "path": "a0166/pinhole.png",
+      "sha256": "5239d60d798d647f4aecde706e97d6e71291879bb1a52027894f077186789fe4"
+    },
+    {
+      "path": "a0166/radial.png",
+      "sha256": "c69bf1842816277c92a80df5d5e21e0f7e5650f04f22e78c41234ccd8d68d668"
+    },
+    {
+      "path": "a0167/pinhole.png",
+      "sha256": "851e0f4c5c9439fe01077d60ee579d8326bbf48eb0babee230ddc58068f727f3"
+    },
+    {
+      "path": "a0167/radial.png",
+      "sha256": "7f8510182027d67eff881ff8acde3f63bc7701e1d314a32df4f34c01324aea02"
+    },
+    {
+      "path": "a0168/pinhole.png",
+      "sha256": "f48133d702d5cd5a283bd966b4c525d7d6809462d411e1548390c45d6a9e2412"
+    },
+    {
+      "path": "a0168/radial.png",
+      "sha256": "5fb55dec881a47922ce9590edf8557663fa96b4418e8ba10b0a9790c395762fc"
+    }
+  ]
+}
