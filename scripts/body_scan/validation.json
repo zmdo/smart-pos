@@ -1,21 +1,24 @@
 {
-  "output_directory": "/root/autodl-fs/case-studio/experiments/body-scan-unified-v1-20261105",
+  "output_directory": "/root/autodl-fs/case-studio/experiments/body-scan-unified-v2-camera-20261105",
   "counts": {
-    "rectangular": 43,
-    "skipped": 2,
-    "needs_review": 1
+    "rectangular": 41,
+    "skipped": 3,
+    "needs_review": 2
   },
   "accepted_routes": {
     "grid": 12,
-    "non_grid": 31
+    "non_grid": 29
   },
   "non_grid_backgrounds": {
     "other": 1,
     "wood": 24,
-    "white_wall": 5,
-    "mirror": 1
+    "white_wall": 4
   },
   "review": [
+    {
+      "asset_id": "a0136",
+      "reason": "camera_estimate_outside_experiment_limits"
+    },
     {
       "asset_id": "a0137",
       "reason": "shoulder_pose_not_reliable_across_contexts"
@@ -23,7 +26,39 @@
   ],
   "new_vlm_requests": 0,
   "source_integrity": "all read originals unchanged",
-  "geometry_checks": "all outputs share canvas, torso ratio and shoulder anchor; non-grid H is identity; content is a valid filled rectangle",
+  "geometry_checks": "all outputs share canvas, torso ratio and shoulder anchor; pinhole uses approved K/R with k1=0; content is a valid filled rectangle",
+  "camera_baseline": "/root/autodl-fs/case-studio/experiments/non-grid-camera-v1-20261105",
+  "experiment_camera_matrices_verified": [
+    "a0034",
+    "a0101",
+    "a0103",
+    "a0104",
+    "a0109",
+    "a0111",
+    "a0113",
+    "a0130",
+    "a0132",
+    "a0133",
+    "a0134",
+    "a0140",
+    "a0141",
+    "a0142",
+    "a0146",
+    "a0148",
+    "a0149",
+    "a0151",
+    "a0153",
+    "a0156",
+    "a0158",
+    "a0159",
+    "a0160",
+    "a0161",
+    "a0162",
+    "a0163",
+    "a0166",
+    "a0167",
+    "a0168"
+  ],
   "grid_baseline": "/root/autodl-fs/case-studio/experiments/grid-single-v2-20261105/grid-shoulder-max-rectangle-v5-verified",
   "byte_identical_grid_files": [
     {
@@ -124,13 +159,23 @@
     }
   ],
   "unit_tests": {
-    "passed": 17,
+    "passed": 27,
     "command": "python -m unittest discover -s scripts/body_scan/tests -t . -v"
   },
+  "classification_audit": {
+    "path": "/root/autodl-fs/case-studio/experiments/body-scan-camera-v2-wall-audit/classification.json",
+    "sha256": "45187387cb51af1dc145d362d3bf8a457d2f6ab74b7af2166b44742b8a6ee7a7",
+    "total": 46,
+    "cache_hits": 37,
+    "new_vlm_requests": 9,
+    "historical_job_modified": false,
+    "excluded_training_asset_id": "a0169"
+  },
+  "camera_cache_hits": 31,
   "frozen_archive_files_verified": 12,
   "delivery_archive": {
-    "name": "non-grid-results.zip",
-    "sha256": "23acb1c01f08933617cf7235c21f476d85d9657af0d775c346a01894844f0fba",
-    "bytes": 63864250
+    "name": "camera-integrated-results.zip",
+    "bytes": 66348614,
+    "sha256": "8916a2ebf9eddea0b34a05fbd94ba3d45517599f16f93030b9ee7fe45b5fa0ac"
   }
 }

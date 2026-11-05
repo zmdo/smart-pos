@@ -10,14 +10,14 @@ import numpy as np
 from .. import pipeline
 from ..framing import UniformConfig, compose_full_source
 from ..localization import Subject
-from ..non_grid import normal_transform
+from ..non_grid import identity_transform, NonGridTransform
 
 
 class PipelineTests(unittest.TestCase):
     def test_non_grid_transform_preserves_pixels_and_returns_identity(self):
         source = np.random.default_rng(1).integers(0, 256, (80, 60, 3), dtype=np.uint8)
         before = source.copy()
-        H, metadata = normal_transform(source)
+        H, metadata = identity_transform(source)
         np.testing.assert_array_equal(H, np.eye(3))
         np.testing.assert_array_equal(source, before)
         self.assertFalse(metadata['correction_applied'])
@@ -32,7 +32,7 @@ class PipelineTests(unittest.TestCase):
         subject = Subject([30, 20, 98, 240], [], [], {})
         with patch.object(pipeline, 'grid_transform', side_effect=AssertionError('grid branch invoked')):
             image, available, used, report = pipeline.render(source, subject,
-                {'background': 'wood', 'view': 'front'}, estimator, UniformConfig(128, 256))
+                {'background': 'wood', 'view': 'front'}, estimator, UniformConfig(128, 256), NonGridTransform(mode='identity'))
         A = np.asarray(report['frame']['H_source_to_aligned'])
         np.testing.assert_allclose(A[:2, :2], np.eye(2) * (256*.27/80))
         np.testing.assert_array_equal(A[2], [0, 0, 1])
@@ -67,7 +67,8 @@ class PipelineTests(unittest.TestCase):
 
     def test_incomplete_group_keeps_review_ids_and_view_order(self):
         records = [{'asset_id': aid, 'store': '店', 'member': '人', 'status': status,
-                    'classification': {'kind': 'body_scan', 'people': 1, 'view': view}}
+                    'classification': {'kind': 'body_scan', 'people': 1, 'view': view,
+                                       'wall_background': True, 'body_scan_pose': True}}
                    for aid, view, status in [('a', 'side_left', 'rectangular'), ('b', 'front', 'needs_review'), ('c', 'back', 'rectangular')]]
         group = pipeline.group_records(records)[0]
         self.assertEqual(group['asset_ids'], ['c', 'a'])

@@ -16,9 +16,11 @@ def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def verify(out, grid_baseline=None):
-    rows = json.loads((out / 'summary.json').read_text())
-    config = json.loads((out / 'config.json').read_text())
+def verify(out, grid_baseline=None, camera_baseline=None):
+    rows = json.loads((out / 'summary.json').read_text(encoding='utf-8'))
+    config = json.loads((out / 'config.json').read_text(encoding='utf-8'))
+    camera_rows = {r['asset_id']: r for r in json.loads((camera_baseline/'summary.json').read_text(encoding='utf-8'))} if camera_baseline else {}
+    equal_camera_matrices = []
     accepted = [r for r in rows if r['status'] == 'rectangular']
     equal_grid_files = []
     for row in rows:
@@ -44,8 +46,24 @@ def verify(out, grid_baseline=None):
         assert abs(A[0, 0]*row['pose']['torso_length']/config['height'] - config['torso_fraction']) < 1e-12, aid
         np.testing.assert_allclose(row['frame']['H_source_to_aligned'], A@H, err_msg=aid)
         if row['route'] == 'non_grid':
-            np.testing.assert_array_equal(H, np.eye(3), err_msg=aid)
-            assert row['geometry']['correction_applied'] is False, aid
+            if row['geometry']['action'] == 'identity':
+                assert config['non_grid_transform'] == 'identity', aid
+                np.testing.assert_array_equal(H, np.eye(3), err_msg=aid)
+                assert row['geometry']['correction_applied'] is False, aid
+            else:
+                assert config['non_grid_transform'] == 'pinhole', aid
+                assert row['geometry']['action'] == 'camera_pinhole' and row['geometry']['correction_applied'], aid
+                assert row['geometry']['applied_k1'] == 0, aid
+                calibration = row['geometry']['calibration']
+                assert calibration['camera_model'] == 'pinhole' and calibration['k1'] == 0, aid
+                K = np.asarray(calibration['K']); R = np.asarray(calibration['R'])
+                M = np.asarray(row['geometry']['canvas_matrix'])
+                np.testing.assert_allclose(H, M@K@R.T@np.linalg.inv(K), err_msg=aid)
+                if camera_baseline:
+                    old = camera_rows[aid]
+                    assert old['source_sha256'] == row['source_sha256'], aid
+                    np.testing.assert_allclose(H, old['variants']['pinhole']['mapping']['H_source_to_output'], rtol=0, atol=1e-9, err_msg=aid)
+                    equal_camera_matrices.append(aid)
         elif grid_baseline is not None:
             for name in ('aligned.png', 'content_mask.png'):
                 digest = sha256(out / aid / name)
@@ -58,7 +76,9 @@ def verify(out, grid_baseline=None):
         'review': [{'asset_id': r['asset_id'], 'reason': r['reason']} for r in rows if r['status'] == 'needs_review'],
         'new_vlm_requests': sum(r.get('localization', {}).get('vlm', {}).get('request_count', 0) for r in rows),
         'source_integrity': 'all read originals unchanged',
-        'geometry_checks': 'all outputs share canvas, torso ratio and shoulder anchor; non-grid H is identity; content is a valid filled rectangle',
+        'geometry_checks': 'all outputs share canvas, torso ratio and shoulder anchor; pinhole uses approved K/R with k1=0; content is a valid filled rectangle',
+        'camera_baseline': str(camera_baseline) if camera_baseline else None,
+        'experiment_camera_matrices_verified': equal_camera_matrices,
         'grid_baseline': str(grid_baseline) if grid_baseline else None,
         'byte_identical_grid_files': equal_grid_files,
     }
@@ -70,7 +90,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--grid-baseline', type=Path)
+    parser.add_argument('--camera-baseline', type=Path)
     args = parser.parse_args()
-    result = verify(args.out, args.grid_baseline)
+    result = verify(args.out, args.grid_baseline, args.camera_baseline)
     print(json.dumps({k: v for k, v in result.items() if k != 'byte_identical_grid_files'}, ensure_ascii=False, indent=2))
     print('Byte-identical grid files:', len(result['byte_identical_grid_files']))

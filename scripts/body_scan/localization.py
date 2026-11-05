@@ -150,7 +150,7 @@ class YoloDetector:
 def default_config():
     # Read only: the CLI must not generate access tokens or modify app settings.
     path = Path(os.environ.get('CASE_SETTINGS', '/root/autodl-fs/case-studio/settings.json'))
-    value = json.loads(path.read_text())
+    value = json.loads(path.read_text(encoding='utf-8'))
     return {key: value.get(key, '') for key in ('base_url', 'model', 'api_key')}
 
 
@@ -227,7 +227,7 @@ class CoarseBoxProvider:
         result, cached = None, False
         if p.exists():
             try:
-                hit = json.loads(p.read_text())
+                hit = json.loads(p.read_text(encoding='utf-8'))
                 if hit['prompt_version'] == PROMPT_VERSION and hit['image_sha256'] == image_sha:
                     result = validate_hint(hit['result'])
                     cached = True
@@ -242,7 +242,7 @@ class CoarseBoxProvider:
             p.parent.mkdir(parents=True, exist_ok=True)
             temporary = p.with_suffix('.'+str(os.getpid())+'.tmp')
             temporary.write_text(json.dumps({'prompt_version': PROMPT_VERSION, 'image_sha256': image_sha,
-                                             'result': result}, ensure_ascii=False))
+                                             'result': result}, ensure_ascii=False), encoding='utf-8')
             temporary.replace(p)
         h, w = img.shape[:2]
         box = (np.array(result['bbox']) * [w, h, w, h]).tolist()

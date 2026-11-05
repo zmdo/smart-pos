@@ -9,6 +9,7 @@ from .framing import UniformConfig
 from .localization import SubjectLocalizer
 from .pipeline import run
 from .pose import ShoulderPose
+from .non_grid import NonGridTransform, DEFAULT_WEIGHTS, DEFAULT_CACHE
 from .preview import make_previews
 
 
@@ -18,6 +19,11 @@ def main():
     parser.add_argument('--out', type=Path, required=True, help='New directory; existing results cannot be overwritten')
     parser.add_argument('--asset-id', nargs='+')
     parser.add_argument('--background', choices=['all', 'grid', 'non-grid'], default='all')
+    parser.add_argument('--classification-audit', type=Path, help='Source-verified cls-v3-wall audit for historical jobs')
+    parser.add_argument('--previous', type=Path, help='Optional previous run for before/after finished-image comparisons')
+    parser.add_argument('--non-grid-mode', choices=['pinhole', 'identity'], default='pinhole')
+    parser.add_argument('--camera-weights', type=Path, default=DEFAULT_WEIGHTS)
+    parser.add_argument('--camera-cache', type=Path, default=DEFAULT_CACHE)
     parser.add_argument('--width', type=int, default=768)
     parser.add_argument('--height', type=int, default=1792)
     parser.add_argument('--torso-fraction', type=float, default=.27)
@@ -32,8 +38,9 @@ def main():
     config = UniformConfig(args.width, args.height, args.torso_fraction, args.shoulder_y)
     cv2.setNumThreads(4)
     records, groups = run(args.job, args.out, SubjectLocalizer(),
-                         ShoulderPose(args.pose_weights, args.pose_cache), config, args.asset_id, args.background)
-    make_previews(args.out, records, groups, args.font)
+                         ShoulderPose(args.pose_weights, args.pose_cache), config, args.asset_id, args.background,
+                         NonGridTransform(args.camera_weights, args.camera_cache, args.non_grid_mode), args.classification_audit)
+    make_previews(args.out, records, groups, args.font, args.previous)
 
 
 if __name__ == '__main__':

@@ -39,7 +39,7 @@ class ShoulderPose:
         path = self.cache_dir/digest[:2]/(digest+'.json') if self.cache_dir else None
         if path and path.exists():
             try:
-                cached = json.loads(path.read_text())
+                cached = json.loads(path.read_text(encoding='utf-8'))
                 measured = landmarks(cached['pose']['keypoints_source'], H, box, view)
                 return {**cached, 'pose': measured, 'cached': True, 'new_inferences': 0}
             except (ValueError, KeyError):
@@ -88,7 +88,7 @@ class ShoulderPose:
                 if path:
                     path.parent.mkdir(parents=True, exist_ok=True)
                     tmp = path.with_suffix('.'+str(os.getpid())+'.tmp')
-                    tmp.write_text(json.dumps(result, ensure_ascii=False, indent=2))
+                    tmp.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
                     tmp.replace(path)
                 return result
         error = AlignmentUnavailable('shoulder_pose_not_reliable_across_contexts')

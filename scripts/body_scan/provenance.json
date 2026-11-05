@@ -109,5 +109,20 @@
         "process (solver/QA portion extracted to grid_transform; intermediate crop and previews removed)"
       ]
     }
-  ]
+  ],
+  "camera_integration": {
+    "approved_experiment_commit": "e77b68708d66d96cfc6025ad4c7a27e259fe4193",
+    "mode": "pinhole",
+    "note": "Reuse approved calibration and canvas planning as libraries; compose camera and framing matrices for one original-image resampling. Standalone experiment and frozen grid package unchanged.",
+    "dependencies": [
+      {
+        "path": "scripts/non_grid_camera/calibration.py",
+        "sha256": "92a0c12cf6adf6f7b1b0915aad99c1f6fb6b5c4662117fd8f96e26ab2dbb0330"
+      },
+      {
+        "path": "scripts/non_grid_camera/geometry.py",
+        "sha256": "fd85562f2734a31eccddffd3feac73f3d990d153dd7e12dd51382ea4da3948dd"
+      }
+    ]
+  }
 }
