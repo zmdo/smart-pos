@@ -1,0 +1,19 @@
+{
+  "resources": [
+    {
+      "name": "SAM2",
+      "path": "/root/autodl-fs/portrait-studio/models/sam2.1_hiera_base_plus.pt",
+      "sha256": "a2345aede8715ab1d5d31b4a509fb160c5a4af1970f199d9054ccfb746c004c5"
+    },
+    {
+      "name": "Chinese preview font",
+      "path": "/root/autodl-fs/case-studio/fonts/NotoSansSC.ttf",
+      "sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da"
+    }
+  ],
+  "sam_config": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+  "read_only_settings": "/root/autodl-fs/case-studio/settings.json",
+  "visibility_cache": "/root/autodl-fs/case-studio/cache/body-scan-group-visibility",
+  "credentials_included": false,
+  "photos_or_weights_included": false
+}

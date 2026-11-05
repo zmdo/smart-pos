@@ -2,7 +2,7 @@
 
 记录日期：2026-11-05。状态：独立脚本已实现并在远程验证，尚未接入网站或统一工作流编排。
 
-入口：[scripts/body_scan_group_display](../../scripts/body_scan_group_display/README.md)。本轮未修改冻结最佳实践。
+权威入口：[同人图片大小标准化最佳实践](../../best-practices/body-scan-group-display/README.md)，已按用户确认归档；开发入口 [scripts/body_scan_group_display](../../scripts/body_scan_group_display/README.md) 继续保留。归档来源为 `3aca63e72f65ccd8d63e59a758b9a1f00065297b`，以海报过滤后的42张结果为当前验证基线；海报排除仍由上游标准化节点执行。
 
 当前实现版本：`body-scan-group-display-v2`。用户明确要求同一个人物不得构建多种比例，因此v1按完整度拆子组的规则已取消。v1来源提交 `b1e5fa8` 和旧实验结果保留作历史；本页以v2为准。整体流程见[体测图处理工作流](body-scan-processing.md)。
 

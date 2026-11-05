@@ -1,0 +1,9 @@
+# Runtime record, not an installation script. Python 3.11.18.
+# GPU server: /root/apps/non-grid-calibration/.venv
+torch==2.5.1
+torchvision==0.20.1
+numpy==1.26.4
+opencv-python==4.11.0.86
+pillow==13.0.0
+httpx==0.28.1
+SAM-2==1.0

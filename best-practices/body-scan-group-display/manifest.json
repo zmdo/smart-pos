@@ -1,0 +1,218 @@
+{
+  "authority": "user-approved same-person image-size standardization and separate display derivatives",
+  "version": "body-scan-group-display-v2",
+  "source_commit": "3aca63e72f65ccd8d63e59a758b9a1f00065297b",
+  "entrypoint": "scripts/body_scan_group_display/run.sh",
+  "input_contract": "Approved v2/v3 single-image results with originals, source hashes, rectangular masks and shoulder/hip transforms. Poster exclusion belongs to upstream standardization; use the current poster-filtered results.",
+  "files": [
+    {
+      "path": "README.md",
+      "role": "archive_support",
+      "sha256": "0a6c5f70301da2c1411f312c536c2f281cc263d3808e947b835b835457a1d88d"
+    },
+    {
+      "path": "external-resources.json",
+      "role": "archive_support",
+      "sha256": "c9e996cbc9d97f9e277e433f3d31205f4584d1ad9c82a334f86bcb57aa633b26"
+    },
+    {
+      "path": "requirements.verified.txt",
+      "role": "archive_support",
+      "sha256": "9647ae90a3423f5627f3e931d2017ea52a0e79fd9a66e721ac9896871f94ae1e"
+    },
+    {
+      "path": "run_tests.sh",
+      "role": "archive_support",
+      "sha256": "373b6c7c13836db73e4ade7810911bf23a7c834f9168576d2327dde95ba29c77"
+    },
+    {
+      "path": "scripts/__init__.py",
+      "role": "archive_support",
+      "sha256": "e85402fb8b97b3d0427a19e46e64034f4f264e3e2c3b6ddb521eae40a7506a05"
+    },
+    {
+      "path": "scripts/body_scan/__init__.py",
+      "source": "scripts/body_scan/__init__.py",
+      "sha256": "1010b10ef4c9b710a9127cb3df7b2f924196a1b011b0842739bb2f50efacdddf",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/background_screening.py",
+      "source": "scripts/body_scan/background_screening.py",
+      "sha256": "14b91dd233986aa7784397b21570c44a3635c7c9eba6befe078d504c10b46a0a",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/classification.py",
+      "source": "scripts/body_scan/classification.py",
+      "sha256": "135aa57778eda1353320b021c11c76aa1670b9ac9016c7f113324c48b0cc3097",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/framing.py",
+      "source": "scripts/body_scan/framing.py",
+      "sha256": "c2ca4df507bdce53310cad48f2136463910148d1547da9ac9a0e1d0f10fb6e19",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/geometry.py",
+      "source": "scripts/body_scan/geometry.py",
+      "sha256": "b52b9985e99817d2886d1fdab5af760bdbc5aa8c52fdb333cda147953b55cce8",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/grid.py",
+      "source": "scripts/body_scan/grid.py",
+      "sha256": "36cc9c921cc0024cec20155698f49a935720703752668e476dc6cf6ba7a1ba5f",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/landmarks.py",
+      "source": "scripts/body_scan/landmarks.py",
+      "sha256": "dfa66b0043e9cccab25c63eedfb1a9af016cfb5c2d090c6e6cb490013e293947",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/localization.py",
+      "source": "scripts/body_scan/localization.py",
+      "sha256": "4627b29df98926ccbe7a17795269bdf26605c5b93e67eac4403cfcf9046f5a5b",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/non_grid.py",
+      "source": "scripts/body_scan/non_grid.py",
+      "sha256": "2b0ad901fc33ec6b702490b6b25d5deef98e83ac8a3319353ecec4a6c441dcbd",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/pipeline.py",
+      "source": "scripts/body_scan/pipeline.py",
+      "sha256": "a0d5ed25308ff5af71a0b4eb4b0876bbe8bba7c4172cad0452da1528300ba0f4",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/reference.py",
+      "source": "scripts/body_scan/reference.py",
+      "sha256": "81383ef74127c04a354169d63495c57f55921f6bee329a6403eac2895c2b41a2",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan/segmentation.py",
+      "source": "scripts/body_scan/segmentation.py",
+      "sha256": "57878b3f6d1910a5a310e96f30df233213e303a0db0332855b304bde371f7784",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/body_scan_group_display/__init__.py",
+      "source": "scripts/body_scan_group_display/__init__.py",
+      "sha256": "abcc55052737fba1abda4872c69c9802f9f02842467747336ea7f23d8c429d06",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/__main__.py",
+      "source": "scripts/body_scan_group_display/__main__.py",
+      "sha256": "bf7f415227770d2f2a92553b50cce055740e118aa37c691c79fa749d49df90e4",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/audit.py",
+      "source": "scripts/body_scan_group_display/audit.py",
+      "sha256": "0d41acf139cbd26964b6a881fd6e3ce376f5da471eb022a7d7dff4f545165901",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/boundary.py",
+      "source": "scripts/body_scan_group_display/boundary.py",
+      "sha256": "2f0aa85ee69f8570ceb28d3320372f8c43671a356fff2326f333f294ab7190aa",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/inputs.py",
+      "source": "scripts/body_scan_group_display/inputs.py",
+      "sha256": "7141c01472006dfe5d50961064fffd02d05dc88a75150c0facf0dbb560963aa4",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/pipeline.py",
+      "source": "scripts/body_scan_group_display/pipeline.py",
+      "sha256": "bca5cc4a591ad24805d37a07735dd0555b1c1aff317fe3d373d9381ed4f116b6",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/planning.py",
+      "source": "scripts/body_scan_group_display/planning.py",
+      "sha256": "28f13f2c41c9534a0e103aef098a2b9b8b61764b5331ae3f0e18bd1e2918bb9f",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/preview.py",
+      "source": "scripts/body_scan_group_display/preview.py",
+      "sha256": "c6b82c5b76001e0bce9452c82bc7bb6f81cf35d3e9207621f88f1676e457633a",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/run.sh",
+      "source": "scripts/body_scan_group_display/run.sh",
+      "sha256": "c66885cede64a8042d7ad8c8a922bd01e577dcd4a7e8fc6ada403afff81537aa",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/tests/test_group_display.py",
+      "source": "scripts/body_scan_group_display/tests/test_group_display.py",
+      "sha256": "dd1882023414699447ee8c1c070fd77ed93d209b674da46a72c76e26d7f05014",
+      "role": "unchanged_test"
+    },
+    {
+      "path": "scripts/body_scan_group_display/verify.py",
+      "source": "scripts/body_scan_group_display/verify.py",
+      "sha256": "57100a3f51643e14130895e7db8eb84a1d973e0003829fd0c8d48020cfa3120d",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/body_scan_group_display/visibility.py",
+      "source": "scripts/body_scan_group_display/visibility.py",
+      "sha256": "77e144bbff15c179137eb2be46ffd87eba6b21da3916cc5a315557b1ca780291",
+      "role": "approved_algorithm"
+    },
+    {
+      "path": "scripts/non_grid_camera/__init__.py",
+      "source": "scripts/non_grid_camera/__init__.py",
+      "sha256": "05c247515e26db2f33bcc94a8c369078e8d6b29dbe1bc2c2e7e72bbc92f12cf8",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/non_grid_camera/calibration.py",
+      "source": "scripts/non_grid_camera/calibration.py",
+      "sha256": "92a0c12cf6adf6f7b1b0915aad99c1f6fb6b5c4662117fd8f96e26ab2dbb0330",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "scripts/non_grid_camera/geometry.py",
+      "source": "scripts/non_grid_camera/geometry.py",
+      "sha256": "fd85562f2734a31eccddffd3feac73f3d990d153dd7e12dd51382ea4da3948dd",
+      "role": "frozen_import_dependency"
+    },
+    {
+      "path": "snapshot.py",
+      "role": "archive_support",
+      "sha256": "c2f79f345f64ef07e09e4845e684a54ea30d1c3c88273d9619acd7f0ff5947e8"
+    },
+    {
+      "path": "source-background-validation.json",
+      "source": "scripts/body_scan/validation-background-v1.json",
+      "sha256": "5db9d0cd638817431111d04b7336da7cddc584b7b9c3f46b34f28853c6ca073a",
+      "role": "approved_source_record"
+    },
+    {
+      "path": "source-validation.json",
+      "source": "scripts/body_scan_group_display/validation.json",
+      "sha256": "9ee590fe9621e5c2791e00a63093280ccb65ded7e1be163273ae8dcee8fe5ac6",
+      "role": "approved_source_record"
+    },
+    {
+      "path": "verify_snapshot.py",
+      "role": "archive_support",
+      "sha256": "6e4b3e3440c249cc531e84b12a14740d50ec8b6546b14b646c91a407e6ff108e"
+    }
+  ]
+}
