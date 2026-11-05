@@ -1,0 +1,97 @@
+{
+  "version": "body-scan-phase-sessions-v2",
+  "date": "2026-11-06",
+  "remote_output": "/root/autodl-fs/case-studio/experiments/body-scan-phase-sessions-v2-reviewed-20261106",
+  "input_scope": "Existing 42-photo / 11-member subset; not the entire uploaded dataset",
+  "tests": {
+    "sessions_and_client": 33,
+    "v1_regression": 20,
+    "total": 53,
+    "passed": true
+  },
+  "counts": {
+    "total": 42,
+    "groups": 11,
+    "phases": {
+      "unknown": 36,
+      "before": 3,
+      "after": 3
+    },
+    "phase_sources": {
+      "unresolved": 36,
+      "comparison_position_rule": 2,
+      "session_visual_propagation": 2,
+      "paired_clear_observation": 2
+    },
+    "unknown_reasons": {
+      "session_assignment_conflict": 2,
+      "no_same_view_counterpart": 14,
+      "single_subtle_view": 4,
+      "swapped_evidence_insufficient": 4,
+      "no_usable_difference": 6,
+      "swapped_direction_conflict": 6
+    },
+    "tentative_suggestions": 4,
+    "reviewed_multi_image_sessions": 5,
+    "comparisons": 13,
+    "model": {
+      "recorded_new_requests": 0,
+      "cached_responses": 41,
+      "failed_stages": 0
+    },
+    "upstream_excluded": 6
+  },
+  "baseline": {
+    "before": {
+      "unknown": 40,
+      "before": 1,
+      "after": 1
+    },
+    "after": {
+      "unknown": 36,
+      "before": 3,
+      "after": 3
+    },
+    "changes": [
+      {
+        "asset_id": "a0130",
+        "old_phase": "unknown",
+        "new_phase": "after",
+        "new_source": "session_visual_propagation"
+      },
+      {
+        "asset_id": "a0132",
+        "old_phase": "unknown",
+        "new_phase": "before",
+        "new_source": "session_visual_propagation"
+      },
+      {
+        "asset_id": "a0133",
+        "old_phase": "unknown",
+        "new_phase": "after",
+        "new_source": "paired_clear_observation"
+      },
+      {
+        "asset_id": "a0134",
+        "old_phase": "unknown",
+        "new_phase": "before",
+        "new_source": "paired_clear_observation"
+      }
+    ]
+  },
+  "verified_input_files_unchanged": 94,
+  "existing_display_png_jpg_byte_identical": 137,
+  "v1_summary_and_comparisons_unchanged": true,
+  "fixed_split_labels_preserved": true,
+  "accepted_session_relations_independently_checked": 1,
+  "stable_observation_fields_independently_checked": 3,
+  "no_images_dropped": true,
+  "no_true_capture_chronology_claimed": true,
+  "limitations": [
+    "No external semantic ground truth; labels are model appearance inferences.",
+    "Ambiguous repeated outfits/backgrounds do not permit session propagation.",
+    "No real multi-view-only acceptance in this subset; that branch is covered by controlled tests."
+  ],
+  "summary_sha256": "b106c4c2bb9e4c9ec9ef36115285b623d738918bed69036752606eab2bb05996",
+  "groups_sha256": "3b6e1c9cb83c72b715b5ea1355678a1fe03a85f5da95ab910875066fb7caed5f"
+}
