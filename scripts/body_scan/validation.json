@@ -1,0 +1,136 @@
+{
+  "output_directory": "/root/autodl-fs/case-studio/experiments/body-scan-unified-v1-20261105",
+  "counts": {
+    "rectangular": 43,
+    "skipped": 2,
+    "needs_review": 1
+  },
+  "accepted_routes": {
+    "grid": 12,
+    "non_grid": 31
+  },
+  "non_grid_backgrounds": {
+    "other": 1,
+    "wood": 24,
+    "white_wall": 5,
+    "mirror": 1
+  },
+  "review": [
+    {
+      "asset_id": "a0137",
+      "reason": "shoulder_pose_not_reliable_across_contexts"
+    }
+  ],
+  "new_vlm_requests": 0,
+  "source_integrity": "all read originals unchanged",
+  "geometry_checks": "all outputs share canvas, torso ratio and shoulder anchor; non-grid H is identity; content is a valid filled rectangle",
+  "grid_baseline": "/root/autodl-fs/case-studio/experiments/grid-single-v2-20261105/grid-shoulder-max-rectangle-v5-verified",
+  "byte_identical_grid_files": [
+    {
+      "path": "a0005/aligned.png",
+      "sha256": "ae398eb1eaf18bd1318d7b50db0303594b4a3e3de3b789833bc720d496818a4a"
+    },
+    {
+      "path": "a0005/content_mask.png",
+      "sha256": "134fe37f87fe3a7041d3bf5ae03c3e4732195aae9264816a32b957e07556f319"
+    },
+    {
+      "path": "a0008/aligned.png",
+      "sha256": "abaa547db0f2621f0e25cf063ed4b33732ceca4625a8b688d771966982a23056"
+    },
+    {
+      "path": "a0008/content_mask.png",
+      "sha256": "77d54238e01eece18b648d7ee42a1e890180db7a65f404ebc79bbf48f86d2e43"
+    },
+    {
+      "path": "a0009/aligned.png",
+      "sha256": "0cbcd2755d193e553098f23934c1a779dff27d034a7b5b6281148902a58d1f0b"
+    },
+    {
+      "path": "a0009/content_mask.png",
+      "sha256": "0444366714e50f454860463ca7438b0b07bfb0a746ecc167234fb1a871446b86"
+    },
+    {
+      "path": "a0015/aligned.png",
+      "sha256": "2c6fb35086ca5b2334aefdda4cf24abb4e16efd03161e19a5ca9784157c275b9"
+    },
+    {
+      "path": "a0015/content_mask.png",
+      "sha256": "ce5a955c37ec4a8cf7ef7acb174127142ac387268aa68642d1d02d31f4bb4243"
+    },
+    {
+      "path": "a0025/aligned.png",
+      "sha256": "7a4aacbe0333940a36502433a3c576795834050b789307379f79f4ce831fc0b4"
+    },
+    {
+      "path": "a0025/content_mask.png",
+      "sha256": "284cb28c26bb4d7404fc684147e0a306845fc6ab062215f1054310cf0ef718cc"
+    },
+    {
+      "path": "a0070/aligned.png",
+      "sha256": "8e7fc26bdfa32a98955c7de60a44a4634866d8c319a2a109b69d73877b1a72de"
+    },
+    {
+      "path": "a0070/content_mask.png",
+      "sha256": "ffef3b1173b7685bdc0252d8a5e0f5783ff3b8c36dc43a9069f5afc5013e5596"
+    },
+    {
+      "path": "a0072/aligned.png",
+      "sha256": "30903eae07cb0272d692ae1c2b0e15b051b0a161a7d49bd67db9f5023ec40b99"
+    },
+    {
+      "path": "a0072/content_mask.png",
+      "sha256": "fc3237c1b0e0dd953a371a07bd83849867f277129dcabaaac4522654ea79a464"
+    },
+    {
+      "path": "a0079/aligned.png",
+      "sha256": "0b15a71b74604cef6d7dc58417f3b28dc687dd5bccc00a976dfc9c9e4d6aa39d"
+    },
+    {
+      "path": "a0079/content_mask.png",
+      "sha256": "22f23557c3b8c60620f414a5595c72762bf0308f960fcc60282011d25a4ca312"
+    },
+    {
+      "path": "a0090/aligned.png",
+      "sha256": "1030fd6e8864fc3df49dbf11a23f3f6e432757cc3938314716c71cdaf7b1e821"
+    },
+    {
+      "path": "a0090/content_mask.png",
+      "sha256": "5b050373ce0401768a178c070c63a4babb2aee192ef7913eaa1632cac885b3f8"
+    },
+    {
+      "path": "a0091/aligned.png",
+      "sha256": "d100e04e1e0f4a858e77c76268463024fa5ba0688f9ab47509a958ff36182424"
+    },
+    {
+      "path": "a0091/content_mask.png",
+      "sha256": "b49c98c45d836a3634f47e2876d4f5c477fb224ad98a1f55732c85d16d592e21"
+    },
+    {
+      "path": "a0093/aligned.png",
+      "sha256": "0711fb05951bf4b08152f81141c18f574ab3d3ca4f7a5318a46e7fc0dca29082"
+    },
+    {
+      "path": "a0093/content_mask.png",
+      "sha256": "433072a86b28910c0832f6b942355ccb3890c13815c83b30197bcea37f9874c4"
+    },
+    {
+      "path": "a0094/aligned.png",
+      "sha256": "7af101f213b8cc48c5e79cbbe7b696535981aca717c9850387489854f5081f32"
+    },
+    {
+      "path": "a0094/content_mask.png",
+      "sha256": "cce0a8bb960c5f33408bcbc7e5b9718d653d6e82469cb4887d25132d0160f018"
+    }
+  ],
+  "unit_tests": {
+    "passed": 17,
+    "command": "python -m unittest discover -s scripts/body_scan/tests -t . -v"
+  },
+  "frozen_archive_files_verified": 12,
+  "delivery_archive": {
+    "name": "non-grid-results.zip",
+    "sha256": "23acb1c01f08933617cf7235c21f476d85d9657af0d775c346a01894844f0fba",
+    "bytes": 63864250
+  }
+}
