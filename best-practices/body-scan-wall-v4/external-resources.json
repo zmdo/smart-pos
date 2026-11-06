@@ -1,0 +1,32 @@
+{
+  "geocalib": {
+    "declared_source_commit": "1dedb29f94fc11b896c5f572005978aeebccd67f",
+    "installed_source_root": "/root/apps/non-grid-calibration/GeoCalib",
+    "git_metadata_present": false,
+    "python_files": 12,
+    "source_tree_sha256": "d5c402766a9fe4718832b9a9e67f46d4184331491f156821ed018fb45ed274b2",
+    "tree_hash_algorithm": "SHA256 over sorted relative POSIX .py paths, NUL, then file bytes"
+  },
+  "models": [
+    {
+      "name": "GeoCalib pinhole",
+      "path": "/root/autodl-fs/case-studio/models/geocalib/geocalib-pinhole.tar",
+      "sha256": "86d6aeacd8bbd974c59ce39f61854e00d36911c732ad89be471476fd708722ac"
+    },
+    {
+      "name": "YOLO person",
+      "path": "/root/autodl-fs/portrait-studio/models/yolo11n.pt",
+      "sha256": "0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1"
+    },
+    {
+      "name": "YOLO pose",
+      "path": "/root/autodl-fs/portrait-studio/models/yolo11m-pose.pt",
+      "sha256": "29b17eaf3a3117cbea906090dbedf9159f7c6a49db58ec8b99ed2dfde1cf6eb2"
+    },
+    {
+      "name": "SAM2",
+      "path": "/root/autodl-fs/portrait-studio/models/sam2.1_hiera_base_plus.pt",
+      "sha256": "a2345aede8715ab1d5d31b4a509fb160c5a4af1970f199d9054ccfb746c004c5"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 从 `best-practices/grid-portrait` 的权威代码复制、提取的共用实现。基础阶段为 `body-scan-unified-v2-pinhole`；新增 **`body-scan-wall-v3` 墙面参照与同组尺度修正**，推荐通过 `scripts/run_body_scan_refined.sh` 运行。权威副本、独立相机实验和旧成品保留；来源见 `provenance.json`。成品始终由原图生成。
 
-用户已确认的完整v3快照现位于 [best-practices/body-scan-wall](../../best-practices/body-scan-wall/README.md)，来源提交 `c3ce38966da8d39cf702778858e8e5881f9744ff`。复现批准版请使用该归档入口；本目录保留为后续开发工作副本。
+当前推荐的完整标准化最佳实践为 [best-practices/body-scan-wall-v4](../../best-practices/body-scan-wall-v4/README.md)，默认包含海报过滤和非网格几何检查/回退，来源提交 `7cfbb0d`。此前 [v3快照](../../best-practices/body-scan-wall/README.md) 原样保留，来源 `c3ce38966da8d39cf702778858e8e5881f9744ff`。本目录继续保留为开发工作副本，默认入口没有自动追加新检查；使用完整批准链路请调用v4归档入口。
 
 ## 墙面参照修正 v3
 

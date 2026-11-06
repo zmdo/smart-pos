@@ -1,0 +1,13 @@
+# Runtime record, not an environment-installation script. Python 3.11.18.
+# Use /root/apps/non-grid-calibration/.venv on the GPU server.
+torch==2.5.1
+torchvision==0.20.1
+numpy==1.26.4
+opencv-python==4.11.0.86
+pillow==13.0.0
+ultralytics==8.3.237
+httpx==0.28.1
+kornia==0.7.4
+kornia-rs==0.1.9
+geocalib==1.0
+SAM-2==1.0
