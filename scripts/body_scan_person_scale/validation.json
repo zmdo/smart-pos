@@ -1,0 +1,345 @@
+{
+  "date": "2026-11-06",
+  "version": "body-scan-person-scale-v1",
+  "status": "independent_experiment_not_promoted",
+  "baseline_commit": "cfbbf55312d18f6517b40ac666e1d2702d6ea8d4",
+  "execution_host": "remote_GPU_server",
+  "output": "/root/autodl-fs/case-studio/experiments/body-scan-person-scale-v1-20261106/final-validated",
+  "baseline_standardized": "/root/autodl-fs/case-studio/experiments/best-practices-body-scan-wall-v4-20261106/upgraded",
+  "baseline_display": "/root/autodl-fs/case-studio/experiments/best-practices-body-scan-wall-v4-20261106/display",
+  "test_counts": {
+    "person_scale": 19,
+    "group_display_regression": 32,
+    "geometry_guard_regression": 13,
+    "total": 64,
+    "passed": true
+  },
+  "row_count": 28,
+  "group_count": 5,
+  "calibration_counts": {
+    "retained_for_review": 11,
+    "retained": 11,
+    "calibrated": 6
+  },
+  "calibrated": [
+    {
+      "asset_id": "a0107",
+      "store": "石厦店",
+      "member": "黎国萍",
+      "relative_scale": 1.1150075215988418,
+      "method": "two_neutral_background_references"
+    },
+    {
+      "asset_id": "a0110",
+      "store": "石厦店",
+      "member": "郑远晨",
+      "relative_scale": 0.940172918077941,
+      "method": "multiple_body_segments"
+    },
+    {
+      "asset_id": "a0112",
+      "store": "石厦店",
+      "member": "郑远晨",
+      "relative_scale": 0.9460256900394393,
+      "method": "multiple_body_segments"
+    },
+    {
+      "asset_id": "a0142",
+      "store": "石厦店",
+      "member": "冯雪奕",
+      "relative_scale": 0.9782224720503705,
+      "method": "multiple_body_segments"
+    },
+    {
+      "asset_id": "a0163",
+      "store": "石厦店",
+      "member": "潘艺文",
+      "relative_scale": 0.9684083966106539,
+      "method": "multiple_body_segments"
+    },
+    {
+      "asset_id": "a0167",
+      "store": "石厦店",
+      "member": "潘艺文",
+      "relative_scale": 1.024013761381471,
+      "method": "multiple_body_segments"
+    }
+  ],
+  "retained_for_review": [
+    {
+      "asset_id": "a0101",
+      "reason": "scale_conflict_or_excessive_change"
+    },
+    {
+      "asset_id": "a0109",
+      "reason": "would_crop_previously_complete_head"
+    },
+    {
+      "asset_id": "a0111",
+      "reason": "insufficient_or_conflicting_scale_votes"
+    },
+    {
+      "asset_id": "a0113",
+      "reason": "insufficient_or_conflicting_scale_votes"
+    },
+    {
+      "asset_id": "a0148",
+      "reason": "insufficient_or_conflicting_scale_votes"
+    },
+    {
+      "asset_id": "a0149",
+      "reason": "insufficient_or_conflicting_scale_votes"
+    },
+    {
+      "asset_id": "a0166",
+      "reason": "would_crop_previously_complete_head"
+    },
+    {
+      "asset_id": "a0036__p01",
+      "reason": "insufficient_or_conflicting_scale_votes"
+    },
+    {
+      "asset_id": "a0036__p02",
+      "reason": "insufficient_or_conflicting_scale_votes"
+    },
+    {
+      "asset_id": "a0038__p01",
+      "reason": "insufficient_or_conflicting_scale_votes"
+    },
+    {
+      "asset_id": "a0038__p02",
+      "reason": "insufficient_or_conflicting_scale_votes"
+    }
+  ],
+  "standardized_verification": {
+    "input_hashes_unchanged": true,
+    "input_files_checked": 143,
+    "geometry_unchanged": true,
+    "source_landmarks_unchanged": true,
+    "new_framing_isotropic": true,
+    "retained_pixels_identical": true,
+    "real_rectangular_content": true,
+    "rows": 28,
+    "checked_ids": [
+      "a0101",
+      "a0102",
+      "a0103",
+      "a0104",
+      "a0105",
+      "a0107",
+      "a0108",
+      "a0109",
+      "a0110",
+      "a0111",
+      "a0112",
+      "a0113",
+      "a0140",
+      "a0141",
+      "a0142",
+      "a0146",
+      "a0148",
+      "a0149",
+      "a0161",
+      "a0162",
+      "a0163",
+      "a0166",
+      "a0167",
+      "a0168",
+      "a0036__p01",
+      "a0036__p02",
+      "a0038__p01",
+      "a0038__p02"
+    ],
+    "eligible": 28,
+    "excluded": 0
+  },
+  "display_verification": {
+    "passed": true,
+    "source_hashes_checked": 28,
+    "baseline_copies_checked": 28,
+    "person_formats": [
+      {
+        "group_id": "g001",
+        "store": "景田店",
+        "member": "张小飞",
+        "output_size": [
+          768,
+          1984
+        ],
+        "displayed_images": 4,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g002",
+        "store": "石厦店",
+        "member": "冯雪奕",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g003",
+        "store": "石厦店",
+        "member": "潘艺文",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g004",
+        "store": "石厦店",
+        "member": "郑远晨",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g005",
+        "store": "石厦店",
+        "member": "黎国萍",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      }
+    ],
+    "derivative_images_checked": 56,
+    "displayed_asset_ids": [
+      "a0101",
+      "a0102",
+      "a0103",
+      "a0104",
+      "a0105",
+      "a0107",
+      "a0108",
+      "a0109",
+      "a0110",
+      "a0111",
+      "a0112",
+      "a0113",
+      "a0140",
+      "a0141",
+      "a0142",
+      "a0146",
+      "a0148",
+      "a0149",
+      "a0161",
+      "a0162",
+      "a0163",
+      "a0166",
+      "a0167",
+      "a0168",
+      "a0036__p01",
+      "a0036__p02",
+      "a0038__p01",
+      "a0038__p02"
+    ],
+    "needs_review_asset_ids": [],
+    "max_observed_vertical_stretch": 1.0,
+    "checks": [
+      "unchanged original and approved output",
+      "one output size, crop, scale and shoulder origin per person",
+      "complete rectangular source coverage",
+      "bounded per-step crop and vertical stretch",
+      "isotropic uniform reference",
+      "single composed source transform",
+      "output dimensions and hashes"
+    ],
+    "presentation_only": true
+  },
+  "focus": {
+    "asset_ids": [
+      "a0101",
+      "a0107"
+    ],
+    "visible_shoulder_hip_pixels": {
+      "a0101": {
+        "old": 576.8225098294181,
+        "new": 553.357106823964
+      },
+      "a0107": {
+        "old": 504.37150860932206,
+        "new": 539.4852392503835
+      }
+    },
+    "old_length_spread": 0.14364610209617412,
+    "new_length_spread": 0.025713154993555642,
+    "limitation": "2D shoulder-hip lengths vary with pose; this is a diagnostic, not physical height ground truth"
+  },
+  "grid_metrics": [
+    {
+      "background_group": "B2",
+      "asset_ids": [
+        "a0102",
+        "a0105",
+        "a0107"
+      ],
+      "old_grid_scale_spread": 0.12709023835844935,
+      "new_grid_scale_spread": 0.021910318285694785
+    }
+  ],
+  "unchanged_final_display_ids": [
+    "a0108",
+    "a0109",
+    "a0111",
+    "a0113",
+    "a0140",
+    "a0141",
+    "a0146",
+    "a0148",
+    "a0149",
+    "a0161",
+    "a0162",
+    "a0166",
+    "a0168",
+    "a0036__p01",
+    "a0036__p02",
+    "a0038__p01",
+    "a0038__p02"
+  ],
+  "final_run_model_evidence": {
+    "provider": "qwen",
+    "eligibility_groups": 5,
+    "new_requests": 0,
+    "cached": 5
+  },
+  "visual_review": {
+    "reviewed_all_five_group_sheets": true,
+    "focus": "a0101/a0107",
+    "protected_candidates": [
+      "a0109",
+      "a0166"
+    ],
+    "observation": "black side scale improved; rejected marginal head/foot candidates; previous Zhang geometry retained"
+  },
+  "limitations": [
+    "five_groups_not_full_dataset",
+    "11_images_keep_old_scale_for_review",
+    "2D_segment_spread_is_not_physical_height_error",
+    "no_new_best_practice_or_site_deployment"
+  ],
+  "python_sha256": {
+    "__init__.py": "0b0a7af977cac28de46a99ef5848921a1035e2d2edd62dcccb1085e5de48ff92",
+    "__main__.py": "19c695b874a98eded13084b63109a2282accd5041e6b6ed24781a31a70eac29f",
+    "background.py": "9629b660cdbf26e90398d4a0a825fb7e0978844555b137e1e55288fd3ee75ed2",
+    "coverage.py": "abd539b3475f5bd2c50789359a990691e4ff970bcfd39eef89d10b6e1bf1134c",
+    "evidence.py": "7c5ebc11aff325362a9b04777ce320c14b8a1b888f699767a6100dea57a1a8cf",
+    "measurements.py": "5fe18c3d0648f196d2c26de74a748d7cf946bd8c050f3b530baf221e4e31725a",
+    "pipeline.py": "7a5c9ab00ee3a32a5a4cf2c35e2c1ee4bb5cab38febda01ca397d5be78c6a8e6",
+    "report.py": "042f361753a86f2335bd68568763fe013bfc39b48207e59f29dec9a56c8c3c9e",
+    "solve.py": "6e82ca383737f3edeab0aab98f0abcc28d35d4b925774ff149039c584bb5303b",
+    "tests/test_scale.py": "910fe39222a04dbb746ff82d013df10f58955afe7d5f26ea6d15809d9b95d894",
+    "verify.py": "068d50327768de0b07f568396e2d7d6f90e77017193d08c5b041c93178a5a131"
+  }
+}
