@@ -1,0 +1,180 @@
+{
+  "schema_version": "body-scan-delivery-validation-v1",
+  "date": "2026-11-06",
+  "base_commit": "edd223ea0779991bb77f6143f84b0df4488eb7fb",
+  "scope": "All 82 approved body-scan display inputs, 16 members; no rerun or reinstatement of upstream exclusions",
+  "delivery_id": "body-review-20261106-v1",
+  "production_revision": 1,
+  "remote_output": "/root/autodl-fs/case-studio/productions/body-review-20261106-v1/revisions/r0001",
+  "local_preview": "/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-delivery-v1/r0001/index.html",
+  "public_entry": "https://uu55868-7936f251bb5f.westd.seetacloud.com:8443/review",
+  "tests": {
+    "remote_unittest_passed": 27,
+    "command": "/root/apps/non-grid-calibration/.venv/bin/python -m unittest discover -s scripts/body_scan_delivery/tests -v",
+    "windows_deploy_helper_executed": false
+  },
+  "verification": {
+    "passed": true,
+    "revision": 1,
+    "images": 82,
+    "products": 130,
+    "product_kinds": {
+      "single": 82,
+      "vs": 39,
+      "three_views": 9
+    },
+    "label_kinds": {
+      "pending": 22,
+      "inferred": 31,
+      "rule": 29
+    },
+    "review_images": 53,
+    "review_products": 88,
+    "source_files_unchanged": 252,
+    "preview_links_checked": 181,
+    "every_input_has_single_product": true,
+    "distinct_source_pairs": true,
+    "verified_photo_chronology": false
+  },
+  "live": {
+    "health_6006": 200,
+    "health_6008": 200,
+    "localhost": {
+      "/review": 200,
+      "/api/productions": 401,
+      "preview_url": 200,
+      "review_url": 200,
+      "result_url": 200,
+      "review_count": 53,
+      "private_files": 404
+    },
+    "public": {
+      "/review": 200,
+      "/api/productions": 401,
+      "preview_url": 200,
+      "review_url": 200,
+      "result_url": 200,
+      "review_count": 53,
+      "private_files": 404,
+      "download_zip_hash_matches": true
+    },
+    "isolated_review_runtime_import": true
+  },
+  "roundtrip": {
+    "request": {
+      "delivery_id": "body-review-20261106-v1",
+      "base_revision": 1,
+      "source_manifest_sha256": "fade881f79f1e6ca71a4c2d77fce32aeed42c431eb4ad671d57525e92a11c3ad",
+      "request_id": "integration-review-0001",
+      "changes": [
+        {
+          "asset_id": "a0161",
+          "phase": "after",
+          "confirm": true,
+          "note": "自动化闭环测试，仅测试副本"
+        },
+        {
+          "asset_id": "a0162",
+          "phase": "before",
+          "confirm": true,
+          "note": "自动化闭环测试，仅测试副本"
+        }
+      ]
+    },
+    "before_counts": {
+      "images": 82,
+      "members": 16,
+      "label_kinds": {
+        "pending": 22,
+        "inferred": 31,
+        "rule": 29
+      },
+      "requires_review": 53,
+      "products": 130,
+      "review_products": 88,
+      "rendered_products": 130,
+      "reused_products": 0
+    },
+    "after_counts": {
+      "images": 82,
+      "members": 16,
+      "label_kinds": {
+        "pending": 22,
+        "inferred": 29,
+        "rule": 29,
+        "human": 2
+      },
+      "requires_review": 51,
+      "products": 130,
+      "review_products": 85,
+      "rendered_products": 4,
+      "reused_products": 126
+    },
+    "reused_unchanged_products": 126,
+    "same_request_idempotent": true,
+    "stale_review_rejected": true,
+    "model_requests": 0,
+    "production_revision_unchanged": 1,
+    "verification": {
+      "passed": true,
+      "revision": 2,
+      "images": 82,
+      "products": 130,
+      "product_kinds": {
+        "single": 82,
+        "vs": 39,
+        "three_views": 9
+      },
+      "label_kinds": {
+        "pending": 22,
+        "inferred": 29,
+        "rule": 29,
+        "human": 2
+      },
+      "review_images": 51,
+      "review_products": 85,
+      "source_files_unchanged": 252,
+      "preview_links_checked": 181,
+      "every_input_has_single_product": true,
+      "distinct_source_pairs": true,
+      "verified_photo_chronology": false
+    }
+  },
+  "ranking": {
+    "groups": 6,
+    "stages": 12,
+    "requests": 12,
+    "schema_valid": true,
+    "prompt_version": [
+      "delivery-review-ranking-v2-panel"
+    ]
+  },
+  "visual_qa": {
+    "inspected": [
+      "g016-three-views",
+      "g016-vs-back"
+    ],
+    "badges_visible": true,
+    "body_display_frames_contained_without_new_crop": true
+  },
+  "limitations": [
+    "Provisional phase support is not calibrated accuracy or verified capture chronology.",
+    "ZIP-upload-to-full-workflow orchestration is not wired; create() consumes approved phase results.",
+    "Only body single/VS/complete three-view basic layouts; other templates and a new sticker/masking library are not implemented.",
+    "Initial failed ranking draft is isolated outside productions; final panel prompt passed all 12 schema checks."
+  ],
+  "source_sha256": {
+    "case-studio/app.py": "5a0f15feb88e151acd83fb85b3fea5f73db0666978efd17b0fc27c9f05d3db6e",
+    "case-studio/static/index.html": "1c02cc0e7ee4bb5b0ef4421d5fa54c6e8a4d7af3592d3d74164f0bde5e62ebfd",
+    "scripts/body_scan_delivery/__init__.py": "61931da777b8fb80d5a0f4fb2aa6370e58e157e25c19c6644ee88372248257d8",
+    "scripts/body_scan_delivery/__main__.py": "0905097a6b9c77f0bc37c3bfba0009be8fdaba17eed8f3e0cb1559cda18b8aba",
+    "scripts/body_scan_delivery/api.py": "1c469519d7b9fa95a428e5db0e0d1685859f7566328ee77cb1e50dc1928b34a3",
+    "scripts/body_scan_delivery/assignment.py": "dc1ae28b451197767f71aa5c680d0b403578f26de142144f58eef69e31c455e6",
+    "scripts/body_scan_delivery/pipeline.py": "4c9582ac78ece2ddd744834b9f20d4739ecee36365c946a9159bcf9fb9683a50",
+    "scripts/body_scan_delivery/preview.py": "64d32f270bfd666ad10a857720595e7e0ad3f3c641330edf1aea2836dee062b4",
+    "scripts/body_scan_delivery/ranking.py": "8560ce39a0b6b6f326055ec4860a10fd8ccd39304ea51486148a5f3034588252",
+    "scripts/body_scan_delivery/render.py": "8a647c30b1f10f15560841c9ce1ad08a40ced29de901375db08f4c330e419a0c",
+    "scripts/body_scan_delivery/tests/test_delivery.py": "4e5a58c7f16612c94fb39edcb7509a640d0fade2f976d8a6fa569ae981fbe223",
+    "scripts/body_scan_delivery/verify.py": "c3b643e6262f73010d237b1ed2a22fca4877387655459b23ac21922bed94148b"
+  }
+}

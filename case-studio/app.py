@@ -1,7 +1,7 @@
 """case-studio：会员案例素材生产（第一阶段：素材体检 / dry-run）。
 
-只做「解包 → 归一 → 去重 → 质量 → 分类 → 报告抽取 → 归并 → 产出决策 → 报告」，
-不做渲染（渲染是下一阶段）。
+上传仍执行「解包 → 归一 → 去重 → 质量 → 分类 → 报告抽取 → 归并 → 产出决策 → 报告」。
+独立挂载体测成品审核与重生成；尚未将上传体检自动编排到全套标准化及生成节点。
 """
 import asyncio, hashlib, hmac, json, re, secrets, shutil, threading, time
 from concurrent.futures import ThreadPoolExecutor
@@ -303,6 +303,11 @@ async def lifespan(app):
 
 
 app = FastAPI(title="Case Studio", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+
+# The delivery node consumes approved phase results, independently of the
+# legacy upload/dry-run pipeline. Its API shares the existing session guard.
+from scripts.body_scan_delivery.api import router as delivery_router
+app.include_router(delivery_router)
 
 
 @app.middleware("http")

@@ -1,7 +1,7 @@
-# Case Studio · 会员案例素材体检（M1/M2 交付）
+# Case Studio · 素材体检与体测成品审核
 
 远程 GPU 机上的第一批实现：**上传压缩包 → 解包 → 归一 → 去重 → 质量 → 分类 → 报告解析 → 产出决策 → 体检报告**。
-本阶段**只出报告，不渲染成品**（渲染是 M3）。
+上传管线仍只出体检报告。另已接入**已批准阶段结果→体测单图/VS/三视图→人工审核重生成**，入口 `/review`；完整ZIP上传到标准化/阶段/成品的调度尚未接通。协议见[工作流](../docs/workflows/body-scan-delivery-review.md)，实现见[生成节点](../scripts/body_scan_delivery/README.md)。
 
 - 公网地址：https://uu55868-7936f251bb5f.westd.seetacloud.com:8443
 - 访问令牌：`/root/autodl-fs/case-studio/settings.json` 里的 `access_token`
@@ -33,6 +33,10 @@
 | GET | `/api/batches/{id}/report.md` | Markdown 体检报告 |
 | GET | `/api/batches/{id}/thumb/{asset}` | 素材缩略图（需登录） |
 | POST | `/api/batches/{id}/cancel` | 取消 |
+| GET | `/api/productions` | 已生成的体测任务 |
+| GET | `/api/productions/{id}` | 成品、全部标签、审核清单与预览/下载地址 |
+| POST | `/api/productions/{id}/review` | 部分确认/修正、增量重生成并返回新版本 |
+| GET | `/api/productions/{id}/files/{revision}/{filename}` | 受登录保护的版本成品、审核页和下载包 |
 
 前端：`/`（上传 → 进度 → 会员卡片 + 缩略图 + 缺口/待确认），`?batch=<id>#token=<token>` 可直达。
 
@@ -62,10 +66,10 @@
 
 ## 已知问题 / 下一步
 
-1. **前后顺序未判定**：目前同一视图两张图只标"待确认"，下一步用 VLM 双图对比 + 报告日期定序。
+1. **阶段核验与完整调度**：独立局部分析及成品生成已覆盖82张/16人；31张推断、22张待审仍需人工确认。上传体检的旧计划不会自动调用这些新节点。
 2. **封面的指标数据**：只有 docx/pdf 才有 `facts`；翻拍体测报告的读数（OCR）还没做，所以「会员案例封面」目前多数缺指标。
 3. **质量阈值**：已从"误杀 30%"调低到 4%，但只在 demo 上校准过；建议先用"仅标记"跑两批再定死。
-4. **渲染（M3）**：17 类版式 + 三层（photo/frame/text）+ 贴纸库还没开始。
+4. **渲染范围**：当前提供体测单图、同朝向VS和完整三视图的1080×1440基础版式，共130张；其他模板及新增贴纸库待实现。
 5. 环境：复用 `portrait-studio` 的 venv（装了 python-docx / pypdf / pillow-heif），后续应拆独立 venv。
 
 ## 运维
@@ -77,4 +81,6 @@ cd /root/apps/case-studio
 /root/apps/portrait-studio/.venv/bin/python -m pytest tests -q     # 15 passed
 ```
 
-本地开发：改完 `case-studio/` 后跑 `scripts/deploy-case.ps1`（上传 + 装依赖 + 跑测试）。
+部署必须同时包含 `case-studio/`（放到远程应用根目录）与 `scripts/body_scan_delivery/*.py`（保留到应用根下同名scripts路径）；审核API按需调用渲染模块，重生成不依赖模型服务。模型初次创建任务仍需仓库其他阶段模块及已有远程处理环境。Windows辅助脚本 `scripts/deploy-case.ps1` 已包含审核运行时模块；该脚本不会复制历史模型/数据目录。
+
+2026-11-06已在现有服务器直接同步模块、备份入口并重启6008。公网 `/review` 登录及受保护的预览/审核JSON已验证；27项节点测试和真实素材2图修正闭环通过，4张重生成、126张逐字节复用。完整记录见 `scripts/body_scan_delivery/validation.json`。
