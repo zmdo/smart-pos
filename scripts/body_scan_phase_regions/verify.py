@@ -4,7 +4,7 @@ import json
 from html.parser import HTMLParser
 from pathlib import Path
 
-from scripts.body_scan.pipeline import save_json
+from scripts.body_scan_contracts.io import save as save_json
 from scripts.body_scan_phase.inputs import digest
 from .evidence import CUES, usable, validate
 
@@ -35,7 +35,7 @@ def verify(directory):
     for rows in variants:
         if any(not r['store'].endswith('店') or r['verified_chronology'] is not False for r in rows):
             raise ValueError('scope_or_chronology_claim_invalid')
-    original={r['asset_id']:r for r in read(Path(config['baseline'])/'summary.json')}
+    original={r['asset_id']:r for r in (read(Path(config['baseline'])/'summary.json') if config.get('baseline') else variants[-1])}
     fixed=[]
     for row in variants[-1]:
         if row['evidence_kind']=='source_rule':

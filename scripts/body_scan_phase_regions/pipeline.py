@@ -9,18 +9,19 @@ from pathlib import Path
 
 from PIL import Image
 
-from scripts.body_scan.pipeline import save_json
+from scripts.body_scan_contracts.io import save as save_json
 from scripts.body_scan_phase.inputs import load, bind, digest
 from scripts.body_scan_phase.policy import PHASES
 from scripts.body_scan_phase_sessions.evidence import SessionEvidence, family
-from scripts.body_scan_phase_sessions.pipeline import capture_metadata, image_for
+from scripts.body_scan_contracts.images import capture_metadata, image_for
 from scripts.body_scan_phase_sessions.resolution import make_units, resolve
-from scripts.body_scan_full_eval.client import MeasuredClient
+from scripts.body_scan_contracts.client import MeasuredClient
 from . import VERSION
 from .crops import prepare_pair
 from .evidence import compare
 from .fusion import fuse
-from .reports import extract_reports
+from scripts.body_scan_contracts.bundles import load_reports
+from scripts.body_scan_phase_classification.report_evidence import expected_changes
 
 
 def read(path):
@@ -176,22 +177,34 @@ def run(args):
         items = [r for r in items if r['member'] in chosen]
     save_json(out/'config.json', {'version': VERSION, 'input': str(args.input.resolve()),
         'overrides': [str(p.resolve()) for p in args.override], 'members': args.member,
-        'baseline': str(args.baseline.resolve()), 'report_root': str(args.reports.resolve()),
+        'baseline': str(args.baseline.resolve()) if args.baseline else None,
+        'report_bundle': str(args.reports.resolve()) if args.reports else None,
         'provider': args.provider, 'workers': args.workers, 'inference_inputs': ['source','uniform','translated_region_windows'],
         'reports_hidden_from_visual_model': True, 'verified_chronology': False})
-    baseline_rows = read(bind(args.baseline/'summary.json', bindings))
-    baseline_groups = read(bind(args.baseline/'groups.json', bindings))
-    baseline = {'rows': {r['asset_id']:r for r in baseline_rows},
-                'pairs': {tuple(p['asset_ids']):p for g in baseline_groups for p in g['comparisons']}}
-    for r in items:
-        old = baseline['rows'].get(r['asset_id'])
-        if not old or any(old.get(k) != r.get(k) for k in ('source_sha256','store','member','view')):
-            raise ValueError('baseline_originals_differ')
+    baseline = {'rows':{}, 'pairs':{}}
+    if args.baseline:
+        baseline_rows = read(bind(args.baseline/'summary.json', bindings))
+        baseline_groups = read(bind(args.baseline/'groups.json', bindings))
+        baseline = {'rows': {r['asset_id']:r for r in baseline_rows},
+                    'pairs': {tuple(p['asset_ids']):p for g in baseline_groups for p in g['comparisons']}}
+        for r in items:
+            old = baseline['rows'].get(r['asset_id'])
+            if not old or any(old.get(k) != r.get(k) for k in ('source_sha256','store','member','view')):
+                raise ValueError('baseline_originals_differ')
     client = MeasuredClient(args.settings, args.cache, args.provider)
     grouped = defaultdict(list)
     for item in items:
         grouped[(item['store'],item['member'])].append(item)
-    reports, inventory = extract_reports(args.reports, grouped, out/'reports', client, bindings)
+    reports = load_reports(args.reports, bindings) if args.reports else []
+    inventory = read(args.reports/'inventory.json') if args.reports else []
+    reports = [{**r, 'expected_changes':expected_changes(r)} for r in reports
+               if (r['store'],r.get('member')) in grouped]
+    save_json(out/'reports/reports.json',reports)
+    save_json(out/'reports/inventory.json',inventory)
+    save_json(out/'report-link.json',{'path':str(args.reports.resolve()) if args.reports else None,
+        'sha256':digest(args.reports/'bundle.json') if args.reports else None})
+    for report in reports:
+        save_json(out/'reports'/report['report_id']/'report.json',report)
     by_member = defaultdict(list)
     for report in reports:
         by_member[(report['store'],report['member'])].append(report)
@@ -238,7 +251,7 @@ def run(args):
     pairs = [p for g in groups for p in g['comparisons']]
     count.update(total=len(items), groups=len(groups), comparisons=len(pairs),
                  reports={'matched':len(reports), 'verified_transcriptions':sum(r['status']=='verified_transcription' for r in reports),
-                          'unmatched_store_reports':sum(e.get('reason')=='no_unique_eligible_photo_group' for e in inventory)},
+                          'unmatched_store_reports':sum(e.get('status') != 'excluded' and (e.get('store'),e.get('member')) not in grouped for e in inventory)},
                  pair_decisions={s:dict(Counter(p[s+'_decision']['after'] or 'unknown' for p in pairs)) for s in ('baseline','regional','fused')},
                  negative_controls=len(controls), original_source_rules=sum(r['phase'] in PHASES for r in items),
                  note='Adoption and evidence coverage, not accuracy: true photo chronology is not available.')
@@ -248,7 +261,6 @@ def run(args):
         for pair in group['comparisons']:
             for kind in ('baseline_audit','regional_audit'):
                 audits.extend(pair[kind].get(stage,{}) for stage in ('primary','swapped'))
-    audits.extend(read(out/'reports'/r['report_id']/'audit.json') for r in reports)
     for control in controls:
         audits.extend(control['audit'].get(stage,{}) for stage in ('primary','swapped'))
     count['model_calls'] = {'new_requests':sum(a.get('request_count',0) for a in audits),

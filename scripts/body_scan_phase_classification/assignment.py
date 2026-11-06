@@ -2,20 +2,7 @@
 import copy
 import itertools
 
-PHASES = ('before','after')
-PHASE_NAMES = {'before':'训练前','after':'训练后'}
-
-
-def family(view):
-    return 'side' if view.startswith('side') else view
-
-
-def decorate(row):
-    badge = {'inferred':'（推断）','pending':'（待审）'}.get(row['label_kind'],'')
-    row['label'] = PHASE_NAMES[row['phase']]+badge
-    row['requires_review'] = row['label_kind'] in ('inferred','pending') or bool(row.get('review_flags'))
-    return row
-
+from scripts.body_scan_contracts.labels import PHASES, PHASE_NAMES, family, decorate
 
 def candidates(group):
     result={aid:[] for aid in group['asset_ids']}

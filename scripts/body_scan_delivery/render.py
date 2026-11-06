@@ -8,7 +8,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-from .assignment import family
+from scripts.body_scan_contracts.labels import family
 
 RED='#E70012';BG='#F3F0EA';INK='#25382F'
 VIEWS={'front':'正视','side':'侧视','back':'后视'}

@@ -69,6 +69,8 @@ def files(identifier:str,revision:str,filename:str):
     result=read(directory/'result.json')
     allowed={'index.html','result.json','review.json','review-template.json','products.zip'}
     allowed.update(p['file'] for p in result['outputs']);allowed.update(r['thumbnail'] for r in result['items'])
+    if result.get('report_comparison'):
+        allowed.update(('reports/index.html','reports/reports.json','reports/inventory.json'))
     if filename not in allowed:raise HTTPException(404)
     path=(directory/filename).resolve()
     if not path.is_relative_to(directory.resolve()) or not path.is_file():raise HTTPException(404)

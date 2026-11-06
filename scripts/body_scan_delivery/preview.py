@@ -45,6 +45,8 @@ def preview(result,dest):
     page+=f'<h1>体测成品与阶段审核 · 第 {result["revision"]} 版</h1><p>{result["counts"]["images"]} 张图片 · {result["counts"]["products"]} 张成品 · {result["counts"]["requires_review"]} 张图片待审核</p>'
     page+='<p class="note">“（推断）”与“（待审）”均为未获人工确认的生成标签。选择正确阶段并勾选已审核，可导出修正文件或在线重新生成。只确认勾选的图片，其他标记继续保留。单图保留全部素材；VS 和三视图仅使用不同原图配对。</p>'
     page+='<div class="bar"><a class="button" href="products.zip" download>下载全部成品与审核清单</a><button id="export">导出审核结果</button><button id="submit">提交修正并重新生成</button><label>导入审核 JSON <input id="import" type="file" accept=".json,application/json"></label><a href="review.json">审核清单 JSON</a><a href="result.json">完整返回结果</a></div><p id="status"></p>'
+    if result.get('report_comparison'):
+        page+='<p><a class="button" href="reports/index.html">查看体检表单前后对比</a> · <a href="reports/reports.json">表单对比数据</a></p>'
     page+=''.join(sections)+f'<script type="application/json" id="metadata">{data}</script>'
     page+='''<script>
 const meta=JSON.parse(document.getElementById('metadata').textContent),status=document.getElementById('status');

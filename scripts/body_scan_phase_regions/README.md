@@ -1,5 +1,7 @@
 # 局部可比性与训练报告辅助判断
 
+当前作为训练阶段分类节点的分析内核。报告提取已移至 `body_report_compare`，完整阶段标签补齐在 `body_scan_phase_classification`；推荐调用两个独立最佳实践入口。下述分析入口仍保留供诊断使用。
+
 独立实验节点，保留已有图片和前后判断脚本。先盲评照片上的局部差异，再把报告的明确前后列作为辅助线索；无法确认的照片保留待复核。训练报告的时间顺序不等于照片已经绑定到这些日期。
 
 流程和限制见 [工作流](../../docs/workflows/training-phase-regions.md)。
@@ -15,7 +17,7 @@ PYTHONPATH=/root/apps/phase-evidence-deps:/root/apps/case-studio \
   --input /path/to/full-display \
   --override /path/to/latest-approved-display \
   --baseline /path/to/previous-phase-qwen \
-  --reports /path/to/私教会员案例项目 \
+  --reports /path/to/report-bundle \
   --settings /path/to/private-provider.json \
   --provider qwen \
   --cache /path/to/model-cache \

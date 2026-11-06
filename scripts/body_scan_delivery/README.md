@@ -1,12 +1,8 @@
 # 体测成品与阶段审核
 
-消费局部阶段分析结果，为每张合格体测图填充生成用的训练前/训练后标签，并生成单图、同朝向VS和完整三视图成品。原分析结论继续保留；生成标签不是已验证的拍摄日期。
+消费训练阶段分类节点已经补齐的标签包，生成单图、同朝向 VS、完整三视图，并附带独立报告节点的标准 HTML 对比表和 JSON。此节点不调用模型、不重新判断阶段、不读取原始体检文档。
 
-- 明确位置/文字规则继续使用；已采用的AI判断及原有初步建议均标记 `（推断）`。
-- 其余按现有稳定方向的支持分，或独立待审排序选择阶段，标记 `（待审）`。
-- 生成层保留可靠批次一致性，先确保能以不同原图构成前后配对，再最大化所选阶段的支持分。必要时与某张图的单独最高分不同，会明确记录约束原因。
-- 没有有效评分时不伪造置信度；仍给可审核的临时占位标签，分数为null。相同来源不能凑成一对VS。
-- 推断和待审都进入审核返回；用户确认后去掉相应标记，保留旧版本和原始依据。
+推断/待审标签按输入原样渲染并进入审核返回；用户确认后移除对应标记，保留旧版本，仅重生成受影响的成品。
 
 完整协议与流程：[工作流文档](../../docs/workflows/body-scan-delivery-review.md)。
 
@@ -15,14 +11,12 @@
 ```bash
 cd /root/apps/case-studio
 /root/apps/non-grid-calibration/.venv/bin/python -m scripts.body_scan_delivery create \
-  --phase /path/to/body-scan-phase-regions/final-reviewed \
+  --phase /path/to/phase-run/classification \
   --out /root/autodl-fs/case-studio/productions/body-review-example \
-  --font /root/autodl-fs/case-studio/fonts/NotoSansSC.ttf \
-  --settings /path/to/private-provider.json \
-  --cache /path/to/review-ranking-cache --provider qwen
+  --font /root/autodl-fs/case-studio/fonts/NotoSansSC.ttf
 ```
 
-输出目录须不存在。`--settings`可省略；此时缺乏已有方向的图片明确标记为无评分占位，而不会声称来自最高置信度。模型排序用一张素材一个编号的原图/参考面板，并反向输入检查位置偏差。评分是主观支持分，不是统计准确率。
+输出目录须不存在。阶段输入必须为 `body-scan-phase-labels-v1`，旧分析目录或未补齐标签会被拒绝。报告从分类包的绑定读取；可用 `--reports` 提供相同指纹的报告包。成品入口不再接受 `--settings/--cache/--provider`。
 
 审核后重生成也可通过命令行执行：
 
@@ -46,7 +40,7 @@ cd /root/apps/case-studio
 
 ## 文件
 
-`private-inputs.json`仅留服务器，绑定原图、等比/展示图、上游结果与字体SHA。`audits/`保留待审模型排序与约束选择，均不通过文件服务公开。
+`private-inputs.json`仅留服务器，绑定原图、等比/展示图、上游结果与字体SHA。模型排序审计已移至分类节点的 `audits/`；成品节点不产生模型审计。
 
 每个`revisions/rNNNN`含：
 
@@ -55,9 +49,10 @@ cd /root/apps/case-studio
 - `review-template.json`：带源版本和指纹的空修正请求。
 - `index.html`：逐图选择前后、确认、导出/导入JSON，在线可提交后重新生成；本地仅导出。
 - `outputs/{店}/{会员_组}/`：1080×1440 JPEG。每张输入保留一张单图；槽位完整才生成VS、三视图，未选中为VS代表的图仍保留单图。
-- `products.zip`：成品、离线审核页和机器可读返回。
+- `reports/`：标准报告 HTML、JSON 和覆盖清单，来源包指纹及表单待审项记录于 `result.report_comparison`。
+- `products.zip`：成品、表单对比、离线审核页和机器可读返回。
 
-成品等比放入画布，不重裁人体，不新增人物拉伸；沿用批准展示图的既有处理和遮罩。本节点实现体测成品基础版式，不含其他生活照/感言/封面/报告模板及新贴纸库。
+成品等比放入画布，不重裁人体，不新增人物拉伸；沿用批准展示图的既有处理和遮罩。本节点实现体测成品基础版式，不含其他生活照/感言/封面/报告图片模板及新贴纸库。
 
 ## 审核保障
 

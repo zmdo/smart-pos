@@ -43,8 +43,7 @@ def preview(out):
             report_html.append(f'<div class="report"><h3>报告 {rid} · {esc(r.get("before_date"))} → {esc(r.get("after_date"))}</h3>'
                 f'<p>已勾选目标：{esc("、".join(r.get("checked_goals",[])) or "未确认")}。报告与照片批次尚无可靠日期绑定。</p>'
                 f'<table><tr><th>项目</th><th>报告训练前</th><th>报告训练后</th><th>重算差值</th></tr>{table}</table>'
-                f'<p class="warn">{esc(warnings)}</p><p>{page_links}<a href="reports/{rid}/report.json">转录与校验</a> · '
-                f'<a href="reports/{rid}/extracted.txt">原始文本/单元格</a></p></div>')
+                f'<p class="warn">{esc(warnings)}</p><p>{page_links}<a href="reports/{rid}/report.json">转录与校验</a></p></div>')
         for aid in g['asset_ids']:
             row = variants['fused'][aid]
             labels = ' → '.join(PHASE[variants[v][aid]['phase']] for v in ('baseline','regional','fused'))

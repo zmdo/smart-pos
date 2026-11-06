@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from .assignment import family
+from scripts.body_scan_contracts.labels import family
 from .pipeline import current,read,sha,digest_json,save
 
 
@@ -20,7 +20,7 @@ class Links(HTMLParser):
 def verify(root):
     root=Path(root);result,directory=current(root);source=read(root/'private-inputs.json')
     rows=result['items'];lookup={r['asset_id']:r for r in rows}
-    original=read(Path(source['phase_input'])/'summary.json')
+    original=read(Path(source['phase_input'])/('labels.json' if source.get('classification_schema') else 'summary.json'))
     if len(rows)!=len(lookup) or set(lookup)!={r['asset_id'] for r in original}:raise ValueError('input_image_coverage_changed')
     if any(sha(p)!=h for p,h in source['bindings'].items()):raise ValueError('bound_source_changed')
     if digest_json(source['bindings'])!=result['source_manifest_sha256']:raise ValueError('manifest_identity_changed')

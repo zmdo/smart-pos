@@ -9,8 +9,8 @@ from PIL import Image
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from scripts.body_scan_delivery.assignment import assign,decorate,required_ranking
-from scripts.body_scan_delivery.ranking import parse,rank
+from scripts.body_scan_phase_classification.assignment import assign,decorate,required_ranking
+from scripts.body_scan_phase_classification.ranking import parse,rank
 from scripts.body_scan_delivery.pipeline import publish,correct,current,read,save,sha,ReviewConflict
 from scripts.body_scan_delivery.render import plan
 from scripts.body_scan_delivery.api import router
@@ -107,7 +107,7 @@ class AssignmentTests(unittest.TestCase):
         from unittest.mock import Mock
         client=Mock();client.ask.return_value=({'items':[{'image':'I1','after_score':.5,'reason':'待审'},
                                                          {'image':'I2','after_score':.5,'reason':'待审'}]}, {})
-        with patch('scripts.body_scan_delivery.ranking.image_for',return_value=np.zeros((80,40,3),np.uint8)):
+        with patch('scripts.body_scan_phase_classification.ranking.image_for',return_value=np.zeros((80,40,3),np.uint8)):
             result,audit=rank(client,[row('a'),row('b')],['a','b'])
         self.assertEqual(len(client.ask.call_args_list),2)
         self.assertTrue(all(len(call.args[0])==2 for call in client.ask.call_args_list))

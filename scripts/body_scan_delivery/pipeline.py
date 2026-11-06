@@ -15,7 +15,8 @@ from pathlib import Path
 from PIL import Image
 
 from . import VERSION
-from .assignment import assign,decorate,required_ranking
+from scripts.body_scan_contracts.labels import decorate
+from scripts.body_scan_contracts.bundles import load_labels, load_reports
 from .render import plan,render,sha
 
 
@@ -39,32 +40,6 @@ def bind(path,manifest,expected=None):
     if expected is not None and actual!=expected:raise ValueError('source_hash_changed')
     if str(path) in manifest and manifest[str(path)]!=actual:raise ValueError('source_changed_during_load')
     manifest[str(path)]=actual;return path
-
-
-def load_phase(directory):
-    root=Path(directory).resolve();manifest={}
-    rows=read(bind(root/'summary.json',manifest));groups=read(bind(root/'groups.json',manifest))
-    if read(bind(root/'config.json',manifest)).get('version')!='body-scan-phase-regions-v1':raise ValueError('unsupported_phase_input')
-    metadata={};photos={};seen=set()
-    for row in rows:
-        aid=row['asset_id']
-        if not re.fullmatch(r'[A-Za-z0-9_-]+',aid) or aid in seen or not row['store'].endswith('店'):raise ValueError('invalid_phase_asset')
-        if (row['view'] not in ('front','back','side','side_left','side_right')
-                or not re.fullmatch(r'[A-Za-z0-9_-]+',row['group_id'])):raise ValueError('invalid_view_or_group_id')
-        seen.add(aid);directory=Path(row['display_input']).resolve()
-        if str(directory) not in metadata:
-            metadata[str(directory)]={r['asset_id']:r for r in read(bind(directory/'summary.json',manifest))}
-        source=metadata[str(directory)][aid]
-        if any(source[k]!=row[k] for k in ('store','member','source_sha256')):raise ValueError('display_identity_mismatch')
-        bind(row['source'],manifest,row['source_sha256']);bind(row['uniform'],manifest,row['uniform_sha256'])
-        photos[aid]=str(bind(directory/'images'/aid/'display.png',manifest,source['output']['display_sha256']))
-    grouped_ids=[aid for g in groups for aid in g['asset_ids']]
-    if len(grouped_ids)!=len(rows) or set(grouped_ids)!=seen:raise ValueError('phase_group_partition_invalid')
-    for group in groups:
-        for row in rows:
-            if row['asset_id'] in group['asset_ids'] and (row['store'],row['member'],row['group_id'])!=(group['store'],group['member'],group['group_id']):
-                raise ValueError('phase_group_identity_mismatch')
-    return rows,groups,photos,manifest
 
 
 def publish(directory,rows,source,revision,previous=None,changes=None,request_id=None):
@@ -103,6 +78,15 @@ def publish(directory,rows,source,revision,previous=None,changes=None,request_id
                 'review_request_sha256':source.get('review_request_sha256'),
                 'generation_scope':'body-photo singles, same-view VS, complete front/side/back grid',
                 'verified_photo_chronology':False}
+        if source.get('report_bundle'):
+            reports=Path(source['report_bundle']);(staging/'reports').mkdir()
+            for filename in ('index.html','reports.json','inventory.json'):
+                shutil.copyfile(reports/filename,staging/'reports'/filename)
+            result['report_comparison']={'preview':'reports/index.html','data':'reports/reports.json',
+                'inventory':'reports/inventory.json','bundle_sha256':sha(reports/'bundle.json'),
+                'review_report_ids':[r['report_id'] for r in read(reports/'reports.json')
+                    if r['status']!='verified_transcription' or r.get('warnings') or r.get('rejected_metrics')]}
+            result['generation_scope']+='; verified report comparison HTML and data'
         save(staging/'result.json',result)
         save(staging/'review.json',{'delivery_id':root.name,'base_revision':revision,'source_manifest_sha256':manifest_hash,
                                    'items':needs,'outputs_requiring_review':[o for o in outputs if o['requires_review']]})
@@ -122,24 +106,24 @@ def publish(directory,rows,source,revision,previous=None,changes=None,request_id
         raise
 
 
-def create(phase_dir,root,font,client=None):
-    from .ranking import rank
+def create(phase_dir,root,font,reports=None):
     if not re.fullmatch(r'[A-Za-z0-9_-]{8,80}',Path(root).name):raise ValueError('invalid_delivery_id')
-    rows,groups,photos,bindings=load_phase(phase_dir)
-    root=Path(root);root.mkdir(parents=True,exist_ok=False);(root/'revisions').mkdir();(root/'audits').mkdir()
-    font=str(bind(font,bindings));assigned=[]
-    for group in groups:
-        original=[r for r in rows if r['asset_id'] in group['asset_ids']]
-        required=required_ranking(group,original)
-        scores,audit=rank(client,original,required) if required else ({},{})
-        labels,assignment=assign(group,original,scores)
-        assigned.extend(labels)
-        save(root/'audits'/(group['group_id']+'.json'),{'required_fallback_ids':required,'scores':scores,'ranking_audit':audit,'assignment':assignment})
-        print('labels',group['member'],dict(Counter(r['label_kind'] for r in labels)),flush=True)
-    assigned.sort(key=lambda r:r['asset_id'])
-    source={'phase_input':str(Path(phase_dir).resolve()),'photos':photos,'bindings':bindings,'font':font,'version':VERSION}
+    rows,photos,bindings,report_link=load_labels(phase_dir)
+    if reports is None and report_link['path']:
+        reports=Path(report_link['path'])
+    if reports:
+        reports=Path(reports).resolve()
+        load_reports(reports,bindings)
+        if sha(reports/'bundle.json')!=report_link['sha256']:
+            raise ValueError('reports_differ_from_classification')
+    elif report_link['sha256']:
+        raise ValueError('classification_report_bundle_missing')
+    root=Path(root);root.mkdir(parents=True,exist_ok=False);(root/'revisions').mkdir()
+    font=str(bind(font,bindings))
+    source={'phase_input':str(Path(phase_dir).resolve()),'photos':photos,'bindings':bindings,'font':font,'version':VERSION,
+            'classification_schema':'body-scan-phase-labels-v1','report_bundle':str(reports) if reports else None}
     save(root/'private-inputs.json',source)
-    return publish(root,assigned,source,1)
+    return publish(root,rows,source,1)
 
 
 class ReviewConflict(ValueError):pass

@@ -1,5 +1,5 @@
 """Explicitly provisional ranking when the evidence layer has no suggestion."""
-from scripts.body_scan_phase_sessions.pipeline import image_for
+from scripts.body_scan_contracts.images import image_for
 
 PROMPT='''你是会员体测素材的待审编排员。每个输入面板对应且只对应一张素材，面板中左边是原图，右边是同一张照片的等比参考。
 面板上的I1、I2等是素材编号。左右不是两个时间点，绝对不能比较同面板左右判断前后！只比较不同面板之间的同朝向照片。每个面板只输出一条结果。

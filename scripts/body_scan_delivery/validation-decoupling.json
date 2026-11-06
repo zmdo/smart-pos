@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "all_labels_identical": 82,
+  "all_product_bytes_identical": 130,
+  "old_files_unchanged": 236,
+  "blocked_imports": [
+    "httpx",
+    "cv2",
+    "report extraction",
+    "phase classification",
+    "visual analysis"
+  ],
+  "review_affected_products": 5,
+  "review_counts": {
+    "images": 82,
+    "members": 16,
+    "label_kinds": {
+      "pending": 22,
+      "inferred": 29,
+      "rule": 29,
+      "human": 2
+    },
+    "requires_review": 51,
+    "products": 130,
+    "review_products": 86,
+    "rendered_products": 5,
+    "reused_products": 125
+  },
+  "initial_verification": {
+    "passed": true,
+    "revision": 1,
+    "images": 82,
+    "products": 130,
+    "product_kinds": {
+      "single": 82,
+      "vs": 39,
+      "three_views": 9
+    },
+    "label_kinds": {
+      "pending": 22,
+      "inferred": 31,
+      "rule": 29
+    },
+    "review_images": 53,
+    "review_products": 88,
+    "source_files_unchanged": 262,
+    "preview_links_checked": 183,
+    "every_input_has_single_product": true,
+    "distinct_source_pairs": true,
+    "verified_photo_chronology": false
+  },
+  "review_verification": {
+    "passed": true,
+    "revision": 2,
+    "images": 82,
+    "products": 130,
+    "product_kinds": {
+      "single": 82,
+      "vs": 39,
+      "three_views": 9
+    },
+    "label_kinds": {
+      "pending": 22,
+      "inferred": 29,
+      "rule": 29,
+      "human": 2
+    },
+    "review_images": 51,
+    "review_products": 86,
+    "source_files_unchanged": 262,
+    "preview_links_checked": 183,
+    "every_input_has_single_product": true,
+    "distinct_source_pairs": true,
+    "verified_photo_chronology": false
+  },
+  "reports": {
+    "reports": 4,
+    "metrics": 32,
+    "unmatched_store_reports": 1,
+    "report_input_sha256": "237b3c2808918cb56c73091d6ad23586ae917e6f78ea0ba2c52b32f1839ad105",
+    "html_sha256": "a121639216e5652295fa4eff7ccd9b97c2666a5c8f7b55f82fdb2d03487f1131",
+    "output": "/autodl-fs/data/case-studio/experiments/decoupled-nodes-20261106/reports/index.html",
+    "store_documents": 5,
+    "excluded_documents": 3,
+    "needs_review": 1
+  },
+  "visual_analysis_calls": {
+    "new_requests": 0,
+    "cached_stages": 95,
+    "failed_stages": 0,
+    "reused_baseline_pairs": 19
+  },
+  "ranking_replay_new_requests": 0
+}

@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 from scripts.body_scan.geometry import project
-from scripts.body_scan_phase_sessions.pipeline import image_for
+from scripts.body_scan_contracts.images import image_for
 
 REGIONS = ('upper', 'waist', 'legs')
 COLORS = {'upper': (60, 150, 40), 'waist': (30, 120, 230), 'legs': (210, 110, 50)}
