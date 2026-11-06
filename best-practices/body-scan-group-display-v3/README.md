@@ -54,3 +54,19 @@ bash /root/apps/case-studio/best-practices/body-scan-group-display-v3/run_tests.
 获准实验的5组28张记录保存在[source-validation.json](source-validation.json)。本次归档的独立重跑、两种基线入口和像素一致性结果见[validation.json](validation.json)。覆盖范围为这5组，不代表全量数据均已通过尺度校准。
 
 后续改进在开发目录测试，获用户确认后再更新权威版本及指纹。维护流程见[工作流说明](../../docs/workflows/person-scale-calibration.md)。
+
+## 封面专用正面双图分支（2026-11-07）
+
+新增独立 `run_cover.sh`，原 `run.sh` 及既有尺度、取景算法保持不变。该分支消费已选定的正面训练前后素材和原阶段行，复用尺度校准后的肩部坐标及原图校正矩阵，仅两张图参与共同取景，不使用六图成品或展示版非等比拉伸。
+
+```bash
+bash /root/apps/case-studio/best-practices/body-scan-group-display-v3/run_cover.sh \
+  --request /path/to/cover-frame-request.json \
+  --out /path/to/NEW-cover-frames
+```
+
+请求协议 `cover-frame-request-v1` 由开发目录的封面适配器 `python -m scripts.body_scan_cover.prepare --delivery ... --out ...` 生成，也可由服务按同一协议提交。输入含阶段结果路径/SHA、两张正面素材完整阶段行、各自展示摘要路径/SHA；本节点不导入该适配器、分类节点或成品生成器。冻结代码位于本目录 `scripts/body_scan_cover_frames`，无开发目录回退依赖。原图和几何来自已绑定摘要，原始单图来源的有效边界完整保留。
+
+输出 `frames.json`、每组 `before.png` / `after.png` / `pair.png`、全有效像素掩码和私有输入指纹。阶段与审核标记按素材 ID 原样继承，新增模型调用为 0。`--width` / `--height` 默认 500×478，`--max-torso-heights` 默认 2.8；当前封面模板只接收 500×478，修改该尺寸需同步调整模板。
+
+双图矩形遵守原图有效区域，保留既有几何及人物尺度，只等比缩放。共同肩线优先；原图缺失与保头冲突时独立记录取景待审，不能伪装成已对齐。该分支允许扩展至六图裁剪前的有效原像素，不受旧单图 768 宽取景窗口限制。具体规则和数据流见[封面工作流](../../docs/workflows/member-cover.md)，本轮验收见[cover-validation.json](cover-validation.json)。

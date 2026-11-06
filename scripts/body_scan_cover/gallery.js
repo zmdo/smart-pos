@@ -20,7 +20,7 @@ function show(c){
   const facts=[['体测报告',c.copy.report_id||'未匹配'],['教练',c.copy.coach||'未提供'],['照片状态',c.requires_review?'训练阶段待复核':'规则／人工标签'],['文案',c.copy.copy_origin==='user_override'?'用户自定义':'根据报告自动编写']];
   document.getElementById('facts').innerHTML=facts.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
   document.getElementById('notes').innerHTML=c.notes.map(n=>`<p>${esc(n)}</p>`).join('');
-  document.getElementById('framing').innerHTML=c.framing.map((f,i)=>`<p>${i?'训练后':'训练前'} · ${esc(c.asset_ids[i])}<br>${f.mode==='full_body_to_upper_body'?'全身照上半身取景':'可用上半身取景'} · 等比缩放 ${f.scale.toFixed(3)}<br>${f.head_already_incomplete?'输入头部已不完整':'保留输入头部'}</p>`).join('');
+  document.getElementById('framing').innerHTML=c.framing.map((f,i)=>`<p>${i?'训练后':'训练前'} · ${esc(c.asset_ids[i])}<br>${f.mode==='pair_original_upper_body'?'正面前后双图取景':(f.mode==='full_body_to_upper_body'?'全身照上半身取景':'可用上半身取景')} · 等比缩放 ${f.scale.toFixed(3)}<br>${f.head_already_incomplete?'已有头部不完整记录，请复核当前取景':'按已有证据保留头部区域'}</p>`).join('');
   fillForm(c);history.replaceState(null,'','#'+c.group_id);
 }
 function refresh(){

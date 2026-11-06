@@ -1,4 +1,4 @@
-# 会员案例封面 · 独立样式实验 v1
+# 会员案例封面 · 独立样式实验 v2
 
 按用户参考图制作 1080×1440 封面，先生成图片与离线 HTML 供微调，不修改已归档的三类体测成品最佳实践，不重新跑标准化或训练阶段判断。
 
@@ -13,7 +13,11 @@
 
 使用既有训练前后标签，优先选择正面全身照，其次头部完整的正面照，再按原有配对与标签优先级选择。要求两张不同原图；不以侧面、同图复制来填补缺失正面配对。
 
-从已绑定展示图的 `summary.json` 复用人物完整度、肩髋点及坐标变换，核验照片 SHA、会员身份、尺寸和来源 SHA。两张图共用相同尺度的最大固定宽高比取景框，按肩部居中，优先保留已有头部，展示头肩及上半身；只等比缩放，不进一步瘦身、拉长、旋转或补画身体。原输入头部缺失时保留实际可用上半身并在预览中说明。肩髋证据不可靠时记录未生成原因，不静默换为任意中心裁剪。本轮复用现有模型判断，新增模型调用为 0。
+封面专用双图由同组展示最佳实践的 `run_cover.sh` 输出：从原图复用已确认几何、共同人物尺度和肩部坐标，仅正面前后两张图求共同取景框。跳过旧同组六图裁剪及纵向展示拉伸，允许恢复旧取景窗口之外的有效原像素。新取景只等比缩放；保留头部区域、尽量展示腹部及大腿，不以人体宽度决定放大倍数。
+
+原图可用区域和头部保护冲突时，允许两图取景框纵向偏移，仍共用宽高和缩放，并独立标记取景待审。阶段标签、置信度、推断/待审与人审信息从既有结果整行继承，新增模型调用为 0。数据合同及全部边界规则见[封面工作流](../../docs/workflows/member-cover.md)。
+
+`--cover-frames` 是默认必需输入，生成器只校验并排版现成双图，不再自行取景。`--legacy-display-crop` 仅用于旧版回归对照；旧取景函数保留但不作为默认路径。
 
 ## 数据与文案
 
@@ -31,10 +35,20 @@
 
 ```bash
 cd /root/apps/case-studio
+# 1. 只选择素材并引用现有阶段结果，不做图像处理。
+/root/apps/non-grid-calibration/.venv/bin/python -m scripts.body_scan_cover.prepare \
+  --delivery /path/to/approved-delivery --out /path/to/NEW-request.json
+# 2. 独立最佳实践节点：输出封面专用前、后图和无标注拼接图。
+bash best-practices/body-scan-group-display-v3/run_cover.sh \
+  --request /path/to/NEW-request.json --out /path/to/NEW-cover-frames
+# 3. 只排版。可增加 --config /path/to/cover-overrides.json。
 /root/apps/non-grid-calibration/.venv/bin/python -m scripts.body_scan_cover \
-  --delivery /path/to/existing-delivery \
-  --out /path/to/new-cover-preview \
-  --config /path/to/cover-config.json
+  --delivery /path/to/approved-delivery --cover-frames /path/to/NEW-cover-frames \
+  --out /path/to/NEW-cover-preview
+# 可选：为同一配对生成旧/新 HTML 对照页。
+/root/apps/non-grid-calibration/.venv/bin/python -m scripts.body_scan_cover.compare \
+  --previous /path/to/old-cover-preview --current /path/to/NEW-cover-preview \
+  --frames /path/to/NEW-cover-frames
 ```
 
 `--config` 可省略。输入为包含 `current.json`、`private-inputs.json` 的完整成品根目录；输出必须为新目录，已有图片不覆盖。
@@ -62,6 +76,6 @@ cd /root/apps/case-studio
 
 本轮预览：15 位会员，其中 4 位有已核验报告及教练；1 位缺少不同原图的正面前后配对。验证记录见 [validation.json](validation.json)。
 
-9 项测试通过；277 个绑定文件未变；30 个取景均在原图内、等比缩放，已有头部未新增截断。真实数据当前没有同时确认头脚完整的正面输入，全身优先分支以合成关键点用例验证。自定义文案实测只改变指定会员 1 张封面，其余 14 张逐字节一致；网页筛选、放大、配置导出及本机图片 SHA 已检查。
+71 项测试通过；310 个输入绑定文件核验无变化；30 张封面专用图均为有效原像素矩形、等比缩放，并原样继承阶段行。14 组保持共同肩部基准，何彦霖因原图顶部缺失冲突保留垂直偏移并标记取景待审。原三类成品的 130 张图片 SHA 未变；旧封面路径重新渲染 15 张与 v1 逐字节一致。15 组新旧效果已逐组查看，HTML 选择、筛选、放大及文字配置导出通过离线 jsdom 检查。
 
-远程：`/root/autodl-fs/case-studio/experiments/body-scan-cover-v1-20261106/validated`。本机：`/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-cover-v1/validated/index.html`。默认潘艺文；缺报告的案例可在“待补报告”分类查看。
+远程：`/root/autodl-fs/case-studio/experiments/body-scan-cover-pair-v2-20261107/validated-v2`。本机：`/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-cover-pair-v2/validated-v2/index.html`；同目录 `comparison.html` 提供新旧封面对比及封面专用双图下载。默认潘艺文；缺报告的案例可在“待补报告”分类查看。v1 和本轮中间版本仍保留，未覆盖。

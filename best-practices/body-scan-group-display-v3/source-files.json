@@ -298,5 +298,35 @@
     "source_commit": "137054176720ab1b0348364961548a304b4ed754",
     "source_sha256": "d4dc39d4099e7863dee4d42ca2ee0787ffa772048ed272f0e5305bbb0ecd232b",
     "role": "unchanged_source"
+  },
+  "scripts/body_scan_cover_frames/__init__.py": {
+    "source": "scripts/body_scan_cover_frames/__init__.py",
+    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "source_sha256": "96e056d6a2572ed1292d49b18b676cdfd19c1280c4549a6ca6942e48be14bc46",
+    "role": "cover_branch_source"
+  },
+  "scripts/body_scan_cover_frames/pipeline.py": {
+    "source": "scripts/body_scan_cover_frames/pipeline.py",
+    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "source_sha256": "3f15fb85fbeca195941e3850ac75b1e6158457a9d29df74618ee43800c56aefd",
+    "role": "cover_branch_source"
+  },
+  "scripts/body_scan_cover_frames/geometry.py": {
+    "source": "scripts/body_scan_cover_frames/geometry.py",
+    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "source_sha256": "d86caff13111b79e0df98b0f8ef6e0622583310da5b474dc5da13873e930889a",
+    "role": "cover_branch_source"
+  },
+  "scripts/body_scan_cover_frames/__main__.py": {
+    "source": "scripts/body_scan_cover_frames/__main__.py",
+    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "source_sha256": "4b74158738f3985cfdb1928791d12d3252ecb98463e33cf1012261c79b11a07b",
+    "role": "cover_branch_source"
+  },
+  "scripts/body_scan_cover_frames/tests/test_frames.py": {
+    "source": "scripts/body_scan_cover_frames/tests/test_frames.py",
+    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "source_sha256": "7d9ce1d56cc450ad39f13bd00934d1b900a7be9d71bad226aeb5df6b60cfd9d5",
+    "role": "cover_branch_source"
   }
 }

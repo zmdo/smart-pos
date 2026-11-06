@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | 硬拼接拆分 | [body-scan-pairs](body-scan-pairs/README.md) | 仅处理两张照片硬拼接，独立分类子图；工作流使用 `--split-only` |
 | 单图标准化 v4 | [body-scan-wall-v4](body-scan-wall-v4/README.md) | 海报过滤、网格/非网格校正、可靠几何检查及回退、最大有效矩形 |
-| 同组展示 v3 | [body-scan-group-display-v3](body-scan-group-display-v3/README.md) | 共同人物尺度、完整头脚保护、肩部共同取景、一人一画幅 |
+| 同组展示 v3 | [body-scan-group-display-v3](body-scan-group-display-v3/README.md) | 共同人物尺度、完整头脚保护、肩部共同取景、一人一画幅；附封面正面双图独立取景入口 |
 | 体检表单对比 | [body-report-compare](body-report-compare/README.md) | 独立提取门店报告、按明确前后列核验、标准 JSON / HTML |
 | 训练阶段自动分类 | [body-scan-phase-classification](body-scan-phase-classification/README.md) | 盲评视觉与可选报告辅助，补齐全部阶段标签及推断/待审标记 |
 | 体测成品生成 | [body-scan-delivery](body-scan-delivery/README.md) | 同目录下分为完整三视图、各朝向 VS、训练前后朝向单图；共用版本与审核逻辑 |
@@ -17,4 +17,6 @@
 
 2026-11-06按用户要求删除 `grid-portrait`、`body-scan-wall`（旧v3）、`body-scan-group-display`（旧v2）。历史代码和验证仍可从Git恢复，不再复制到当前目录；来源清单中的旧路径是指定提交中的历史来源，不是运行依赖。清理范围、恢复方式及远程验证见[版本清理记录](retired-snapshots.md)。
 
-下游链路：**同组展示 → 阶段分类 → 成品生成**；**体检表单对比**可先独立运行，同时向分类与成品提供数据。已有三个图像处理最佳实践的代码和清单保持不变。
+下游链路：**同组展示 → 阶段分类 → 成品生成**；**体检表单对比**可先独立运行，同时向分类与成品提供数据。
+
+封面分支：既有阶段结果选定正面前后素材 → 同组展示 v3 的 `run_cover.sh` 复用已确认几何及尺度，从原图生成封面双图 → 独立封面生成器。这里只新增双图分支，标准组六图及原三类成品算法不变，详见[封面工作流](../docs/workflows/member-cover.md)。

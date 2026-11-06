@@ -6,12 +6,12 @@
   "previous_snapshot": "../body-scan-group-display",
   "input_contract": "approved standardized directory, original images; optional fingerprint-matched previous display",
   "output_contract": "standardized scale results + one shared display frame per person; separate scale and crop review status",
-  "algorithm_changes": "none; frozen kernels and prompts copied byte-for-byte",
+  "algorithm_changes": "existing processing kernels and prompts unchanged; optional cover-pair branch added separately",
   "archive_adaptations": "workflow orchestration, optional baseline generation, integrity and provenance metadata only",
   "files": [
     {
       "path": "README.md",
-      "sha256": "b6b9d328f88e8b7ea30c872c88056f836ae6399034539ace31cc0775669337fc",
+      "sha256": "52df3e93ac852a5fb8dde1c0121d917e40b9cea80946c63775b03e447b327a5e",
       "role": "archive_support"
     },
     {
@@ -34,7 +34,7 @@
     },
     {
       "path": "run_tests.sh",
-      "sha256": "8733455b244980e44dc32583839251f02e9e5cfd6aa28a8a97d8be75ae6a2f59",
+      "sha256": "47d5d9c8ad8504a14f980acce75a9e8749c5b07c96f7566e81691008eb5fb80e",
       "role": "archive_support"
     },
     {
@@ -415,7 +415,7 @@
     },
     {
       "path": "source-files.json",
-      "sha256": "78791b9deb3158ae29bb08b0b247e4eee8194f9bd96f3aace68d7c3d37bc8e00",
+      "sha256": "f3241ec9928a39e51d26fde7bddf0cdd5c690b7b34555fc143dad34e0fa356b4",
       "role": "archive_support"
     },
     {
@@ -438,8 +438,71 @@
       "path": "workflow.py",
       "sha256": "2a23d9e89fc43aa36dbd711c541fcdf2b4613fce44090986cf03f67a10830d95",
       "role": "archive_support"
+    },
+    {
+      "path": "scripts/body_scan_cover_frames/__init__.py",
+      "source": "scripts/body_scan_cover_frames/__init__.py",
+      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+      "source_sha256": "96e056d6a2572ed1292d49b18b676cdfd19c1280c4549a6ca6942e48be14bc46",
+      "role": "cover_branch_source",
+      "sha256": "96e056d6a2572ed1292d49b18b676cdfd19c1280c4549a6ca6942e48be14bc46"
+    },
+    {
+      "path": "scripts/body_scan_cover_frames/pipeline.py",
+      "source": "scripts/body_scan_cover_frames/pipeline.py",
+      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+      "source_sha256": "3f15fb85fbeca195941e3850ac75b1e6158457a9d29df74618ee43800c56aefd",
+      "role": "cover_branch_source",
+      "sha256": "3f15fb85fbeca195941e3850ac75b1e6158457a9d29df74618ee43800c56aefd"
+    },
+    {
+      "path": "scripts/body_scan_cover_frames/geometry.py",
+      "source": "scripts/body_scan_cover_frames/geometry.py",
+      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+      "source_sha256": "d86caff13111b79e0df98b0f8ef6e0622583310da5b474dc5da13873e930889a",
+      "role": "cover_branch_source",
+      "sha256": "d86caff13111b79e0df98b0f8ef6e0622583310da5b474dc5da13873e930889a"
+    },
+    {
+      "path": "scripts/body_scan_cover_frames/__main__.py",
+      "source": "scripts/body_scan_cover_frames/__main__.py",
+      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+      "source_sha256": "4b74158738f3985cfdb1928791d12d3252ecb98463e33cf1012261c79b11a07b",
+      "role": "cover_branch_source",
+      "sha256": "4b74158738f3985cfdb1928791d12d3252ecb98463e33cf1012261c79b11a07b"
+    },
+    {
+      "path": "scripts/body_scan_cover_frames/tests/test_frames.py",
+      "source": "scripts/body_scan_cover_frames/tests/test_frames.py",
+      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+      "source_sha256": "7d9ce1d56cc450ad39f13bd00934d1b900a7be9d71bad226aeb5df6b60cfd9d5",
+      "role": "cover_branch_source",
+      "sha256": "7d9ce1d56cc450ad39f13bd00934d1b900a7be9d71bad226aeb5df6b60cfd9d5"
+    },
+    {
+      "path": "cover_workflow.py",
+      "role": "archive_support",
+      "sha256": "07ea9143cdfa61246b6657e3ac59bbe0c591f990e17a765a86a0b5f86b9e240b"
+    },
+    {
+      "path": "run_cover.sh",
+      "role": "archive_support",
+      "sha256": "56ea4cb3019c7d7a7168ed8dea780c270c9f7f5fb75406ab0561e71bc697ab02"
+    },
+    {
+      "path": "cover-validation.json",
+      "role": "archive_support",
+      "sha256": "8bb63a01d4656b46ab1cb2cf3da2b881a9256679cd000ea374a6afd5a161bc63"
     }
   ],
   "previous_snapshot_status": "retired; path exists only in Git history",
-  "previous_snapshot_checkout_commit": "ec5dcb4cda00534b7547dbaaa54177b4d5cfe503"
+  "previous_snapshot_checkout_commit": "ec5dcb4cda00534b7547dbaaa54177b4d5cfe503",
+  "cover_branch": {
+    "version": "body-scan-cover-frames-v1",
+    "entrypoint": "run_cover.sh",
+    "policy": "optional two-front-frame branch; no changes to existing processing kernels",
+    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "input_contract": "cover-frame-request-v1 with bound stage rows, display summaries and original sources",
+    "output_contract": "body-scan-cover-frames-v1; two equal-sized isotropic frames and inherited labels"
+  }
 }
