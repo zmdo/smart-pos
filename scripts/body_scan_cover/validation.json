@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "counts": {
+    "covers": 15,
+    "with_report": 4,
+    "with_coach": 4,
+    "gaps": 1
+  },
+  "tests_passed": 9,
+  "all_covers_1080x1440": true,
+  "all_inputs_unchanged": 277,
+  "all_front_pairs_distinct_originals": true,
+  "all_crops_isotropic_and_in_bounds": true,
+  "no_additional_head_crop_when_head_available": true,
+  "labels_and_review_flags_retained": true,
+  "headings_and_stories_fit": true,
+  "model_requests": 0,
+  "source_result_sha256": "0dc46d401caa9cf8cc22abd1f24d56c18fb7e86108dc65618ef334b48d0940c8",
+  "remote_output": "/root/autodl-fs/case-studio/experiments/body-scan-cover-v1-20261106/validated",
+  "local_gallery": {
+    "passed": true,
+    "images_verified": 15,
+    "filters_search_and_empty_state": true,
+    "zoom": true,
+    "user_config_export_and_reset": true,
+    "default_case": "潘艺文"
+  },
+  "custom_copy": {
+    "passed": true,
+    "custom_title_story_coach_and_highlights_applied": true,
+    "only_target_cover_changed": [
+      "g013"
+    ],
+    "other_covers_identical": 14,
+    "source_photos_labels_framing_and_report_facts_unchanged": true
+  },
+  "visual_inspection": {
+    "passed": true,
+    "cases": [
+      "g013",
+      "g011"
+    ],
+    "checks": [
+      "Reference layout and fixed member-case badge",
+      "Correct decimal typography and quotation placement",
+      "Full available head versus pre-existing missing head",
+      "No new subject stretch"
+    ]
+  },
+  "real_framing_modes": {
+    "available_upper_body": 30
+  },
+  "full_body_branch_validation": "synthetic unit coverage; current selected inputs do not meet complete-head-and-feet criterion",
+  "local_preview": "/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-cover-v1/validated/index.html"
+}

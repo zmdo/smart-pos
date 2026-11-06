@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>会员案例封面 · 样式预览</title><link rel="stylesheet" href="gallery.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="#"><b>UP<span>＋</span></b><div>会员案例<span>成品设计工作台</span></div></a><div class="edition"><i></i> 封面方案 01</div><a href="cases.json" download>下载案例清单 ↗</a></header>
+  <div class="workspace">
+    <aside class="library">
+      <div class="eyebrow">CASE LIBRARY</div><h2>选择会员 <small id="total"></small></h2>
+      <input id="search" type="search" placeholder="搜索姓名或门店" aria-label="搜索姓名或门店">
+      <div class="filters"><button data-filter="all" aria-pressed="true">全部</button><button data-filter="report" aria-pressed="false">有报告</button><button data-filter="missing" aria-pressed="false">待补报告</button></div>
+      <div id="case-list"></div>
+      <details class="gaps"><summary>查看未生成项</summary><div id="gaps"></div></details>
+    </aside>
+    <main>
+      <div class="intro"><div><div class="eyebrow">MEMBER STORY / COVER DESIGN</div><h1>把改变，写成一个故事。</h1><p>固定取景 · 阶段对比 · 真实数据</p></div><div class="size">1080 × 1440<span>封面画布</span></div></div>
+      <div class="case-heading"><h2 id="member-heading"></h2><span id="report-badge" class="badge"></span></div>
+      <div class="stage">
+        <section class="artwork"><button id="zoom" aria-label="放大封面"><img id="cover" alt=""></button><div class="artwork-toolbar"><span>正面 · 训练前 / 训练后</span><a id="download" download>下载封面 JPG ↗</a></div></section>
+        <aside class="details">
+          <section class="summary"><div class="eyebrow">ABOUT THIS COVER</div><h3>这张封面的依据</h3><dl id="facts"></dl><div id="notes"></div><details><summary>查看取景与素材</summary><div id="framing"></div></details></section>
+          <section class="editor"><div class="eyebrow">YOUR WORDS, YOUR STORY</div><h3>替换成你的文案</h3><p>修改后导出配置，交给生成服务重新出图。</p>
+            <form id="copy-form">
+              <label>主标题<input name="title" maxlength="12"></label>
+              <label>副标题<input name="subtitle" maxlength="36"></label>
+              <label>成果标题<input name="headline" maxlength="40"></label>
+              <div class="two-fields"><label>教练<input name="coach" maxlength="40"></label><label>地址<input name="address" maxlength="70"></label></div>
+              <label>故事正文<textarea name="story" rows="6" maxlength="280"></textarea></label>
+              <label>红色强调文字（每行一段）<textarea name="highlights" rows="2"></textarea></label>
+              <div class="actions"><button type="button" id="reset">恢复本版文案</button><button type="submit" class="primary">导出本例配置 ↗</button></div><p id="edit-status" role="status"></p>
+            </form>
+          </section>
+        </aside>
+      </div>
+      <footer>当前为独立封面实验 · 原体测成品及最佳实践保持不变</footer>
+    </main>
+  </div>
+  <dialog id="lightbox"><div class="dialog-toolbar"><b id="dialog-title"></b><button id="close" aria-label="关闭放大预览">×</button></div><img id="large-cover" alt=""></dialog>
+  <script id="cover-data" type="application/json"><!--COVER_DATA--></script><script src="gallery.js"></script>
+</body></html>
