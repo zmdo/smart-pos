@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>三视图体测 · 成品样式预览</title>
+  <link rel="stylesheet" href="gallery.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">UP<span>+</span></span><span>会员案例<span class="brand-sub">成品样式预览</span></span></a>
+    <div class="edition"><span class="live-dot"></span>当前方案 <span class="edition-num">01</span></div>
+    <a class="download-all" href="preview.zip" download>下载整套预览 <span aria-hidden="true">↗</span></a>
+  </header>
+  <div class="app">
+    <aside class="sidebar" aria-label="案例选择">
+      <div class="sidebar-heading"><span class="eyebrow">CASE LIBRARY</span><h2>完整案例 <span id="case-count"></span></h2></div>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索会员或门店" aria-label="搜索会员或门店"></label>
+      <div id="store-filters" class="store-filters" aria-label="门店筛选"></div>
+      <div id="case-list" class="case-list" aria-label="会员案例列表"></div>
+      <div class="sidebar-note">每套含前后各 3 个朝向。<br>沿用现有成品与阶段标记。</div>
+    </aside>
+    <main id="main">
+      <div class="intro"><div><p class="eyebrow">BODY ASSESSMENT / STYLE 01</p><h1>三视图体测成品</h1><p class="subtitle">从完整拼图到单张细节，查看同一套案例的当前生成效果。</p></div><span class="size-label">1080 × 1440 <small>成品尺寸</small></span></div>
+      <nav class="tabs" aria-label="成品分类" role="tablist">
+        <button id="tab-three_views" role="tab" data-tab="three_views" aria-selected="true" aria-controls="stage">完整三视图 <span>01</span></button>
+        <button id="tab-vs" role="tab" data-tab="vs" aria-selected="false" aria-controls="stage" tabindex="-1">同朝向对比 <span>03</span></button>
+        <button id="tab-single" role="tab" data-tab="single" aria-selected="false" aria-controls="stage" tabindex="-1">单张体测图 <span>06</span></button>
+      </nav>
+      <div id="case-heading" class="case-heading"></div>
+      <section id="stage" role="tabpanel" aria-labelledby="tab-three_views"></section>
+      <p id="review-note" class="review-note"></p>
+      <footer><span>当前样式基线 · 原成品直接展示</span><a href="cases.json" download>案例清单 ↗</a></footer>
+    </main>
+  </div>
+  <dialog id="lightbox" aria-labelledby="lightbox-title">
+    <div class="dialog-header"><span id="lightbox-title"></span><div><a id="lightbox-download" download>下载原尺寸</a><button id="close-lightbox" aria-label="关闭放大预览">✕</button></div></div>
+    <div class="dialog-canvas"><img id="lightbox-image" alt=""></div>
+  </dialog>
+  <noscript>请启用 JavaScript 查看案例分类；图片文件保存在旁边的 media 目录中。</noscript>
+  <script id="gallery-data" type="application/json"><!--GALLERY_DATA--></script>
+  <script src="gallery.js"></script>
+</body>
+</html>
