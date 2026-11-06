@@ -111,3 +111,9 @@
 用户要求图片去掉 Before/After 下的推断/待审小字和页脚数据来源说明，并在红色页眉右下角加入指定声明。只调整渲染，不更改阶段、报告数据或审核队列；图片的简化标签不可当作人工确认。声明文本经用户明确指定，仍通过 `consent_text` 配置。
 
 使用既有 v4 成品通过 `restyle` 生成独立 v5 版本，重绘 39 张 VS、复用 91 张其他成品，全部输入标签、配对素材及画布尺寸未变。验证记录见 [validation-clean-v5.json](../../scripts/body_scan_delivery/validation-clean-v5.json)。
+
+### 三类成品归档为最佳实践
+
+当前实现冻结到 [best-practices/body-scan-delivery](../../best-practices/body-scan-delivery/README.md)。同一目录下 `three_views` 保存完整三视图绘图，`view_comparison` 保存各朝向 VS 绘图，`single_view` 保存训练前后朝向单图绘图；各有说明和类别入口。公共数据契约、配对、配置、审核和不可变版本代码在套件内共享，不导入开发代码或其他最佳实践。
+
+根入口负责完整生产任务和审核；类别入口消费已有生产版本，只重新绘制对应成品并返回来源任务的审核目标。分类结果和照片处理不在此节点重跑，当前图片样式不变。

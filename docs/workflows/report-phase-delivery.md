@@ -34,7 +34,7 @@ flowchart LR
 
 1. [体检表对比最佳实践](../../best-practices/body-report-compare/README.md)：`run.sh --input RAW --out REPORTS --settings SETTINGS --cache CACHE`。
 2. [训练阶段分类最佳实践](../../best-practices/body-scan-phase-classification/README.md)：`run.sh run --input DISPLAY --reports REPORTS --out PHASES --settings SETTINGS --cache CACHE`。
-3. [成品生成](../../scripts/body_scan_delivery/README.md)：`python -m scripts.body_scan_delivery create --phase PHASES/classification --out DELIVERY --font FONT`。
+3. [成品生成最佳实践](../../best-practices/body-scan-delivery/README.md)：`run.sh create --phase PHASES/classification --out DELIVERY --font FONT --presentation PRESENTATION`。同一目录下的 `three_views`、`view_comparison`、`single_view` 分别维护三种绘图代码，并提供独立类别入口；开发入口仍保留在 `scripts/body_scan_delivery`。
 
 参数是示意路径，真实图片/模型运行在远程服务器。可省略第二步 `--reports`；第一步可独立运行。三个输出目录都必须是新目录。冻结入口清空开发 PYTHONPATH 并检查清单，两个新增最佳实践互不导入。
 

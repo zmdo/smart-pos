@@ -1,0 +1,19 @@
+{
+  "width": 1080,
+  "image_root": "/absolute/path/to/用户图片目录",
+  "logo_file": "品牌logo（白色）.svg",
+  "brand_name": "UP 健身私教馆",
+  "address": "UP 健身私教馆",
+  "stores": {
+    "示例店": {"address": "深圳·某区·UP健身私教馆（示例店）"}
+  },
+  "members": {
+    "示例店/示例会员": {
+      "surname": "某",
+      "gender": "女",
+      "report_id": "r001"
+    }
+  },
+  "metrics": ["waist", "hip", "arm"],
+  "consent_text": "*案例真实有效，经会员本人同意使用"
+}

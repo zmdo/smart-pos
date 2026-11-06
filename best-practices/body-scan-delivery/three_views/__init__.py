@@ -1,0 +1,1 @@
+"""Approved product renderer."""

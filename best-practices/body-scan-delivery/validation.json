@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+  "tests_passed": 43,
+  "isolated_copy_without_development_code": true,
+  "source_result_sha256": "0dc46d401caa9cf8cc22abd1f24d56c18fb7e86108dc65618ef334b48d0940c8",
+  "category_checks": {
+    "three_views": {
+      "kind": "three_views",
+      "images": 54,
+      "products": 9,
+      "review_images": 48,
+      "review_products": 8,
+      "all_re_rendered": true,
+      "all_bytes_and_product_metadata_identical": true,
+      "labels_and_review_flags_unchanged": true
+    },
+    "view_comparison": {
+      "kind": "vs",
+      "images": 78,
+      "products": 39,
+      "review_images": 53,
+      "review_products": 27,
+      "all_re_rendered": true,
+      "all_bytes_and_product_metadata_identical": true,
+      "labels_and_review_flags_unchanged": true
+    },
+    "single_view": {
+      "kind": "single",
+      "images": 82,
+      "products": 82,
+      "review_images": 53,
+      "review_products": 53,
+      "all_re_rendered": true,
+      "all_bytes_and_product_metadata_identical": true,
+      "labels_and_review_flags_unchanged": true
+    }
+  },
+  "total_re_rendered": 130,
+  "all_130_products_byte_identical": true,
+  "model_requests": 0,
+  "remote_validation_root": "/root/autodl-fs/case-studio/experiments/body-scan-delivery-best-practice-20261106",
+  "complete_delivery_verification": {
+    "passed": true,
+    "revision": 1,
+    "images": 82,
+    "products": 130,
+    "product_kinds": {
+      "single": 82,
+      "vs": 39,
+      "three_views": 9
+    },
+    "label_kinds": {
+      "pending": 22,
+      "inferred": 31,
+      "rule": 29
+    },
+    "review_images": 53,
+    "review_products": 88,
+    "source_files_unchanged": 269,
+    "preview_links_checked": 183,
+    "every_input_has_single_product": true,
+    "distinct_source_pairs": true,
+    "verified_photo_chronology": false
+  },
+  "complete_delivery_labels_unchanged": true,
+  "complete_delivery_counts": {
+    "images": 82,
+    "members": 16,
+    "label_kinds": {
+      "pending": 22,
+      "inferred": 31,
+      "rule": 29
+    },
+    "requires_review": 53,
+    "products": 130,
+    "review_products": 88,
+    "rendered_products": 0,
+    "reused_products": 130
+  },
+  "manifest_sha256": "d4d1bca78133422248b3e88d31eef04af0216211063e6c6d928738313524914d",
+  "deployed_directory": "/root/apps/case-studio/best-practices/body-scan-delivery",
+  "test_scope": {
+    "contracts": 7,
+    "delivery_render_and_review": 31,
+    "snapshot_and_category_boundary": 5,
+    "upstream_classification_tests_excluded": 14
+  }
+}

@@ -1,0 +1,5 @@
+Pillow==13.0.0
+CairoSVG==2.9.1
+# Only needed for the optional API adapter and existing HTTP tests:
+fastapi==0.162.0
+httpx==0.28.1

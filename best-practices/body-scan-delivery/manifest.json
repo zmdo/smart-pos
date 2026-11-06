@@ -1,0 +1,302 @@
+{
+  "version": "body-scan-delivery-best-practice-v1",
+  "authority": "user-approved three-family product generation",
+  "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+  "entrypoint": "run.sh",
+  "components": {
+    "three_views": "body-three-views-seamless-v2",
+    "view_comparison": "body-same-view-reference-v5",
+    "single_view": "body-delivery-v1"
+  },
+  "dependencies": "Frozen local scripts and three sibling renderer packages only; no upstream models or development imports",
+  "excluded_tests": "14 classification/ranking tests remain with the classification node; revision fixtures now use preclassified labels",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "1f4def0eaae1a48e0564d0839d919ebb3b997be59c4d53474412b45f1c770405"
+    },
+    {
+      "path": "category.py",
+      "sha256": "5d79fa214a74af275eb6af61d803e932e7e105cbc115058c0cacd20be9bc2b30"
+    },
+    {
+      "path": "launch.py",
+      "sha256": "879f93c61ee0dca8658bfaa799e3a8b38011a23131ae159d0d050a0f655bdfc3"
+    },
+    {
+      "path": "requirements.verified.txt",
+      "sha256": "c41585cccd66b016e6893ddb335c00db7bb40097ab9d19b6eabd2ecd6be496bb"
+    },
+    {
+      "path": "run.sh",
+      "sha256": "df5a436ddd31de67d3614c5d2069c5e6405b98f88f31db3863b55ecec27f9762"
+    },
+    {
+      "path": "run_tests.sh",
+      "sha256": "038638fa8afc7eda857688653ce382ed8f05d606d33b0bb265efcc8a20f169a2"
+    },
+    {
+      "path": "scripts/__init__.py",
+      "sha256": "b78a6bc93ca6b8115db4e06e1efd301d89af1596bc090417214e5f9fb19fcb9e"
+    },
+    {
+      "path": "scripts/body_scan_contracts/__init__.py",
+      "sha256": "640e14351006da20ee1fd6fbd1702ab45542d6147d4a0c3d14c6145228edeefe",
+      "source": "scripts/body_scan_contracts/__init__.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "640e14351006da20ee1fd6fbd1702ab45542d6147d4a0c3d14c6145228edeefe",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_contracts/bundles.py",
+      "sha256": "cb689b0048c49acad27243e9cd0813784d9eb560f2243216e9baad2203337712",
+      "source": "scripts/body_scan_contracts/bundles.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "cb689b0048c49acad27243e9cd0813784d9eb560f2243216e9baad2203337712",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_contracts/io.py",
+      "sha256": "54969a064241607fcb9de16f4521c9a035f739fe87761fc7e7a689cb0d299a85",
+      "source": "scripts/body_scan_contracts/io.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "54969a064241607fcb9de16f4521c9a035f739fe87761fc7e7a689cb0d299a85",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_contracts/labels.py",
+      "sha256": "55773925eb380e28e25c2de8600d9bd7e0aa944d6ef08002a8d0b8b85750b3d6",
+      "source": "scripts/body_scan_contracts/labels.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "def135e551395fefad72a8c48eb0631d7459bc3bc029f9db8603c2d97434a43f",
+      "unchanged": false,
+      "adaptation": "Frozen dependency; renderer delegation and test fixtures adapted where needed"
+    },
+    {
+      "path": "scripts/body_scan_contracts/tests/test_contracts.py",
+      "sha256": "19d48bd127ca6ccb1d7f4317450bc2a99cf8860e47efa98bf51f3b32a06c97b4",
+      "source": "scripts/body_scan_contracts/tests/test_contracts.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "19d48bd127ca6ccb1d7f4317450bc2a99cf8860e47efa98bf51f3b32a06c97b4",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/__init__.py",
+      "sha256": "61931da777b8fb80d5a0f4fb2aa6370e58e157e25c19c6644ee88372248257d8",
+      "source": "scripts/body_scan_delivery/__init__.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "61931da777b8fb80d5a0f4fb2aa6370e58e157e25c19c6644ee88372248257d8",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/__main__.py",
+      "sha256": "809403941a8aa0c72d7c73149a3c32389a6da547d36d8a66128dcc7558514c5a",
+      "source": "scripts/body_scan_delivery/__main__.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "809403941a8aa0c72d7c73149a3c32389a6da547d36d8a66128dcc7558514c5a",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/api.py",
+      "sha256": "df19ca08d96346a00b9e8aaec9cd12f889fd8b30f08d2311f53c675f3328bd92",
+      "source": "scripts/body_scan_delivery/api.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "df19ca08d96346a00b9e8aaec9cd12f889fd8b30f08d2311f53c675f3328bd92",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/logo.py",
+      "sha256": "b4a3fcaf447646e4ada0ed493dec823842a72fc34a38feb291587897d40b1425",
+      "source": "scripts/body_scan_delivery/logo.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "b4a3fcaf447646e4ada0ed493dec823842a72fc34a38feb291587897d40b1425",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/pipeline.py",
+      "sha256": "b3a511da6efab8f1f672b6207752a723276e0cac8b716bf8e73039c12f7bb41a",
+      "source": "scripts/body_scan_delivery/pipeline.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "b3a511da6efab8f1f672b6207752a723276e0cac8b716bf8e73039c12f7bb41a",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/presentation.py",
+      "sha256": "3cef96a7ac86c3d190030fc2eab92d45f5a64af50d878bcf9db2ea1c3ed3d4f4",
+      "source": "scripts/body_scan_delivery/presentation.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "3cef96a7ac86c3d190030fc2eab92d45f5a64af50d878bcf9db2ea1c3ed3d4f4",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/preview.py",
+      "sha256": "b8f74b8ad21c66194db7abe8be738a996136e1bf96bb90075ceb7ea88ff2e3d3",
+      "source": "scripts/body_scan_delivery/preview.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "b8f74b8ad21c66194db7abe8be738a996136e1bf96bb90075ceb7ea88ff2e3d3",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/render.py",
+      "sha256": "02ed7ab87821544c20bc90c7f752296c63eba3340ad720929f23bc2568ff81ea",
+      "source": "scripts/body_scan_delivery/render.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "82189612af7e481baf92553937cf7c176073ebe90f7fa98c2ce6da594d74d47e",
+      "unchanged": false,
+      "adaptation": "Frozen dependency; renderer delegation and test fixtures adapted where needed"
+    },
+    {
+      "path": "scripts/body_scan_delivery/restyle.py",
+      "sha256": "00f045289992c98179b14a982117908cf434a81a2bdec945707739420f18da29",
+      "source": "scripts/body_scan_delivery/restyle.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "00f045289992c98179b14a982117908cf434a81a2bdec945707739420f18da29",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/tests/test_delivery.py",
+      "sha256": "7808f738d26380481f758140215e933f23526f1c2615d33b3d6a753e2e5daf99",
+      "source": "scripts/body_scan_delivery/tests/test_delivery.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "15e31b162b9d2bc0218f5fb4c1efed194c6f1451e5664373592a72dbf430d2b2",
+      "unchanged": false,
+      "adaptation": "Frozen dependency; renderer delegation and test fixtures adapted where needed"
+    },
+    {
+      "path": "scripts/body_scan_delivery/tests/test_logo_xml.py",
+      "sha256": "3af668d8ea9e95e4027da6e3559e7169683d9b2f6dcafd070045375b114b7c73",
+      "source": "scripts/body_scan_delivery/tests/test_logo_xml.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "3af668d8ea9e95e4027da6e3559e7169683d9b2f6dcafd070045375b114b7c73",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/tests/test_node_boundary.py",
+      "sha256": "0d765d148bacb8a5a6affc76d152a75497ff93f12c13b82a631925f5a2852273",
+      "source": "scripts/body_scan_delivery/tests/test_node_boundary.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "0d765d148bacb8a5a6affc76d152a75497ff93f12c13b82a631925f5a2852273",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/tests/test_reference_vs.py",
+      "sha256": "1d93a1e29ddc87396dd71829542ec26b2a89f0ba0be1e5591aecc71026d99439",
+      "source": "scripts/body_scan_delivery/tests/test_reference_vs.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "1d93a1e29ddc87396dd71829542ec26b2a89f0ba0be1e5591aecc71026d99439",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/tests/test_seamless_grid.py",
+      "sha256": "65876384da71f878e3d8bd06853cc28a9bed45b90e31946ca5200ca4138ea2f3",
+      "source": "scripts/body_scan_delivery/tests/test_seamless_grid.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "65876384da71f878e3d8bd06853cc28a9bed45b90e31946ca5200ca4138ea2f3",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/verify.py",
+      "sha256": "9a999e588ae35c2ee59cff7ae74ca1f8de63c35a2f5c0197b46af6bed1434358",
+      "source": "scripts/body_scan_delivery/verify.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "9a999e588ae35c2ee59cff7ae74ca1f8de63c35a2f5c0197b46af6bed1434358",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/body_scan_delivery/vs_layout.py",
+      "sha256": "8a54721007a4ec4d76ad70040d75ef01623bf804ebafbb82d38970b22d98564a",
+      "source": "scripts/body_scan_delivery/vs_layout.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "2da0e2392e04577664b10427ca6c1d477e18f6d28b0e8ecf6d7626eb8cff5723",
+      "unchanged": false,
+      "adaptation": "Frozen dependency; renderer delegation and test fixtures adapted where needed"
+    },
+    {
+      "path": "single_view/README.md",
+      "sha256": "e84db2936c62b30540daf6a5d98d379067b16be79c9ad6eaef40244fe3445970"
+    },
+    {
+      "path": "single_view/__init__.py",
+      "sha256": "e51b705e945c66ae4a39a54ff252d2e7e5a9835a2ea72d49a4d9ffd66de5c9a9"
+    },
+    {
+      "path": "single_view/render.py",
+      "sha256": "fc9bbd81a3331c34a538259f89f7274e963f059ade2f4094fc4928bfc3117b1d",
+      "source": "scripts/body_scan_delivery/render.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "82189612af7e481baf92553937cf7c176073ebe90f7fa98c2ce6da594d74d47e",
+      "unchanged": false,
+      "adaptation": "Extract single drawing branch and helpers without changing pixels"
+    },
+    {
+      "path": "single_view/run.sh",
+      "sha256": "865c419ad4fcaca602fba54137cec4bf0995bdefc5d51057d9502beda9bde112"
+    },
+    {
+      "path": "snapshot.py",
+      "sha256": "1fe06a4b7045a32dccdd6c77ecbbae0429989ad13cecae50aafc9e4df5ae50f5"
+    },
+    {
+      "path": "source-validation.json",
+      "sha256": "86b5f38f6cee995a3c333a21bf415eedb654db8721e4036250d26fbac7b24927",
+      "source": "scripts/body_scan_delivery/validation-clean-v5.json",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "86b5f38f6cee995a3c333a21bf415eedb654db8721e4036250d26fbac7b24927",
+      "unchanged": true
+    },
+    {
+      "path": "tests/test_snapshot.py",
+      "sha256": "d7ed9a3f9f2f4cb1e9ccde47fd66141c6436b4e579889a9c30120f2fad222958"
+    },
+    {
+      "path": "three_views/README.md",
+      "sha256": "1d741951aceb1edbba00e11fcb93ba864f44e4b6d1b1700cc37e9b65078795f6"
+    },
+    {
+      "path": "three_views/__init__.py",
+      "sha256": "e51b705e945c66ae4a39a54ff252d2e7e5a9835a2ea72d49a4d9ffd66de5c9a9"
+    },
+    {
+      "path": "three_views/render.py",
+      "sha256": "784ea956e61fd68f1abfb8d88c24625792e744e0b661b83f7e006bd7451ae4c6",
+      "source": "scripts/body_scan_delivery/render.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "82189612af7e481baf92553937cf7c176073ebe90f7fa98c2ce6da594d74d47e",
+      "unchanged": false,
+      "adaptation": "Extract seamless_grid unchanged into its product directory"
+    },
+    {
+      "path": "three_views/run.sh",
+      "sha256": "25d64bccb5d080489a92ddcde40805a3a2dee4cb32e859c3f97b84f62c368491"
+    },
+    {
+      "path": "view_comparison/README.md",
+      "sha256": "32e1b8189edae994bc97bdf74922b0cf1af31a4b76fb5585f3162899e60875d9"
+    },
+    {
+      "path": "view_comparison/__init__.py",
+      "sha256": "e51b705e945c66ae4a39a54ff252d2e7e5a9835a2ea72d49a4d9ffd66de5c9a9"
+    },
+    {
+      "path": "view_comparison/presentation.example.json",
+      "sha256": "17c40433f734585e73e5441ac8c3834638c4ce20021f236075abfb17d88a4354",
+      "source": "scripts/body_scan_delivery/presentation.example.json",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "17c40433f734585e73e5441ac8c3834638c4ce20021f236075abfb17d88a4354",
+      "unchanged": true
+    },
+    {
+      "path": "view_comparison/render.py",
+      "sha256": "bc3e5ad9b3387d55a71d6564595d36c0b52dd7ebf801df6e7f1c8c2adc9556d2",
+      "source": "scripts/body_scan_delivery/vs_layout.py",
+      "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+      "source_sha256": "2da0e2392e04577664b10427ca6c1d477e18f6d28b0e8ecf6d7626eb8cff5723",
+      "unchanged": false,
+      "adaptation": "Move approved VS renderer; resolve logo from frozen shared module"
+    },
+    {
+      "path": "view_comparison/run.sh",
+      "sha256": "f33c53dc23f04cb75f4246181ee903f2d692f439ed2c16788fea29880ed91dda"
+    }
+  ]
+}
