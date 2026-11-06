@@ -5,10 +5,11 @@ from collections import Counter
 from html.parser import HTMLParser
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image,ImageChops
 
 from scripts.body_scan_contracts.labels import family
 from .pipeline import current,read,sha,digest_json,save
+from .render import GRID_RENDERER
 
 
 class Links(HTMLParser):
@@ -36,7 +37,19 @@ def verify(root):
         if set(output['review_asset_ids'])!={r['asset_id'] for r in selected if r['requires_review']}:raise ValueError('review_dependencies_incomplete')
         if sha(directory/output['file'])!=output['sha256']:raise ValueError('product_bytes_changed')
         with Image.open(directory/output['file']) as image:
-            if image.size!=(1080,1440):raise ValueError('wrong_canvas_size')
+            if image.size!=(output['width'],output['height']):raise ValueError('wrong_canvas_size')
+            if output.get('renderer_version')==GRID_RENDERER:
+                if output['kind']!='three_views' or output.get('image_annotations') is not False or image.format!='PNG':
+                    raise ValueError('invalid_seamless_grid_metadata')
+                tile_width,tile_height=image.width//3,image.height//2
+                if image.size!=(tile_width*3,tile_height*2):raise ValueError('invalid_grid_dimensions')
+                for index,row in enumerate(selected):
+                    with Image.open(source['photos'][row['asset_id']]) as original:
+                        if original.size!=(tile_width,tile_height):raise ValueError('grid_frame_size_changed')
+                        x=(index%3)*tile_width;y=(index//3)*tile_height
+                        if ImageChops.difference(image.crop((x,y,x+tile_width,y+tile_height)).convert('RGB'),original.convert('RGB')).getbbox():
+                            raise ValueError('grid_frame_pixels_changed')
+            elif image.size!=(1080,1440):raise ValueError('wrong_legacy_canvas_size')
         if output['kind']=='single':single_ids.extend(output['asset_ids'])
         elif output['kind']=='vs':
             if [r['phase'] for r in selected]!=['before','after'] or selected[0]['source_sha256']==selected[1]['source_sha256']:

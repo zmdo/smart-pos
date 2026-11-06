@@ -12,6 +12,7 @@ from scripts.body_scan_contracts.labels import family
 
 RED='#E70012';BG='#F3F0EA';INK='#25382F'
 VIEWS={'front':'正视','side':'侧视','back':'后视'}
+GRID_RENDERER='body-three-views-seamless-v2'
 
 
 def sha(path):
@@ -38,7 +39,7 @@ def product_file(product,rows):
     if product['kind']=='single':
         filename=rows[0]['asset_id']+'-体测'+VIEWS[product['view']]+'图-'+rows[0]['label']+'.jpg'
     elif product['kind']=='vs':filename='会员体测'+VIEWS[product['view']]+'图（训练前VS训练后）.jpg'
-    else:filename='会员体测三视图对比拼图.jpg'
+    else:filename='会员体测三视图对比拼图.png'
     return str(prefix/filename)
 
 
@@ -76,7 +77,25 @@ def plan(rows):
     return plans,gaps,selections
 
 
+def seamless_grid(rows,photos):
+    """Join the six approved frames at native size; add no pixels between them."""
+    if len(rows)!=6:raise ValueError('three_views_requires_six_frames')
+    images=[]
+    for row in rows:
+        with Image.open(photos[row['asset_id']]) as source:
+            images.append(source.convert('RGB'))
+    if len({image.size for image in images})!=1:
+        raise ValueError('three_views_requires_equal_frame_sizes')
+    width,height=images[0].size
+    canvas=Image.new('RGB',(width*3,height*2))
+    for index,image in enumerate(images):
+        canvas.paste(image,((index%3)*width,(index//3)*height))
+    return canvas
+
+
 def draw_product(product,rows,photos,font):
+    if product['kind']=='three_views':
+        return seamless_grid(rows,photos)
     canvas=Image.new('RGB',(1080,1440),BG);draw=ImageDraw.Draw(canvas)
     if product['kind']=='single':
         row=rows[0];place(canvas,photos[row['asset_id']],(0,0,1080,1320))
@@ -95,13 +114,7 @@ def draw_product(product,rows,photos,font):
         text(draw,(540,1380),product['store']+'  ·  '+masked,font,32,'white')
         draw.ellipse((489,658,591,760),fill=RED,outline='white',width=5)
         text(draw,(540,709),'VS',font,42,'white')
-    else:
-        for index,row in enumerate(rows):
-            col=index%3;line=index//3;x=col*360;y=line*720
-            place(canvas,photos[row['asset_id']],(x+3,y+3,x+357,y+651))
-            draw.rectangle((x,y+651,x+360,y+720),fill=RED)
-            text(draw,(x+180,y+676),VIEWS[family(row['view'])],font,24,'white')
-            text(draw,(x+180,y+704),row['label'],font,24,'white')
+    else:raise ValueError('unsupported_product_kind')
     return canvas
 
 
@@ -116,8 +129,13 @@ def render(plans,rows,photos,dest,font,previous=None):
         if product['kind']=='vs' and product['view']=='side' and len({r['view'] for r in selected})>1:
             flags.append('side_direction_labels_differ_verify_view')
         dependencies=[{k:r.get(k) for k in ('asset_id','phase','label_kind','label','review_flags')} for r in selected]
-        identity={'renderer':'body-delivery-v1','product':product,'labels':dependencies,
-                  'photo_hashes':[sha(photos[r['asset_id']]) for r in selected],'font_sha256':sha(font)}
+        photo_hashes=[sha(photos[r['asset_id']]) for r in selected]
+        if product['kind']=='three_views':
+            # Labels remain in metadata, but no longer affect image pixels.
+            identity={'renderer':GRID_RENDERER,'product':product,'photo_hashes':photo_hashes}
+        else:
+            identity={'renderer':'body-delivery-v1','product':product,'labels':dependencies,
+                      'photo_hashes':photo_hashes,'font_sha256':sha(font)}
         signature=hashlib.sha256(json.dumps(identity,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
         relative=product_file(product,selected);path=dest/relative;path.parent.mkdir(parents=True,exist_ok=True)
         reused=False
@@ -126,8 +144,13 @@ def render(plans,rows,photos,dest,font,previous=None):
             if sha(source)!=old[product['product_id']]['sha256']:raise ValueError('previous_product_changed')
             shutil.copy2(source,path);reused=True
         else:
-            draw_product(product,selected,photos,font).save(path,quality=92,subsampling=0)
-        outputs.append({**product,'file':relative,'width':1080,'height':1440,'sha256':sha(path),
+            image=draw_product(product,selected,photos,font)
+            if product['kind']=='three_views':image.save(path,format='PNG')
+            else:image.save(path,quality=92,subsampling=0)
+        with Image.open(path) as image:width,height=image.size
+        layout=({'renderer_version':GRID_RENDERER,'layout':'seamless-3x2','image_annotations':False}
+                if product['kind']=='three_views' else {})
+        outputs.append({**product,**layout,'file':relative,'width':width,'height':height,'sha256':sha(path),
             'dependency_sha256':signature,'reused':reused,'labels':[{k:r[k] for k in ('asset_id','phase','label','requires_review')} for r in selected],
             'requires_review':any(r['requires_review'] for r in selected),
             'review_asset_ids':[r['asset_id'] for r in selected if r['requires_review']], 'warnings':flags})

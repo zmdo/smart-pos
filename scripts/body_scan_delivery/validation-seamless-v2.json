@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "source_images_unchanged": 130,
+  "labels_unchanged": 82,
+  "new_three_view_images": 9,
+  "unchanged_other_products": 121,
+  "model_requests": 0,
+  "tests_passed": 35,
+  "default_case_dimensions": [
+    2304,
+    3768
+  ],
+  "image_format": "lossless PNG",
+  "layout": "native-size 3 columns by 2 rows, no annotations or gutters",
+  "pixel_exact_tiles_verified": 54,
+  "gallery_cases_verified": 9,
+  "gallery_assets_verified": 90
+}

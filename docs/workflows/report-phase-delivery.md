@@ -62,3 +62,11 @@ flowchart LR
 准备调整版式时，使用 [body_scan_gallery](../../scripts/body_scan_gallery/README.md) 直接读取既有成品版本，生成离线 HTML。按门店/会员筛选，分为完整三视图、同朝向对比、单图三个类别；每套各类别绑定同一组六张素材。该入口仅复制并校验图片，不调用生成器或前面的处理节点。
 
 当前样式基线包含 9 套完整案例、90 张既有成品，默认展示景田店／董彦琦。远程目录为 `/root/autodl-fs/case-studio/experiments/body-scan-three-view-style-v1-20261106`；本机预览为 `/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-three-view-style-v1/index.html`。生成模板和五个最佳实践均未修改。验证记录包括全部图片指纹、离线包，以及 9 套案例的分类/筛选/放大目标等 DOM 检查；本轮内置浏览器阻止本地 file URL，因此未做浏览器视觉验收。
+
+### 三视图无缝版 v2
+
+按用户后续要求，完整三视图去掉所有生成文字、红色标签条及拼接间隔。现将六张已批准展示图按原尺寸直接拼接为 3 列、2 行的无损 PNG，不再强制套入 1080×1440 画布。每组尺寸必须一致；拼图尺寸为三倍单图宽、两倍单图高，顺序沿用上前下后、每排正/侧/背。原图中已有的图像内容保留，阶段审核信息仍在 JSON 和页面中返回。
+
+执行 `scripts.body_scan_delivery.restyle` 可复用既有标签和图片，只重绘成品。此次 9 张三视图重绘、121 张其他成品原样复用，原有 130 张成品和 82 张标签均未修改；35 项测试通过，核验器逐像素确认六个区域与输入帧完全一致。三视图渲染版本及缓存独立升级，旧红条图片不会误用；只确认阶段而未改变六张素材时，新三视图像素可以复用。
+
+本机新版为 `/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-three-view-style-v2/index.html`，远程实验为 `/root/autodl-fs/case-studio/experiments/body-scan-seamless-v2-20261106`。默认董彦琦案例的拼图为 2304×3768。v1 预览保留供对照，标准化、阶段分类及其他最佳实践未改。

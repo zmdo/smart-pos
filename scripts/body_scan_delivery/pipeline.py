@@ -63,7 +63,7 @@ def publish(directory,rows,source,revision,previous=None,changes=None,request_id
                for r in rows if r['requires_review']]
         manifest_hash=digest_json(source['bindings'])
         result={'schema_version':VERSION,'delivery_id':root.name,'revision':revision,'created_at':stamp(),
-                'parent_revision':revision-1 if previous else None,'source_manifest_sha256':manifest_hash,
+                'parent_revision':revision-1 if previous and revision>1 else None,'source_manifest_sha256':manifest_hash,
                 'status':'generated_requires_review' if needs or any(o['requires_review'] for o in outputs) else 'generated',
                 'counts':{'images':len(rows),'members':len({(r['store'],r['member']) for r in rows}),
                           'label_kinds':dict(Counter(r['label_kind'] for r in rows)),
@@ -78,6 +78,7 @@ def publish(directory,rows,source,revision,previous=None,changes=None,request_id
                 'review_request_sha256':source.get('review_request_sha256'),
                 'generation_scope':'body-photo singles, same-view VS, complete front/side/back grid',
                 'verified_photo_chronology':False}
+        if source.get('restyle_of'):result['restyle_of']=source['restyle_of']
         if source.get('report_bundle'):
             reports=Path(source['report_bundle']);(staging/'reports').mkdir()
             for filename in ('index.html','reports.json','inventory.json'):

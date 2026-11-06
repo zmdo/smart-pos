@@ -36,12 +36,13 @@ def build(source, out):
         if not path.is_relative_to(source) or sha(path) != product['sha256']:
             raise ValueError('product_path_or_hash_mismatch')
         # Generated names contain no member data and need no URL escaping.
-        filename = f'media/image-{len(copies)+1:03d}.jpg'
+        filename = f'media/image-{len(copies)+1:03d}{path.suffix.lower()}'
         shutil.copyfile(path, out/filename)
         if sha(out/filename) != product['sha256']:
             raise ValueError('copied_product_changed')
         value = {k:product[k] for k in ('product_id','kind','view','width','height','asset_ids','sha256')}
-        value.update(file=filename, requires_review=product['requires_review'])
+        value.update(file=filename, requires_review=product['requires_review'],
+                     renderer_version=product.get('renderer_version','body-delivery-v1'))
         copies[pid] = value
         return value
 
@@ -75,7 +76,9 @@ def build(source, out):
     cases.sort(key=lambda c:(c['review_count']>0,c['store'],c['member']))
     counts = {'cases':len(cases), 'stores':len({c['store'] for c in cases}),
               'three_views':len(cases),'vs':len(cases)*3,'single':len(cases)*6}
-    data = {'title':'三视图体测 · 当前成品样式','version':'current-v1',
+    seamless = all(p.get('layout')=='seamless-3x2' for p in grids)
+    data = {'title':'三视图体测 · 当前成品样式','version':'seamless-v2' if seamless else 'current-v1',
+            'grid_style':'seamless' if seamless else 'labeled',
             'source_delivery':result['delivery_id'],'source_revision':result['revision'],
             'default_case':cases[0]['group_id'],'counts':counts,'cases':cases}
     templates = Path(__file__).parent
