@@ -1,13 +1,15 @@
 # 同人尺度校准与共同取景
 
-状态：独立实验，先验证景田店张小飞、石厦店黎国萍、郑远晨、冯雪奕、潘艺文五组28张。尚未覆盖全部历史素材，也未更新冻结最佳实践或网站。
+状态：用户批准后已归档为[同组展示v3最佳实践](../../best-practices/body-scan-group-display-v3/README.md)，来源`1370541`。覆盖景田店张小飞、石厦店黎国萍、郑远晨、冯雪奕、潘艺文五组28张；开发实验与旧v2保留，尚未覆盖全部历史素材，网站未接入。
+
+推荐入口`best-practices/body-scan-group-display-v3/run.sh`串接基线证据→尺度校准→最终共同取景。可以复用指纹匹配的基线；省略时自动生成。算法、提示词、门槛未改，归档独立验证见[validation.json](../../best-practices/body-scan-group-display-v3/validation.json)。
 
 ## 节点位置
 
 ```text
 分类/硬拼接拆分 → 单图最佳实践v4（背景几何 + 矩形有效区域）
                          ↓
-                  同人尺度校准实验
+                  同人尺度校准节点
                   ↖ 旧版完整度与展示证据（绑定输入SHA，保护完整头脚）
                          ↓
                原有同组展示节点（一人一画幅）
@@ -36,4 +38,4 @@
 
 报告中的“肩髋长度差”只是二维辅助诊断，会随抬臂/侧身变化；“网格尺度差”只检验同背景尺度。没有真实身高、拍摄距离真值，不能宣称所有照片的人体比例误差已低于5%。
 
-入口、文件职责和复现命令见[脚本说明](../../scripts/body_scan_person_scale/README.md)。
+权威入口及复现命令见[最佳实践](../../best-practices/body-scan-group-display-v3/README.md)；原独立实验的文件职责和验证记录仍见[开发脚本说明](../../scripts/body_scan_person_scale/README.md)。

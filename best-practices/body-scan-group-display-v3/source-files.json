@@ -1,0 +1,302 @@
+{
+  "scripts/body_scan_person_scale/background.py": {
+    "source": "scripts/body_scan_person_scale/background.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "9629b660cdbf26e90398d4a0a825fb7e0978844555b137e1e55288fd3ee75ed2",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/__init__.py": {
+    "source": "scripts/body_scan_person_scale/__init__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "0b0a7af977cac28de46a99ef5848921a1035e2d2edd62dcccb1085e5de48ff92",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/grid.py": {
+    "source": "scripts/body_scan/grid.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "36cc9c921cc0024cec20155698f49a935720703752668e476dc6cf6ba7a1ba5f",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/__init__.py": {
+    "source": "scripts/body_scan/__init__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "1010b10ef4c9b710a9127cb3df7b2f924196a1b011b0842739bb2f50efacdddf",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/group_scale.py": {
+    "source": "scripts/body_scan/group_scale.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "905131493e2c8af7de476a2e4df697b5e634ee56358d370e5822839f3ee60f13",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/geometry.py": {
+    "source": "scripts/body_scan/geometry.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "b52b9985e99817d2886d1fdab5af760bdbc5aa8c52fdb333cda147953b55cce8",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/wall_geometry.py": {
+    "source": "scripts/body_scan/wall_geometry.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "a7f57872f39b1333a98be6fe362920b6f65d7388bd41d2118b0b4e677f85558f",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/coverage.py": {
+    "source": "scripts/body_scan_person_scale/coverage.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "abd539b3475f5bd2c50789359a990691e4ff970bcfd39eef89d10b6e1bf1134c",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/pipeline.py": {
+    "source": "scripts/body_scan_person_scale/pipeline.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "7a5c9ab00ee3a32a5a4cf2c35e2c1ee4bb5cab38febda01ca397d5be78c6a8e6",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/framing.py": {
+    "source": "scripts/body_scan/framing.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "c2ca4df507bdce53310cad48f2136463910148d1547da9ac9a0e1d0f10fb6e19",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/landmarks.py": {
+    "source": "scripts/body_scan/landmarks.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "dfa66b0043e9cccab25c63eedfb1a9af016cfb5c2d090c6e6cb490013e293947",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/pipeline.py": {
+    "source": "scripts/body_scan/pipeline.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "573187c15853d8a4a0fbd15e9faedd34017be7f6ce056a2acc4326e006f6ae17",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/classification.py": {
+    "source": "scripts/body_scan/classification.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "135aa57778eda1353320b021c11c76aa1670b9ac9016c7f113324c48b0cc3097",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/background_screening.py": {
+    "source": "scripts/body_scan/background_screening.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "14b91dd233986aa7784397b21570c44a3635c7c9eba6befe078d504c10b46a0a",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/reference.py": {
+    "source": "scripts/body_scan/reference.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "81383ef74127c04a354169d63495c57f55921f6bee329a6403eac2895c2b41a2",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/localization.py": {
+    "source": "scripts/body_scan/localization.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "4627b29df98926ccbe7a17795269bdf26605c5b93e67eac4403cfcf9046f5a5b",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/segmentation.py": {
+    "source": "scripts/body_scan/segmentation.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "57878b3f6d1910a5a310e96f30df233213e303a0db0332855b304bde371f7784",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/non_grid.py": {
+    "source": "scripts/body_scan/non_grid.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "2b0ad901fc33ec6b702490b6b25d5deef98e83ac8a3319353ecec4a6c441dcbd",
+    "role": "unchanged_source"
+  },
+  "scripts/non_grid_camera/calibration.py": {
+    "source": "scripts/non_grid_camera/calibration.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "92a0c12cf6adf6f7b1b0915aad99c1f6fb6b5c4662117fd8f96e26ab2dbb0330",
+    "role": "unchanged_source"
+  },
+  "scripts/non_grid_camera/__init__.py": {
+    "source": "scripts/non_grid_camera/__init__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "05c247515e26db2f33bcc94a8c369078e8d6b29dbe1bc2c2e7e72bbc92f12cf8",
+    "role": "unchanged_source"
+  },
+  "scripts/non_grid_camera/geometry.py": {
+    "source": "scripts/non_grid_camera/geometry.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "fd85562f2734a31eccddffd3feac73f3d990d153dd7e12dd51382ea4da3948dd",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/refinement.py": {
+    "source": "scripts/body_scan/refinement.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "9a0bd52c19b23cd09acfd1b74abb1ffb29d37ab786dc6c94c837ebb550d60220",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan/preview.py": {
+    "source": "scripts/body_scan/preview.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "4a832711926545f3976c8cf0434fc9de039433ef39a400662b1aa84ea01687c7",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_full_eval/client.py": {
+    "source": "scripts/body_scan_full_eval/client.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "18807c6a332d030c1d6c3d45f712c7178794d8907a2ea4e11cb0aea6485e2241",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_full_eval/__init__.py": {
+    "source": "scripts/body_scan_full_eval/__init__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "cb07743ae50062ace0958e97e9789f18da9cd32d20531323f7c52daea750dbd0",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_phase_sessions/client.py": {
+    "source": "scripts/body_scan_phase_sessions/client.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "30b80281ae5cf44f0cdbfaa559cbd2d2a66ce05a33b72d1c4da4af2a8620a56d",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_phase_sessions/__init__.py": {
+    "source": "scripts/body_scan_phase_sessions/__init__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "7bd7fa4513b54c60ad7c86cb40a8f1ddd1e1b8098e44be2ade44facf7a081799",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/boundary.py": {
+    "source": "scripts/body_scan_group_display/boundary.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "2f0aa85ee69f8570ceb28d3320372f8c43671a356fff2326f333f294ab7190aa",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/__init__.py": {
+    "source": "scripts/body_scan_group_display/__init__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "abcc55052737fba1abda4872c69c9802f9f02842467747336ea7f23d8c429d06",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/inputs.py": {
+    "source": "scripts/body_scan_group_display/inputs.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "7141c01472006dfe5d50961064fffd02d05dc88a75150c0facf0dbb560963aa4",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/evidence.py": {
+    "source": "scripts/body_scan_person_scale/evidence.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "7c5ebc11aff325362a9b04777ce320c14b8a1b888f699767a6100dea57a1a8cf",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/measurements.py": {
+    "source": "scripts/body_scan_person_scale/measurements.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "5fe18c3d0648f196d2c26de74a748d7cf946bd8c050f3b530baf221e4e31725a",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/solve.py": {
+    "source": "scripts/body_scan_person_scale/solve.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "6e82ca383737f3edeab0aab98f0abcc28d35d4b925774ff149039c584bb5303b",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/verify.py": {
+    "source": "scripts/body_scan_person_scale/verify.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "068d50327768de0b07f568396e2d7d6f90e77017193d08c5b041c93178a5a131",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/__main__.py": {
+    "source": "scripts/body_scan_person_scale/__main__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "19c695b874a98eded13084b63109a2282accd5041e6b6ed24781a31a70eac29f",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/report.py": {
+    "source": "scripts/body_scan_person_scale/report.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "042f361753a86f2335bd68568763fe013bfc39b48207e59f29dec9a56c8c3c9e",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_person_scale/tests/test_scale.py": {
+    "source": "scripts/body_scan_person_scale/tests/test_scale.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "910fe39222a04dbb746ff82d013df10f58955afe7d5f26ea6d15809d9b95d894",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/preview.py": {
+    "source": "scripts/body_scan_group_display/preview.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "c6b82c5b76001e0bce9452c82bc7bb6f81cf35d3e9207621f88f1676e457633a",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/audit.py": {
+    "source": "scripts/body_scan_group_display/audit.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "0d41acf139cbd26964b6a881fd6e3ce376f5da471eb022a7d7dff4f545165901",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/visibility.py": {
+    "source": "scripts/body_scan_group_display/visibility.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "77e144bbff15c179137eb2be46ffd87eba6b21da3916cc5a315557b1ca780291",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/pipeline.py": {
+    "source": "scripts/body_scan_group_display/pipeline.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "bca5cc4a591ad24805d37a07735dd0555b1c1aff317fe3d373d9381ed4f116b6",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/planning.py": {
+    "source": "scripts/body_scan_group_display/planning.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "28f13f2c41c9534a0e103aef098a2b9b8b61764b5331ae3f0e18bd1e2918bb9f",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/verify.py": {
+    "source": "scripts/body_scan_group_display/verify.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "57100a3f51643e14130895e7db8eb84a1d973e0003829fd0c8d48020cfa3120d",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/__main__.py": {
+    "source": "scripts/body_scan_group_display/__main__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "bf7f415227770d2f2a92553b50cce055740e118aa37c691c79fa749d49df90e4",
+    "role": "unchanged_source"
+  },
+  "scripts/body_scan_group_display/tests/test_group_display.py": {
+    "source": "scripts/body_scan_group_display/tests/test_group_display.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "dd1882023414699447ee8c1c070fd77ed93d209b674da46a72c76e26d7f05014",
+    "role": "unchanged_source"
+  },
+  "scripts/__init__.py": {
+    "source": "best-practices/body-scan-group-display/scripts/__init__.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "e85402fb8b97b3d0427a19e46e64034f4f264e3e2c3b6ddb521eae40a7506a05",
+    "role": "unchanged_source"
+  },
+  "snapshot.py": {
+    "source": "best-practices/body-scan-wall-v4/snapshot.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "d8d664912c48eb3ad2222b82c7e8a72549619ac97dc01a78f4b0cab909223f70",
+    "role": "unchanged_source"
+  },
+  "verify_snapshot.py": {
+    "source": "best-practices/body-scan-wall-v4/verify_snapshot.py",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "f6bf324cb177857c0ec737117c7f3e026d8779d3453b692308e2199c257115d8",
+    "role": "unchanged_source"
+  },
+  "requirements.verified.txt": {
+    "source": "best-practices/body-scan-group-display/requirements.verified.txt",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "9647ae90a3423f5627f3e931d2017ea52a0e79fd9a66e721ac9896871f94ae1e",
+    "role": "unchanged_source"
+  },
+  "source-validation.json": {
+    "source": "scripts/body_scan_person_scale/validation.json",
+    "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+    "source_sha256": "d4dc39d4099e7863dee4d42ca2ee0787ffa772048ed272f0e5305bbb0ecd232b",
+    "role": "unchanged_source"
+  }
+}

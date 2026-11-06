@@ -2,11 +2,11 @@
 
 记录日期：2026-11-05。状态：独立脚本已实现并在远程验证，尚未接入网站或统一工作流编排。
 
-权威入口：[同人图片大小标准化最佳实践](../../best-practices/body-scan-group-display/README.md)，已按用户确认归档；开发入口 [scripts/body_scan_group_display](../../scripts/body_scan_group_display/README.md) 继续保留。归档来源为 `3aca63e72f65ccd8d63e59a758b9a1f00065297b`，以海报过滤后的42张结果为当前验证基线；海报排除仍由上游标准化节点执行。
+当前权威入口：[同组展示v3最佳实践](../../best-practices/body-scan-group-display-v3/README.md)，先进行共同人物尺度校准，再调用本页描述的一人一画幅取景。原[同组展示v2快照](../../best-practices/body-scan-group-display/README.md)及开发入口 [scripts/body_scan_group_display](../../scripts/body_scan_group_display/README.md)继续保留。海报排除仍由上游标准化节点执行。
 
 当前实现版本：`body-scan-group-display-v2`。用户明确要求同一个人物不得构建多种比例，因此v1按完整度拆子组的规则已取消。v1来源提交 `b1e5fa8` 和旧实验结果保留作历史；本页以v2为准。整体流程见[体测图处理工作流](body-scan-processing.md)。
 
-2026-11-06补充：本节点沿用上游尺度，仅统一画幅和取景，**不能保证真实人物占比完全相同**。新增[同人尺度校准实验](person-scale-calibration.md)在上游共同定标后复用本节点；本节点及冻结副本未修改。
+2026-11-06补充：本取景子节点沿用上游尺度，仅统一画幅和取景，**不能保证真实人物占比完全相同**。用户已批准[同人尺度校准](person-scale-calibration.md)，新v3入口先共同定标，再复用本节点；取景算法与旧v2副本未修改。下面的v2流程、历史基线和参数仍描述最终取景子节点。
 
 ## 需求落点
 

@@ -1,0 +1,433 @@
+{
+  "date": "2026-11-06",
+  "version": "body-scan-group-display-v3",
+  "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+  "approved_experiment": "/root/autodl-fs/case-studio/experiments/body-scan-person-scale-v1-20261106/final-validated",
+  "run_location": "remote GPU server; launcher invoked from /tmp",
+  "manifest_sha256": "a93c8656531635da177e24d0ae8f9bcb36991ff2ebb98b26988ba6ee09f7e964",
+  "snapshot_verified_files": 56,
+  "project_imports_isolated": 46,
+  "immutable_source_files": 50,
+  "tests": {
+    "person_scale": 19,
+    "group_display": 32,
+    "total": 51,
+    "passed": true
+  },
+  "runs": [
+    {
+      "mode": "reused-baseline",
+      "output": "/root/autodl-fs/case-studio/experiments/best-practices-group-display-v3-20261106/reused-baseline",
+      "images_and_masks_identical_to_approved": 168,
+      "geometry_pose_frame_scale_decisions_identical": 28,
+      "group_plans_identical": true,
+      "workflow": {
+        "version": "body-scan-group-display-v3",
+        "status": "completed_with_review",
+        "stage": "finished",
+        "input": "/autodl-fs/data/case-studio/experiments/best-practices-body-scan-wall-v4-20261106/upgraded",
+        "snapshot": {
+          "version": "body-scan-group-display-v3",
+          "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+          "verified_files": 56,
+          "snapshot_root": "/root/apps/case-studio/best-practices/body-scan-group-display-v3"
+        },
+        "display_parameters": {
+          "width": 768,
+          "max_stretch": 1.1,
+          "max_crop_loss": 0.25,
+          "crop_step": 0.02,
+          "max_steps": 80,
+          "adaptive_group_ratio": true
+        },
+        "baseline_display_generated": false,
+        "baseline_display": "/autodl-fs/data/case-studio/experiments/best-practices-body-scan-wall-v4-20261106/display",
+        "calibration_counts": {
+          "retained_for_review": 11,
+          "retained": 11,
+          "calibrated": 6
+        },
+        "scale_review_asset_ids": [
+          "a0101",
+          "a0109",
+          "a0111",
+          "a0113",
+          "a0148",
+          "a0149",
+          "a0166",
+          "a0036__p01",
+          "a0036__p02",
+          "a0038__p01",
+          "a0038__p02"
+        ],
+        "display_review_asset_ids": [],
+        "displayed": 28
+      },
+      "verification": {
+        "scale": {
+          "input_hashes_unchanged": true,
+          "input_files_checked": 143,
+          "geometry_unchanged": true,
+          "source_landmarks_unchanged": true,
+          "new_framing_isotropic": true,
+          "retained_pixels_identical": true,
+          "real_rectangular_content": true,
+          "rows": 28,
+          "checked_ids": [
+            "a0101",
+            "a0102",
+            "a0103",
+            "a0104",
+            "a0105",
+            "a0107",
+            "a0108",
+            "a0109",
+            "a0110",
+            "a0111",
+            "a0112",
+            "a0113",
+            "a0140",
+            "a0141",
+            "a0142",
+            "a0146",
+            "a0148",
+            "a0149",
+            "a0161",
+            "a0162",
+            "a0163",
+            "a0166",
+            "a0167",
+            "a0168",
+            "a0036__p01",
+            "a0036__p02",
+            "a0038__p01",
+            "a0038__p02"
+          ],
+          "eligible": 28,
+          "excluded": 0
+        },
+        "display": {
+          "passed": true,
+          "source_hashes_checked": 28,
+          "baseline_copies_checked": 28,
+          "person_formats": [
+            {
+              "group_id": "g001",
+              "store": "景田店",
+              "member": "张小飞",
+              "output_size": [
+                768,
+                1984
+              ],
+              "displayed_images": 4,
+              "single_crop_scale_and_shoulder": true
+            },
+            {
+              "group_id": "g002",
+              "store": "石厦店",
+              "member": "冯雪奕",
+              "output_size": [
+                768,
+                1792
+              ],
+              "displayed_images": 6,
+              "single_crop_scale_and_shoulder": true
+            },
+            {
+              "group_id": "g003",
+              "store": "石厦店",
+              "member": "潘艺文",
+              "output_size": [
+                768,
+                1792
+              ],
+              "displayed_images": 6,
+              "single_crop_scale_and_shoulder": true
+            },
+            {
+              "group_id": "g004",
+              "store": "石厦店",
+              "member": "郑远晨",
+              "output_size": [
+                768,
+                1792
+              ],
+              "displayed_images": 6,
+              "single_crop_scale_and_shoulder": true
+            },
+            {
+              "group_id": "g005",
+              "store": "石厦店",
+              "member": "黎国萍",
+              "output_size": [
+                768,
+                1792
+              ],
+              "displayed_images": 6,
+              "single_crop_scale_and_shoulder": true
+            }
+          ],
+          "derivative_images_checked": 56,
+          "displayed_asset_ids": [
+            "a0101",
+            "a0102",
+            "a0103",
+            "a0104",
+            "a0105",
+            "a0107",
+            "a0108",
+            "a0109",
+            "a0110",
+            "a0111",
+            "a0112",
+            "a0113",
+            "a0140",
+            "a0141",
+            "a0142",
+            "a0146",
+            "a0148",
+            "a0149",
+            "a0161",
+            "a0162",
+            "a0163",
+            "a0166",
+            "a0167",
+            "a0168",
+            "a0036__p01",
+            "a0036__p02",
+            "a0038__p01",
+            "a0038__p02"
+          ],
+          "needs_review_asset_ids": [],
+          "max_observed_vertical_stretch": 1.0,
+          "checks": [
+            "unchanged original and approved output",
+            "one output size, crop, scale and shoulder origin per person",
+            "complete rectangular source coverage",
+            "bounded per-step crop and vertical stretch",
+            "isotropic uniform reference",
+            "single composed source transform",
+            "output dimensions and hashes"
+          ],
+          "presentation_only": true
+        }
+      },
+      "scale_model_new_requests": 0
+    },
+    {
+      "mode": "generated-baseline",
+      "output": "/root/autodl-fs/case-studio/experiments/best-practices-group-display-v3-20261106/generated-baseline",
+      "images_and_masks_identical_to_approved": 168,
+      "geometry_pose_frame_scale_decisions_identical": 28,
+      "group_plans_identical": true,
+      "workflow": {
+        "version": "body-scan-group-display-v3",
+        "status": "completed_with_review",
+        "stage": "finished",
+        "input": "/autodl-fs/data/case-studio/experiments/best-practices-body-scan-wall-v4-20261106/upgraded",
+        "snapshot": {
+          "version": "body-scan-group-display-v3",
+          "source_commit": "137054176720ab1b0348364961548a304b4ed754",
+          "verified_files": 56,
+          "snapshot_root": "/root/apps/case-studio/best-practices/body-scan-group-display-v3"
+        },
+        "display_parameters": {
+          "width": 768,
+          "max_stretch": 1.1,
+          "max_crop_loss": 0.25,
+          "crop_step": 0.02,
+          "max_steps": 80,
+          "adaptive_group_ratio": true
+        },
+        "baseline_display_generated": true,
+        "baseline_display": "/autodl-fs/data/case-studio/experiments/best-practices-group-display-v3-20261106/generated-baseline/baseline-display",
+        "calibration_counts": {
+          "retained_for_review": 11,
+          "retained": 11,
+          "calibrated": 6
+        },
+        "scale_review_asset_ids": [
+          "a0101",
+          "a0109",
+          "a0111",
+          "a0113",
+          "a0148",
+          "a0149",
+          "a0166",
+          "a0036__p01",
+          "a0036__p02",
+          "a0038__p01",
+          "a0038__p02"
+        ],
+        "display_review_asset_ids": [],
+        "displayed": 28
+      },
+      "verification": {
+        "scale": {
+          "input_hashes_unchanged": true,
+          "input_files_checked": 143,
+          "geometry_unchanged": true,
+          "source_landmarks_unchanged": true,
+          "new_framing_isotropic": true,
+          "retained_pixels_identical": true,
+          "real_rectangular_content": true,
+          "rows": 28,
+          "checked_ids": [
+            "a0101",
+            "a0102",
+            "a0103",
+            "a0104",
+            "a0105",
+            "a0107",
+            "a0108",
+            "a0109",
+            "a0110",
+            "a0111",
+            "a0112",
+            "a0113",
+            "a0140",
+            "a0141",
+            "a0142",
+            "a0146",
+            "a0148",
+            "a0149",
+            "a0161",
+            "a0162",
+            "a0163",
+            "a0166",
+            "a0167",
+            "a0168",
+            "a0036__p01",
+            "a0036__p02",
+            "a0038__p01",
+            "a0038__p02"
+          ],
+          "eligible": 28,
+          "excluded": 0
+        },
+        "display": {
+          "passed": true,
+          "source_hashes_checked": 28,
+          "baseline_copies_checked": 28,
+          "person_formats": [
+            {
+              "group_id": "g001",
+              "store": "景田店",
+              "member": "张小飞",
+              "output_size": [
+                768,
+                1984
+              ],
+              "displayed_images": 4,
+              "single_crop_scale_and_shoulder": true
+            },
+            {
+              "group_id": "g002",
+              "store": "石厦店",
+              "member": "冯雪奕",
+              "output_size": [
+                768,
+                1792
+              ],
+              "displayed_images": 6,
+              "single_crop_scale_and_shoulder": true
+            },
+            {
+              "group_id": "g003",
+              "store": "石厦店",
+              "member": "潘艺文",
+              "output_size": [
+                768,
+                1792
+              ],
+              "displayed_images": 6,
+              "single_crop_scale_and_shoulder": true
+            },
+            {
+              "group_id": "g004",
+              "store": "石厦店",
+              "member": "郑远晨",
+              "output_size": [
+                768,
+                1792
+              ],
+              "displayed_images": 6,
+              "single_crop_scale_and_shoulder": true
+            },
+            {
+              "group_id": "g005",
+              "store": "石厦店",
+              "member": "黎国萍",
+              "output_size": [
+                768,
+                1792
+              ],
+              "displayed_images": 6,
+              "single_crop_scale_and_shoulder": true
+            }
+          ],
+          "derivative_images_checked": 56,
+          "displayed_asset_ids": [
+            "a0101",
+            "a0102",
+            "a0103",
+            "a0104",
+            "a0105",
+            "a0107",
+            "a0108",
+            "a0109",
+            "a0110",
+            "a0111",
+            "a0112",
+            "a0113",
+            "a0140",
+            "a0141",
+            "a0142",
+            "a0146",
+            "a0148",
+            "a0149",
+            "a0161",
+            "a0162",
+            "a0163",
+            "a0166",
+            "a0167",
+            "a0168",
+            "a0036__p01",
+            "a0036__p02",
+            "a0038__p01",
+            "a0038__p02"
+          ],
+          "needs_review_asset_ids": [],
+          "max_observed_vertical_stretch": 1.0,
+          "checks": [
+            "unchanged original and approved output",
+            "one output size, crop, scale and shoulder origin per person",
+            "complete rectangular source coverage",
+            "bounded per-step crop and vertical stretch",
+            "isotropic uniform reference",
+            "single composed source transform",
+            "output dimensions and hashes"
+          ],
+          "presentation_only": true
+        }
+      },
+      "scale_model_new_requests": 0
+    }
+  ],
+  "generated_baseline_identical_files": 84,
+  "existing_output_overwrite_rejected": true,
+  "existing_output_unchanged": true,
+  "external_resource_hashes_matched": 2,
+  "scope": {
+    "groups": 5,
+    "images": 28,
+    "full_dataset": false,
+    "best_practice_promoted": true,
+    "website_changed": false
+  },
+  "limitations": [
+    "11 scale-review images remain at previous scale; all 28 displayed",
+    "not a physical height accuracy guarantee"
+  ],
+  "algorithm_changes": false
+}
