@@ -227,12 +227,16 @@ def prepare(job, out, ids=None, evidence=None, subjects=None):
 def align(out):
     """Run the frozen approved pipeline in its own process/import namespace."""
     out = Path(out).resolve()
-    archive = Path(__file__).resolve().parents[2]/'best-practices/body-scan-wall'
+    archive = Path(__file__).resolve().parents[2]/'best-practices/body-scan-wall-v4'
     if not json.loads((out/'dataset/job.json').read_text(encoding='utf-8'))['assets']:
         save_json(out/'alignment.json', {'status': 'no_eligible_children'})
         return
     manifest = archive/'manifest.json'
-    audit = {'status': 'running', 'archive': str(archive), 'manifest_sha256': sha(manifest)}
+    approved = json.loads(manifest.read_text(encoding='utf-8'))
+    if approved.get('version') != 'body-scan-wall-v4':
+        raise ValueError('unexpected_single_photo_snapshot_version')
+    audit = {'status': 'running', 'archive': str(archive), 'manifest_sha256': sha(manifest),
+             'best_practice_version': approved['version']}
     save_json(out/'alignment.json', audit)
     environment = dict(os.environ)
     environment.pop('PYTHONPATH', None)
@@ -248,6 +252,12 @@ def align(out):
             audit.update({'status': 'failed', 'log': name, 'returncode': result.returncode})
             save_json(out/'alignment.json', audit)
             raise ValueError('approved_pipeline_failed: '+name)
+    config = json.loads((out/'aligned/config.json').read_text(encoding='utf-8'))
+    if config.get('best_practice_version') != approved['version'] or not config.get('geometry_guard_version'):
+        audit.update(status='failed', reason='approved_geometry_guard_missing')
+        save_json(out/'alignment.json', audit)
+        raise ValueError('approved_geometry_guard_missing')
+    audit['geometry_guard_version'] = config['geometry_guard_version']
     rows = json.loads((out/'aligned/summary.json').read_text(encoding='utf-8'))
     children = {c['asset_id']: c for r in json.loads((out/'summary.json').read_text(encoding='utf-8')) for c in r['children']}
     mapping = []

@@ -2,7 +2,7 @@
 
 日期：2026-11-06。状态：**五组实验获准，已归档为单图标准化最佳实践v4，推荐入口默认执行几何检查**。
 
-当前入口：[best-practices/body-scan-wall-v4](../../best-practices/body-scan-wall-v4/README.md)。它包含完整标准化依赖和检查代码，从原始job、已有v2或已有v3结果均可自动完成所需阶段。旧v3目录原样保留以兼容旧拆分快照的指纹锁定；拆分后接v4时先用 `--split-only`。本页下文保留上一轮独立实验的原始验证记录；归档验证见v4目录的 `validation.json`。
+当前入口：[best-practices/body-scan-wall-v4](../../best-practices/body-scan-wall-v4/README.md)。它包含完整标准化依赖和检查代码，从原始job、已有v2或已有v3结果均可自动完成所需阶段。拆分依赖及默认下游已迁移至v4，旧v3目录已删除；分节点编排时仍使用 `--split-only`。本页下文保留上一轮独立实验的原始验证记录；归档验证见v4目录的 `validation.json`。
 
 ## 问题与节点位置
 

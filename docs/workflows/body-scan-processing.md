@@ -4,7 +4,7 @@
 
 **状态：处理流程已记录，各阶段可独立运行；完整工作流编排尚未实现。** 硬拼接拆分、单人体测图标准化及标准化后的同组尺寸统一均已有独立最佳实践。海报过滤已在v4标准化入口；同组v3已串接尺度与取景。6008网站现已接入“阶段结果→体测成品→人工审核→重生成”，ZIP上传到这些节点的完整调度仍未接通。
 
-2026-11-06新增并获准归档：[非网格相机校正检查与回退](non-grid-geometry-guard.md)，已并入 [单图标准化最佳实践v4](../../best-practices/body-scan-wall-v4/README.md) 默认入口，在墙面校正后、同组展示前执行。五组28张实验仅改变1张，其余27张最终成品逐字节不变。旧v3、拆分及同组展示快照原样保留；新链路使用拆分 `--split-only` → v4完整标准化 → 下述同组展示v3。
+2026-11-06新增并获准归档：[非网格相机校正检查与回退](non-grid-geometry-guard.md)，已并入 [单图标准化最佳实践v4](../../best-practices/body-scan-wall-v4/README.md) 默认入口，在墙面校正后、同组展示前执行。五组28张实验仅改变1张，其余27张最终成品逐字节不变。旧v3和旧同组v2已从当前目录清理，历史由Git保留；新链路使用拆分 `--split-only` → v4完整标准化 → 下述同组展示v3。
 
 同日用户批准[同人尺度校准](person-scale-calibration.md)，归档为[同组展示v3](../../best-practices/body-scan-group-display-v3/README.md)：在标准化与最终共同取景之间增加共同中立参考、网格/墙面尺度传递和等比定标，解决“画幅与肩部相同，但人物大小不同”。v3自动生成或复用基线展示完整度及SAM实测轮廓，防止新增头脚截断；尺度证据不足时保留并标记复核。
 
@@ -77,14 +77,14 @@ flowchart TD
 - 权威副本：[best-practices/body-scan-pairs](../../best-practices/body-scan-pairs/README.md)。
 - 批准算法来源提交：`5dec62c3b96eedd84c8159d071dbb289957815c4`。
 - 入口：`best-practices/body-scan-pairs/scripts/body_scan_pairs/run.sh`，**工作流接入时必须使用 `--split-only`**。
-- 当前切分入口默认会继续执行单图校正；如果直接采用默认模式，再衔接标准化节点，就会重复执行。工作流中的切分节点仅输出通过拆分和独立分类的子图job。
+- 当前切分入口默认会继续执行v4完整标准化，并验证几何检查标记；如果直接采用默认模式，再衔接标准化节点，就会重复执行。工作流中的切分节点仅输出通过拆分和独立分类的子图job。
 - 新增阶段标签的开发入口：`scripts/body_scan_pairs/run.sh --split-only`（`body-scan-pairs-v2-phase`）。冻结入口仍按历史规则保留未知；新增标注节点能读取其父子报告补上左右标签，无须改冻结快照。
 
 ### 标准化节点
 
 - 当前权威副本：[best-practices/body-scan-wall-v4](../../best-practices/body-scan-wall-v4/README.md)，来源提交 `7cfbb0d23e27a570f52120fe8d0d1d8c148b3a3c`。
 - 当前入口：`best-practices/body-scan-wall-v4/scripts/run_body_scan_refined.sh`，自动执行 `standardization-background-v1` 背景审查、网格/相机/墙面处理及可疑非网格几何检查。已有v2/v3结果通过同目录 `scripts/run_refinement.sh` 升级。
-- 历史 [body-scan-wall v3](../../best-practices/body-scan-wall/README.md) 保留来源 `c3ce38966da8d39cf702778858e8e5881f9744ff`，尚无海报过滤及新检查，用于复现和旧拆分快照的锁定依赖。
+- 历史 [body-scan-wall v3](https://github.com/zmdo/smart-pos/blob/ec5dcb4cda00534b7547dbaaa54177b4d5cfe503/best-practices/body-scan-wall/README.md) 的来源是 `c3ce38966da8d39cf702778858e8e5881f9744ff`，现仅保存在Git历史中；拆分运行依赖已迁移到v4。
 - 开发目录 `scripts/run_body_scan_refined.sh` 继续保留，不作为完整v4的推荐入口。
 - 接收已确认的单人体测图及标签，执行完整批准流程。默认画布768×1792；实际尺寸和取景参数以本次运行配置为准。
 - 网格、非网格变换及同组尺度修正继续使用批准版内部规则；节点封装不重新实现这些算法。
@@ -93,7 +93,7 @@ flowchart TD
 
 ### 同组展示节点
 
-- 当前权威副本：[best-practices/body-scan-group-display-v3](../../best-practices/body-scan-group-display-v3/README.md)，来源`137054176720ab1b0348364961548a304b4ed754`。旧v2副本及v1历史实现保留。
+- 当前权威副本：[best-practices/body-scan-group-display-v3](../../best-practices/body-scan-group-display-v3/README.md)，来源`137054176720ab1b0348364961548a304b4ed754`。旧v2快照已删除，通过Git保留历史；当前v3自带所需旧取景模块。
 - 权威入口：`best-practices/body-scan-group-display-v3/run.sh`。内部冻结尺度校准与原取景模块，不读取开发目录或相邻快照。
 - 接收一个汇总后的标准化结果目录，仅处理`rectangular`图片；原有单图和拆分子图由上游按同店同名汇合。
 - 自动生成或复用匹配的基线完整度/展示证据，执行共同尺度校准和头脚保护，再执行原来的肩部共同矩形取景、整组画幅选择、原图单次采样与输出校验。

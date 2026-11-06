@@ -1,6 +1,6 @@
 # 两张体测照片的硬拼接拆分
 
-独立实验方案 `body-scan-pairs-v2-phase`。先识别两张照片的真实接缝，输出无损单图，再调用已批准的 [body-scan-wall](../../best-practices/body-scan-wall/README.md) 完成独立校正、比例统一和矩形取景。新版按用户规则增加左前右后标签，拆分几何算法不变，原始素材和冻结最佳实践保留；尚未接入网站。
+独立实验方案 `body-scan-pairs-v2-phase`。先识别两张照片的真实接缝，输出无损单图，再调用已批准的 [body-scan-wall-v4](../../best-practices/body-scan-wall-v4/README.md) 完成独立校正、比例统一和矩形取景。新版按用户规则增加左前右后标签，拆分几何算法不变，原始素材和冻结最佳实践保留；尚未接入网站。
 
 用户已确认本方案，来源提交 `5dec62c3b96eedd84c8159d071dbb289957815c4` 已冻结到 [best-practices/body-scan-pairs](../../best-practices/body-scan-pairs/README.md)。复现批准版请使用归档入口；本目录继续作为后续开发副本。
 
@@ -73,3 +73,5 @@ PYTHONUTF8=1 /root/apps/non-grid-calibration/.venv/bin/python -m scripts.body_sc
 - `a0180`（任胜男）：整图判断硬拼接，但局部审查无法确认接缝；最终为 `needs_review / seam_detail_uncertain`，未生成子图。**不能把这个结果表述成“大模型已正确识别渐变”**。已验证的是冲突拦截；渐变标签触发立即淘汰的路径另有自动化测试覆盖。
 
 只以 `body-scan-pairs-hard-v1-20261105-final` 为本版验收输出；同名前缀的早期试验目录不是本版结果。样本规模有限，未宣称所有拼图自动判定正确；不可靠的结果会显式拦截。
+
+2026-11-06：默认标准化下游改为v4，要求输出包含v4及几何检查标记；无需旧 `body-scan-wall` 目录。拆分算法、左右阶段标签和原始素材不变。工作流分节点调用时继续使用 `--split-only`。

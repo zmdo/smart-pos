@@ -11,7 +11,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "dcd4df6fb1260580cd30169d1c2ecb09d7b0279156148d8d39aaf1024b48fb2f",
+      "sha256": "b6b9d328f88e8b7ea30c872c88056f836ae6399034539ace31cc0775669337fc",
       "role": "archive_support"
     },
     {
@@ -439,5 +439,7 @@
       "sha256": "2a23d9e89fc43aa36dbd711c541fcdf2b4613fce44090986cf03f67a10830d95",
       "role": "archive_support"
     }
-  ]
+  ],
+  "previous_snapshot_status": "retired; path exists only in Git history",
+  "previous_snapshot_checkout_commit": "ec5dcb4cda00534b7547dbaaa54177b4d5cfe503"
 }

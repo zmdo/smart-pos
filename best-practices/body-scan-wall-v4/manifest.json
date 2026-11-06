@@ -15,7 +15,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "29fdc16a2e7a01d9bdc0981083409e6d9ca4fcbfc1f00a1d056554546a38f374",
+      "sha256": "92e2eeda3e436a2b9835c3629344db23dd9b29a0ec593756a209fdde00d48fa4",
       "role": "archive_support"
     },
     {
@@ -384,5 +384,7 @@
       "sha256": "f6bf324cb177857c0ec737117c7f3e026d8779d3453b692308e2199c257115d8",
       "role": "archive_support"
     }
-  ]
+  ],
+  "previous_snapshot_status": "retired; path exists only in Git history",
+  "previous_snapshot_checkout_commit": "ec5dcb4cda00534b7547dbaaa54177b4d5cfe503"
 }

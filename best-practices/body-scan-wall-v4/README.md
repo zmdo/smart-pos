@@ -2,9 +2,9 @@
 
 当前推荐的单图标准化版本。用户批准了 `7cfbb0d23e27a570f52120fe8d0d1d8c148b3a3c` 中经过五组28张验证的非网格几何检查与回退，现整理为可独立部署的完整快照。
 
-**默认入口自动执行：海报背景过滤 → 主体定位 → 网格/相机校正 → 墙面参照及同组尺度修正 → 可疑非网格几何检查 → 最终矩形取景。** 后续同组大小统一仍使用独立的 [body-scan-group-display](../body-scan-group-display/README.md)。
+**默认入口自动执行：海报背景过滤 → 主体定位 → 网格/相机校正 → 墙面参照及同组尺度修正 → 可疑非网格几何检查 → 最终矩形取景。** 后续同组大小统一仍使用独立的 [body-scan-group-display-v3](../body-scan-group-display-v3/README.md)。
 
-旧 [body-scan-wall v3](../body-scan-wall/README.md) 原样保留，拆分最佳实践锁定的旧依赖不变。新工作流使用拆分的 `--split-only`，再将拆分子图和原有单人图交给本目录；避免使用旧拆分入口隐含的 v3 标准化。拆分算法、同组展示算法没有改变。
+旧v3快照已从当前目录移除，历史版本见[清理记录](../retired-snapshots.md)。拆分最佳实践现锁定本v4快照，默认一键处理也执行v4。工作流仍使用拆分的 `--split-only`，再将子图与原有单人图合并交给本目录，避免重复标准化。
 
 ## 处理策略
 
@@ -49,12 +49,13 @@ bash /root/apps/case-studio/best-practices/body-scan-wall-v4/scripts/run_refinem
 ### 后续一人一画幅
 
 ```bash
-bash /root/apps/case-studio/best-practices/body-scan-group-display/scripts/body_scan_group_display/run.sh \
+bash /root/apps/case-studio/best-practices/body-scan-group-display-v3/run.sh \
   --input /root/autodl-fs/case-studio/experiments/NEW-approved-standardized \
+  --settings /root/autodl-fs/case-studio/private/qwen3.8-max-eval.json \
   --out /root/autodl-fs/case-studio/experiments/NEW-approved-display
 ```
 
-可通过多个输入目录汇合同一个人的单人图和拆分图，一起选择共同画幅。需要同时更新的下游结果另存，不覆盖历史结果。本次仅升级最佳实践及部署入口，没有修改网站服务或全量历史成品。
+同组v3接受一个汇总的标准化目录；多个单人/拆分来源应先由v4的 `--input` 升级入口汇总，再选择共同画幅。需要同时更新的下游结果另存，不覆盖历史结果。本次仅升级最佳实践及部署入口，没有修改网站服务或全量历史成品。
 
 ## 输出与兼容性
 
@@ -70,6 +71,6 @@ bash /root/apps/case-studio/best-practices/body-scan-group-display/scripts/body_
 bash /root/apps/case-studio/best-practices/body-scan-wall-v4/scripts/run_tests.sh
 ```
 
-全部推理和测试在远程GPU服务器执行。默认解释器 `/root/apps/non-grid-calibration/.venv/bin/python`，可设置 `CASE_PYTHON`。模型、字体和只读密钥配置复用服务器环境，不进入Git。依赖版本和外部资源清单沿用旧快照，见 [requirements.verified.txt](requirements.verified.txt)、[external-resources.json](external-resources.json)；本次无新增模型或依赖。GeoCalib来源、许可证及作者信息见保留的 [v3环境说明](../body-scan-wall/README.md)。
+全部推理和测试在远程GPU服务器执行。默认解释器 `/root/apps/non-grid-calibration/.venv/bin/python`，可设置 `CASE_PYTHON`。模型、字体和只读密钥配置复用服务器环境，不进入Git。依赖版本和外部资源清单沿用旧快照，见 [requirements.verified.txt](requirements.verified.txt)、[external-resources.json](external-resources.json)；本次无新增模型或依赖。GeoCalib官方来源为 https://github.com/cvg/GeoCalib ，原记录提交 `1dedb29f94fc11b896c5f572005978aeebccd67f`；代码Apache-2.0、模型CC BY 4.0，作者Alexander Veicht、Paul-Edouard Sarlin和Philipp Lindenberger。实际安装源码及模型指纹见本目录外部资源清单。
 
-后续实验继续在开发目录进行；更新最佳实践时必须维护清单与独立验证记录，保留已批准旧版本并提交、推送。
+后续实验继续在开发目录进行；更新最佳实践时必须维护清单与独立验证记录，历史版本通过Git保留并提交、推送；当前目录只保留推荐快照。

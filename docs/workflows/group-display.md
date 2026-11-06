@@ -2,7 +2,7 @@
 
 记录日期：2026-11-05。状态：独立脚本已实现并在远程验证，尚未接入网站或统一工作流编排。
 
-当前权威入口：[同组展示v3最佳实践](../../best-practices/body-scan-group-display-v3/README.md)，先进行共同人物尺度校准，再调用本页描述的一人一画幅取景。原[同组展示v2快照](../../best-practices/body-scan-group-display/README.md)及开发入口 [scripts/body_scan_group_display](../../scripts/body_scan_group_display/README.md)继续保留。海报排除仍由上游标准化节点执行。
+当前权威入口：[同组展示v3最佳实践](../../best-practices/body-scan-group-display-v3/README.md)，先进行共同人物尺度校准，再调用本页描述的一人一画幅取景。旧v2快照已删除，其代码和验证记录由Git保留；开发入口 [scripts/body_scan_group_display](../../scripts/body_scan_group_display/README.md) 继续保留。海报排除仍由上游标准化节点执行。
 
 当前实现版本：`body-scan-group-display-v2`。用户明确要求同一个人物不得构建多种比例，因此v1按完整度拆子组的规则已取消。v1来源提交 `b1e5fa8` 和旧实验结果保留作历史；本页以v2为准。整体流程见[体测图处理工作流](body-scan-processing.md)。
 

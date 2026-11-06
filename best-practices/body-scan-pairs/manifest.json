@@ -3,22 +3,23 @@
   "source_commit": "5dec62c3b96eedd84c8159d071dbb289957815c4",
   "entrypoint": "scripts/body_scan_pairs/run.sh",
   "dependency": {
-    "path": "../body-scan-wall",
-    "source_commit": "c3ce38966da8d39cf702778858e8e5881f9744ff",
-    "manifest_sha256": "1e2be20aedd12b1d7db195b92faad61b5fc733f9fb69238c037d11d0291f11a9"
+    "path": "../body-scan-wall-v4",
+    "version": "body-scan-wall-v4",
+    "source_commit": "7cfbb0d23e27a570f52120fe8d0d1d8c148b3a3c",
+    "manifest_sha256": "4452f65acc790d3f9407db128caa60589345cb9a19f2915591ced7b25357ed68"
   },
   "files": [
     {
       "path": "DESIGN.md",
-      "sha256": "ac733bef40ff91497dfa518abbacaeaf4c8f916d08e1a4e742faa654e07c23d2",
+      "sha256": "a50b7be9258d9387a81410bd96275e4df7eac43ee2a610090e2e5157c49f8761",
       "source": "scripts/body_scan_pairs/README.md",
       "source_sha256": "a7e45b0c3887715d4527e01f70b096d779ba3a65c6ab19fdc2d718a95642e31e",
       "role": "adapted_source",
-      "adaptation": "Adjust links for archive location"
+      "adaptation": "Update archive links and migration boundary documentation"
     },
     {
       "path": "README.md",
-      "sha256": "67d3d559ce3b06afd4d391965e2516a7c774e91c8c24ac50ef782ab7f965bdd1",
+      "sha256": "323c452540550db25a1e99f199f74c86b7ed561835ad1726144d8e1eeb9defa7",
       "role": "archive_support"
     },
     {
@@ -61,11 +62,11 @@
     },
     {
       "path": "scripts/body_scan_pairs/pipeline.py",
-      "sha256": "22b2593cd2d37f75ab1c9a91cf63de93b2f0512b1bc654ff01bf8552da59fdfd",
+      "sha256": "1874800dde716ab8fc9e636968ba7891b8ef6816ba889523a22e8e35055679c5",
       "source": "scripts/body_scan_pairs/pipeline.py",
       "source_sha256": "4671acf3f3ac856ce34819ffd2a2cdf0d7a84cf689672e5baf6727ffe086af4a",
       "role": "adapted_source",
-      "adaptation": "Only change single-photo archive lookup to sibling body-scan-wall"
+      "adaptation": "Use sibling v4 snapshot and require completed v4 geometry guard before accepting output"
     },
     {
       "path": "scripts/body_scan_pairs/preview.py",
@@ -76,10 +77,11 @@
     },
     {
       "path": "scripts/body_scan_pairs/run.sh",
-      "sha256": "7c7c0a4f9f933c49234aec1c3054805b10efaddfe7b747dde5a8dbf4bcdcd500",
+      "sha256": "8162948c0565f7da7cda21f8e2245637165e8d5eb2895dde41b689c4fa9af7aa",
       "source": "scripts/body_scan_pairs/run.sh",
       "source_sha256": "7c7c0a4f9f933c49234aec1c3054805b10efaddfe7b747dde5a8dbf4bcdcd500",
-      "role": "unchanged_source"
+      "role": "adapted_source",
+      "adaptation": "Clear external PYTHONPATH before launching approved snapshot"
     },
     {
       "path": "scripts/body_scan_pairs/tests/__init__.py",
@@ -118,6 +120,16 @@
       "path": "verify_snapshot.py",
       "sha256": "e31c8bd927be2c3771bda811241835b2b377bd5a6eb9552653437d352918233a",
       "role": "archive_support"
+    },
+    {
+      "path": "scripts/body_scan_pairs/tests/test_alignment_dependency.py",
+      "role": "migration_regression_tests",
+      "sha256": "daeef9819643c02a2ffe4223a352ad99a84abcd02ec8781602406ef4f5d35276"
     }
-  ]
+  ],
+  "dependency_migration": {
+    "date": "2026-11-06",
+    "previous_checkout_commit": "ec5dcb4cda00534b7547dbaaa54177b4d5cfe503",
+    "scope": "Public-module imports and default downstream v4; split geometry and prompts unchanged"
+  }
 }
