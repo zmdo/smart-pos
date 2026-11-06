@@ -3,7 +3,7 @@
 远程 GPU 机上的第一批实现：**上传压缩包 → 解包 → 归一 → 去重 → 质量 → 分类 → 报告解析 → 产出决策 → 体检报告**。
 上传管线仍只出体检报告。另已接入**已批准阶段结果→体测单图/VS/三视图→人工审核重生成**，入口 `/review`；完整ZIP上传到标准化/阶段/成品的调度尚未接通。协议见[工作流](../docs/workflows/body-scan-delivery-review.md)，实现见[生成节点](../scripts/body_scan_delivery/README.md)。
 
-- 公网地址：https://uu55868-7936f251bb5f.westd.seetacloud.com:8443
+- 公网地址：https://uu55868-793909b1c426.weste.seetacloud.com:8443
 - 访问令牌：`/root/autodl-fs/case-studio/settings.json` 里的 `access_token`
 - 端口：6008（supervisord 托管，`/root/apps/case-studio/start.sh` 重启）
 - 数据：`/root/autodl-fs/case-studio/{batches,cache,logs}`

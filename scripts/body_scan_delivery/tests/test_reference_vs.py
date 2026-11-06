@@ -8,6 +8,7 @@ from PIL import Image,ImageChops
 from scripts.body_scan_delivery.presentation import load_presentation,resolve,metric_display,nickname
 from scripts.body_scan_delivery.vs_layout import geometry
 from scripts.body_scan_delivery.render import draw_product,render
+from scripts.body_scan_delivery.logo import load_logo
 
 FONT=Path('/root/autodl-fs/case-studio/fonts/NotoSansSC.ttf')
 
@@ -80,6 +81,26 @@ class ReferenceVSTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'multiple_logos'):load_presentation(path,{})
             path.write_text(json.dumps({'image_root':'.','logo_file':'../config.json'}))
             with self.assertRaisesRegex(ValueError,'invalid_logo_file'):load_presentation(path,{})
+
+    def test_svg_logo_is_discovered_trimmed_and_bound(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'logo').mkdir()
+            (root/'logo/brand.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><rect x="100" y="250" width="400" height="100" fill="white"/></svg>')
+            path=root/'config.json';path.write_text(json.dumps({'image_root':'.','address':'UP 健身私教馆'}))
+            config=load_presentation(path,{})
+            logo=load_logo(config['logo_path'],(660,130),config['logo_sha256'])
+            self.assertAlmostEqual(logo.width/logo.height,4,delta=.05)
+            self.assertEqual(logo.height,130)
+            self.assertEqual(logo.getpixel((logo.width//2,logo.height//2)),(255,255,255,255))
+            self.assertEqual(resolve(dict(store='测试店',member='张三'),config)['address'],'UP 健身私教馆')
+            (root/'logo/brand.svg').write_text('<svg/>')
+            with self.assertRaisesRegex(ValueError,'logo_changed'):load_logo(config['logo_path'],(660,130),config['logo_sha256'])
+
+    def test_svg_cannot_fetch_external_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'logo.svg'
+            path.write_text('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><image href="file:///etc/passwd" width="100" height="100"/></svg>')
+            with self.assertRaisesRegex(ValueError,'external_resource'):load_logo(path,(660,130))
 
     def test_config_report_and_review_changes_invalidate_vs_cache(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,0 +1,2 @@
+# Optional: install on the rendering server to use SVG files in image_root/logo.
+CairoSVG==2.9.1

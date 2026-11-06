@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 from scripts.body_scan_contracts.io import read, bind, sha
+from .logo import FORMATS as LOGO_FORMATS,VERSION as LOGO_VERSION
 
 METRICS = {'waist':'腰围', 'hip':'臀围', 'arm':'臂围', 'chest':'胸围', 'weight':'体重', 'fat':'体脂率'}
 COMPOUND_SURNAMES = ('欧阳','司马','上官','诸葛','夏侯','东方','皇甫','尉迟','公孙','慕容','司徒','司空')
@@ -29,10 +30,11 @@ def load_presentation(path, bindings):
         folders = [p for p in root.iterdir() if p.is_dir() and p.name.lower()=='logo']
         if len(folders)>1:raise ValueError('multiple_logo_directories')
         logo_dir = folders[0] if folders else root/'logo'
-        candidates = sorted(p for p in logo_dir.rglob('*') if p.is_file() and p.suffix.lower() in ('.png','.jpg','.jpeg','.webp'))
+        candidates = sorted(p for p in logo_dir.rglob('*') if p.is_file() and p.suffix.lower() in LOGO_FORMATS)
         if config.get('logo_file'):
             chosen = (logo_dir/config['logo_file']).resolve()
             if not chosen.is_relative_to(logo_dir.resolve()) or not chosen.is_file():raise ValueError('invalid_logo_file')
+            if chosen.suffix.lower() not in LOGO_FORMATS:raise ValueError('unsupported_logo_format')
         else:
             if len(candidates)>1:raise ValueError('multiple_logos_select_logo_file')
             chosen = candidates[0] if candidates else None
@@ -98,6 +100,7 @@ def resolve(product, config=None, reports=None):
     if any(not m['available'] for m in metrics):warnings.append('some_measurements_unavailable')
     return {'width':config.get('width',1080),'logo_path':config.get('logo_path'),
             'logo_sha256':config.get('logo_sha256'),'brand_name':config.get('brand_name','LOGO'),
+            **({'logo_processing':LOGO_VERSION} if config.get('logo_path') else {}),
             'nickname':nickname(member,merged_profile),'address':address,'metrics':metrics,
             'consent_text':config.get('consent_text',''),
             'report_id':report['report_id'] if report else None,

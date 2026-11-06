@@ -1,9 +1,9 @@
 {
   "width": 1080,
   "image_root": "/absolute/path/to/用户图片目录",
-  "logo_file": "brand.png",
-  "brand_name": "UP健身私教馆",
-  "address": "",
+  "logo_file": "品牌logo（白色）.svg",
+  "brand_name": "UP 健身私教馆",
+  "address": "UP 健身私教馆",
   "stores": {
     "示例店": {"address": "深圳·某区·UP健身私教馆（示例店）"}
   },

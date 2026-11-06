@@ -91,7 +91,7 @@ python -m scripts.body_scan_delivery.restyle --delivery /path/to/existing-delive
 
 复制 [presentation.example.json](presentation.example.json) 到数据目录后填写：
 
-- `image_root`：用户图片根目录。自动寻找其 `logo` 目录里的 PNG/JPG/WebP；只有一个文件时自动选择，多个时必须用 `logo_file` 指定相对路径。不会从参考成品抠取 logo。缺少时使用 `brand_name` 文字占位，并在返回中标记。
+- `image_root`：用户图片根目录。自动寻找其 `logo` 目录里的 PNG/JPG/WebP/SVG；只有一个文件时自动选择，多个时必须用 `logo_file` 指定相对路径。不会从参考成品抠取 logo。缺少时使用 `brand_name` 文字占位，并在返回中标记。
 - `width`：成品宽度；`metrics`：页脚项目，支持 waist/hip/arm/chest/weight/fat，最多六项、每行三项。
 - `address`：默认地址；`stores[店名].address`：按门店配置；`members[店名/会员].address` 可单独覆盖。未配置仅显示门店名称。
 - `members[店名/会员].gender`：来自报告明确文字或用户资料的“男/女”；或用 `honorific` 明确指定“先生/女士/会员”，复姓及特殊姓名可用 `surname`。不从人物外貌、名字猜性别。缺少依据用“某会员”。报告数据将来提供明确 `gender` 字段时也可直接读取。
@@ -112,3 +112,20 @@ python -m scripts.body_scan_delivery create \
 `output.presentation` 返回展示文字、选中报告与原文件 SHA、各指标前后值/变化/页码、数据缺失原因和未核实的照片关联状态。品牌、地址、称谓、指标和 logo SHA 均进入 VS 缓存键。配置文件和 logo 绑定到本次生成；修改配置时先复制为新配置文件，再新建版本，可用 `restyle --presentation ...`，不原地替换已发布成品。`restyle` 沿用原任务已绑定报告，不给旧任务偷偷补入不同报告；旧任务没有报告时应使用已绑定报告的分类包通过 `create` 生成新任务。
 
 本轮远程验证：82 张照片、16 位会员，重绘 39 张 VS，91 张单图/三视图逐字节复用；41 项测试通过。11 张 VS 有可用报告指标，其余明确显示未提供。全部成品宽 1080，高度 1277–1952。预览收录 9 个完整三视图案例的 27 张 VS。当前输入未发现 logo，未配置完整地址，分别使用品牌文字和门店名称占位。详见 [validation-reference-v3.json](validation-reference-v3.json)。
+
+
+### SVG Logo 与统一地址（2026-11-06）
+
+已接入用户提供的 `品牌logo（白色）.svg`。SVG 保留原有路径、颜色和透明度，清除 Illustrator 私有编辑数据，以可见透明边界取景后等比放入页眉；不会把正方形空画布一起缩小。外部文件/网络资源不会被 SVG 读取。原始 SVG 的 SHA 和处理版本参与缓存绑定，Logo 内容变更会重绘相关 VS。
+
+仅在渲染服务器安装可选依赖：
+
+```bash
+/root/apps/non-grid-calibration/.venv/bin/python -m pip install -r scripts/body_scan_delivery/requirements-logo.txt
+```
+
+当前用户要求地址栏统一为 **UP 健身私教馆**，配置使用 `address`，品牌素材从图片根目录 `logo/` 中显式选择白色版。实际素材未提交 Git。输入配置另存为新文件，原版本、原图及审核标签保留。
+
+新结果：`/root/autodl-fs/case-studio/experiments/body-scan-vs-logo-v4-20261106/delivery-v4`；本机预览：`artifacts/body-scan-vs-logo-v4/index.html`。
+
+本轮 45 项成品测试、15 项来源测试、1 项代理登录测试通过；266 个绑定文件与全部原审核标签校验通过。新域名健康与登录、Secure Cookie、旧来源拒绝均实测通过，四个 GPU 模型在新实例完成单样本推理。详见 [validation-logo-v4.json](validation-logo-v4.json) 和[迁移记录](../../docs/deployment-weste-20261106.md)。

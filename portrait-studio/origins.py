@@ -21,7 +21,7 @@ PUBLIC_ORIGINS = frozenset(filter(None, (
     origin_key(value.strip())
     for value in os.environ.get(
         "PORTRAIT_PUBLIC_ORIGINS",
-        "https://u55868-7936f251bb5f.westd.seetacloud.com:8443"
+        "https://u55868-793909b1c426.weste.seetacloud.com:8443"
     ).split(",")
 )))
 

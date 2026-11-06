@@ -349,7 +349,9 @@ def login(body: dict, request: Request):
         raise HTTPException(401, "令牌不正确")
     LOGIN_HITS.pop(ip, None)
     resp = JSONResponse({"ok": True})
-    secure = request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+    # Preserve secure cookies when the public proxy omits its external scheme.
+    secure = (request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+              or request.headers.get("origin", "").startswith("https://"))
     resp.set_cookie("case_session", COOKIE, max_age=604800, httponly=True,
                     secure=secure, samesite="strict")
     return resp

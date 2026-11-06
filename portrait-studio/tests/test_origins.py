@@ -3,8 +3,8 @@ from origins import origin_key, is_allowed_origin
 from fastapi.testclient import TestClient
 from app import app, AUTH_SECRET
 
-PUBLIC = "https://u55868-7936f251bb5f.westd.seetacloud.com:8443"
-HOST = "u55868-7936f251bb5f.westd.seetacloud.com"
+PUBLIC = "https://u55868-793909b1c426.weste.seetacloud.com:8443"
+HOST = "u55868-793909b1c426.weste.seetacloud.com"
 
 def test_public_origin_survives_proxy_port_removal():
     assert is_allowed_origin(PUBLIC, "http", HOST)
@@ -17,6 +17,7 @@ def test_direct_same_origin_and_default_port():
     assert not is_allowed_origin("http://example.com", "https", "example.com")
 
 @pytest.mark.parametrize("origin", [
+    "https://u55868-7936f251bb5f.westd.seetacloud.com:8443",
     "https://attacker.example", "null", "https://"+HOST+":8444",
     "http://"+HOST+":8443", PUBLIC+".attacker.example",
     PUBLIC+"/evil", "https://user:pass@"+HOST+":8443",
@@ -28,8 +29,9 @@ def test_untrusted_or_malformed_origin_denied(origin):
 def test_proxy_browser_login_sets_working_session():
     # The browser sends the public port, while the upstream sees a portless Host.
     c = TestClient(app, base_url="https://"+HOST)
-    response = c.post("/api/login", headers={"Origin": PUBLIC}, json={"code": AUTH_SECRET})
+    response = c.post("/api/login", headers={"Origin": PUBLIC, "X-Forwarded-Proto": "http"}, json={"code": AUTH_SECRET})
     assert response.status_code == 200
+    assert all(cookie.secure for cookie in c.cookies.jar)
     assert c.get("/api/settings").status_code == 200
     # A post-login mutation from this same public origin must also work.
     assert c.post("/api/logout", headers={"Origin": PUBLIC}).status_code == 200

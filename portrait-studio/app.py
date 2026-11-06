@@ -82,7 +82,9 @@ def login(body:Credentials,request:Request):
         raise HTTPException(401,"访问码不正确")
     LOGIN_ATTEMPTS.pop(ip,None)
     response=JSONResponse({"ok":True})
-    secure=request.headers.get("x-forwarded-proto",request.url.scheme)=="https"
+    # The public proxy can omit the HTTPS scheme; browser Origin still carries it.
+    secure=(request.headers.get("x-forwarded-proto",request.url.scheme)=="https"
+            or request.headers.get("origin","").startswith("https://"))
     response.set_cookie("portrait_session",COOKIE,max_age=604800,httponly=True,secure=secure,samesite="strict")
     return response
 @app.post("/api/logout")
@@ -92,7 +94,7 @@ def logout():
 def settings():
     s=load()
     return {"base_url":s["base_url"],"model":s["model"],"api_key_configured":bool(s["api_key"]),
-        "segmentation":"SAM 2.1 Base+","gpu":"NVIDIA RTX 4090","model_loaded":bool(MODELS)}
+        "segmentation":"SAM 2.1 Base+","gpu":"NVIDIA CUDA","model_loaded":bool(MODELS)}
 def validate_url(url):
     parsed=urlparse(url)
     if parsed.scheme!="https" or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:

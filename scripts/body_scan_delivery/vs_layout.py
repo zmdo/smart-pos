@@ -1,6 +1,7 @@
 """Reference-style VS card: full photos, fixed width, content-driven height."""
 import math
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont
+from .logo import load_logo
 
 VERSION = 'body-same-view-reference-v3'
 RED = '#E70012'
@@ -55,8 +56,7 @@ def draw_vs(rows, photos, font, context, view):
         draw.rounded_rectangle(box,radius=(box[3]-box[1])/2,fill=fill,outline=outline,width=px(stroke))
 
     if context.get('logo_path'):
-        with Image.open(context['logo_path']) as source:
-            logo=ImageOps.contain(source.convert('RGBA'),(px(660),px(130)),Image.Resampling.LANCZOS)
+        logo=load_logo(context['logo_path'],(px(660),px(130)),context.get('logo_sha256'))
         canvas.paste(logo,((width-logo.width)//2,px(35)+(px(130)-logo.height)//2),logo)
     else:
         label(context['brand_name'],(px(200),px(45),width-px(200),px(150)),60,'white')

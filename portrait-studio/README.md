@@ -1,7 +1,7 @@
 # 四向 · Portrait Studio
 
 远程 GPU 人物素材处理网站。源代码只在服务器实现，监听 6006。
-公开入口：https://u55868-7936f251bb5f.westd.seetacloud.com:8443
+公开入口：https://u55868-793909b1c426.weste.seetacloud.com:8443
 
 ## 路径
 - 应用：/root/apps/portrait-studio
