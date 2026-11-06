@@ -15,6 +15,7 @@ from pathlib import Path
 from PIL import Image
 
 from . import VERSION
+from .presentation import load_presentation
 from scripts.body_scan_contracts.labels import decorate
 from scripts.body_scan_contracts.bundles import load_labels, load_reports
 from .render import plan,render,sha
@@ -50,7 +51,8 @@ def publish(directory,rows,source,revision,previous=None,changes=None,request_id
         for path,expected in source['bindings'].items():
             if sha(path)!=expected:raise ValueError('bound_source_changed_before_generation')
         plans,gaps,selections=plan(rows)
-        outputs=render(plans,rows,photos,staging,source['font'],previous)
+        reports=load_reports(source['report_bundle']) if source.get('report_bundle') else []
+        outputs=render(plans,rows,photos,staging,source['font'],previous,source.get('presentation'),reports)
         (staging/'photos').mkdir()
         for aid in assets:
             with Image.open(photos[aid]) as image:
@@ -107,7 +109,7 @@ def publish(directory,rows,source,revision,previous=None,changes=None,request_id
         raise
 
 
-def create(phase_dir,root,font,reports=None):
+def create(phase_dir,root,font,reports=None,presentation=None,previous=None):
     if not re.fullmatch(r'[A-Za-z0-9_-]{8,80}',Path(root).name):raise ValueError('invalid_delivery_id')
     rows,photos,bindings,report_link=load_labels(phase_dir)
     if reports is None and report_link['path']:
@@ -119,12 +121,14 @@ def create(phase_dir,root,font,reports=None):
             raise ValueError('reports_differ_from_classification')
     elif report_link['sha256']:
         raise ValueError('classification_report_bundle_missing')
+    settings=load_presentation(presentation,bindings)
     root=Path(root);root.mkdir(parents=True,exist_ok=False);(root/'revisions').mkdir()
     font=str(bind(font,bindings))
     source={'phase_input':str(Path(phase_dir).resolve()),'photos':photos,'bindings':bindings,'font':font,'version':VERSION,
-            'classification_schema':'body-scan-phase-labels-v1','report_bundle':str(reports) if reports else None}
+            'classification_schema':'body-scan-phase-labels-v1','report_bundle':str(reports) if reports else None,
+            'presentation':settings}
     save(root/'private-inputs.json',source)
-    return publish(root,rows,source,1)
+    return publish(root,rows,source,1,previous=previous)
 
 
 class ReviewConflict(ValueError):pass

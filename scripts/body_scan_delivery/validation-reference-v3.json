@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "revision": 1,
+  "images": 82,
+  "products": 130,
+  "product_kinds": {
+    "single": 82,
+    "vs": 39,
+    "three_views": 9
+  },
+  "label_kinds": {
+    "pending": 22,
+    "inferred": 31,
+    "rule": 29
+  },
+  "review_images": 53,
+  "review_products": 88,
+  "source_files_unchanged": 263,
+  "preview_links_checked": 183,
+  "every_input_has_single_product": true,
+  "distinct_source_pairs": true,
+  "verified_photo_chronology": false,
+  "tests_passed": 41,
+  "model_requests": 0,
+  "phase_labels_unchanged": true,
+  "non_vs_products_byte_identical": 91,
+  "vs_rendered": 39,
+  "vs_widths": [
+    1080
+  ],
+  "vs_heights": [
+    1277,
+    1340,
+    1367,
+    1397,
+    1766,
+    1808,
+    1817,
+    1870,
+    1882,
+    1951,
+    1952
+  ],
+  "vs_with_report_metrics": 11,
+  "gallery_cases": 9,
+  "gallery_vs_images": 27,
+  "logo_available": false,
+  "address_configured": false,
+  "preview_path": "artifacts/body-scan-vs-style-v3/index.html",
+  "remote_output": "/root/autodl-fs/case-studio/experiments/body-scan-vs-style-v3-20261106/delivery-v3",
+  "font_visual_check": "Noto Sans SC variable weight 700, no synthetic bold stroke",
+  "limitations": [
+    "No logo folder in supplied image root; brand text placeholder shown",
+    "No street address configured; store name shown",
+    "Unknown honorific uses neutral member; missing measurements remain unavailable"
+  ]
+}

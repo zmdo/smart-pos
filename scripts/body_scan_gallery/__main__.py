@@ -11,7 +11,7 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def build(source, out):
+def build(source, out, default_case=None, default_category=None):
     source = Path(source).resolve(); out = Path(out).resolve()
     result_path = source/'result.json'
     original_hash = sha(result_path)
@@ -43,6 +43,7 @@ def build(source, out):
         value = {k:product[k] for k in ('product_id','kind','view','width','height','asset_ids','sha256')}
         value.update(file=filename, requires_review=product['requires_review'],
                      renderer_version=product.get('renderer_version','body-delivery-v1'))
+        if product.get('presentation'):value['presentation']=product['presentation']
         copies[pid] = value
         return value
 
@@ -77,10 +78,15 @@ def build(source, out):
     counts = {'cases':len(cases), 'stores':len({c['store'] for c in cases}),
               'three_views':len(cases),'vs':len(cases)*3,'single':len(cases)*6}
     seamless = all(p.get('layout')=='seamless-3x2' for p in grids)
-    data = {'title':'三视图体测 · 当前成品样式','version':'seamless-v2' if seamless else 'current-v1',
+    reference_vs = all(p.get('renderer_version')=='body-same-view-reference-v3' for c in cases for p in c['comparisons'])
+    if default_case and default_case not in {c['group_id'] for c in cases}:raise ValueError('unknown_default_case')
+    if default_category and default_category not in ('three_views','vs','single'):raise ValueError('unknown_default_category')
+    default_case=default_case or cases[0]['group_id']
+    data = {'title':'三视图体测 · 当前成品样式','version':'reference-v3' if reference_vs else 'seamless-v2' if seamless else 'current-v1',
+            'vs_style':'reference' if reference_vs else 'basic','default_category':default_category or ('vs' if reference_vs else 'three_views'),
             'grid_style':'seamless' if seamless else 'labeled',
             'source_delivery':result['delivery_id'],'source_revision':result['revision'],
-            'default_case':cases[0]['group_id'],'counts':counts,'cases':cases}
+            'default_case':default_case,'counts':counts,'cases':cases}
     templates = Path(__file__).parent
     payload = json.dumps(data,ensure_ascii=False).replace('<','\\u003c').replace('\u2028','\\u2028').replace('\u2029','\\u2029')
     html = (templates/'template.html').read_text(encoding='utf-8').replace('<!--GALLERY_DATA-->',payload)
@@ -92,7 +98,7 @@ def build(source, out):
         raise ValueError('source_result_changed_during_build')
     verification = {'passed':True, 'source_result_sha256':original_hash, 'source_result_unchanged':True,
                     'copied_images':len(copies), 'all_image_bytes_unchanged':True, 'model_requests':0,
-                    'image_processing':False, 'counts':counts, 'default_case':cases[0]['member']}
+                    'image_processing':False, 'counts':counts, 'default_case':next(c['member'] for c in cases if c['group_id']==default_case)}
     (out/'verification.json').write_text(json.dumps(verification,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(out/'preview.zip','w',zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(out.rglob('*')):
@@ -105,5 +111,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description='使用既有成品生成离线分类预览，不运行上游处理或模型')
     parser.add_argument('--input',type=Path,required=True,help='含 result.json 的成品版本目录')
     parser.add_argument('--out',type=Path,required=True,help='全新预览目录')
+    parser.add_argument('--default-case',help='默认展示的 group_id')
+    parser.add_argument('--default-category',choices=('three_views','vs','single'))
     args=parser.parse_args()
-    print(json.dumps(build(args.input,args.out),ensure_ascii=False,indent=2))
+    print(json.dumps(build(args.input,args.out,args.default_case,args.default_category),ensure_ascii=False,indent=2))

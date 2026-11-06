@@ -70,3 +70,8 @@ flowchart LR
 执行 `scripts.body_scan_delivery.restyle` 可复用既有标签和图片，只重绘成品。此次 9 张三视图重绘、121 张其他成品原样复用，原有 130 张成品和 82 张标签均未修改；35 项测试通过，核验器逐像素确认六个区域与输入帧完全一致。三视图渲染版本及缓存独立升级，旧红条图片不会误用；只确认阶段而未改变六张素材时，新三视图像素可以复用。
 
 本机新版为 `/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-three-view-style-v2/index.html`，远程实验为 `/root/autodl-fs/case-studio/experiments/body-scan-seamless-v2-20261106`。默认董彦琦案例的拼图为 2304×3768。v1 预览保留供对照，标准化、阶段分类及其他最佳实践未改。
+
+
+### 同朝向参考版 v3
+
+同朝向成品已加入用户目录 `logo/`、可配置姓氏称谓/门店地址，以及独立报告节点的围度变化。只读取结构化报告，不在成品节点重新抽取表格或推断阶段。宽度固定、两照片完整等比缩放、高度自适应。缺失数据与素材在 `output.presentation.warnings` 返回；明确来源的变化值保留前后单元格及报告 SHA。详见[配置与运行方法](../../scripts/body_scan_delivery/README.md#同朝向参考版-v3)。

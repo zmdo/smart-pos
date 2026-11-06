@@ -6,10 +6,10 @@ const TAB_NAMES = {three_views:'完整三视图',vs:'同朝向对比',single:'�
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const family = view => view.startsWith('side') ? 'side' : view;
 const extension = product => product.file.split('.').pop();
-const STYLE = DATA.grid_style === 'seamless' ? '02' : '01';
+const STYLE = DATA.vs_style === 'reference' ? '03' : DATA.grid_style === 'seamless' ? '02' : '01';
 document.querySelector('.edition-num').textContent = STYLE;
 document.getElementById('style-name').textContent = 'BODY ASSESSMENT / STYLE '+STYLE;
-let selected = DATA.default_case, category = 'three_views', store = '', query = '';
+let selected = DATA.default_case, category = DATA.default_category || 'three_views', store = '', query = '';
 let activeZoom = null;
 const stage = document.getElementById('stage');
 const dialog = document.getElementById('lightbox');
@@ -77,7 +77,9 @@ function renderStage(c) {
     const labels = Object.entries(KINDS).filter(([kind]) => c.label_counts[kind]).map(([kind,label]) => `<span>${label}</span><strong>${c.label_counts[kind]} 张</strong>`).join('');
     stage.innerHTML = `<div class="hero-layout"><div class="artwork"><div class="artwork-canvas">${zoomButton(p,`${c.member}完整三视图`,true)}</div><div class="artwork-toolbar"><span>2 × 3 · ${seamless ? '无缝拼接' : '当前拼图'}</span><button class="text-button" data-zoom="${p.product_id}">放大查看 ⤢</button><a class="download" href="${p.file}" download="${esc(c.member)}-当前三视图.${extension(p)}">下载原图 ↗</a></div></div><aside class="info-panel" aria-label="当前版式说明"><h3>六张照片，一组对比</h3><div class="layout-map" aria-label="上排训练前，下排训练后；每排正面、侧面、背面">${diagram}</div><ul class="design-notes"><li>上排训练前，下排训练后</li><li>每列对应同一个朝向</li><li>${seamless ? '原尺寸直接拼接，无文字、无红条' : '红色标签条标注朝向与阶段'}</li></ul><hr class="info-divider"><h3>本例阶段标记</h3><div class="label-list">${labels}</div><p class="info-callout">${c.review_count ? (seamless ? '三视图内不绘制文字；推断与待审信息保留在本页和单图分类中。' : '带“推断”或“待审”的图片保留原有标记，方便查看样式时同时核对。') : '这套案例六张图均沿用位置或文字规则，可作为当前样式的完整参考。'}</p><details class="source-slots"><summary>查看六张素材编号</summary><ul>${c.slots.map(row => `<li>${esc(row.asset_id)} · ${VIEWS[family(row.view)]} · ${row.phase === 'before' ? '前' : '后'}</li>`).join('')}</ul></details></aside></div>`;
   } else if (category === 'vs') {
-    stage.innerHTML = `<div class="product-grid">${c.comparisons.map((p,i) => productCard(c,p,i)).join('')}</div>`;
+    const info=c.comparisons[0].presentation;
+    const notices=info ? [info.warnings.includes('logo_missing_text_placeholder') ? '素材目录暂缺 logo，顶部使用品牌文字占位。' : '',info.warnings.includes('address_missing_store_only') ? '地址暂显示门店名称，可通过配置替换。' : '',info.warnings.includes('honorific_missing_neutral_member') ? '称谓资料未提供，暂用“会员”。' : '',info.warnings.includes('some_measurements_unavailable') ? '未提供的围度不填入数值。' : '',info.report_id ? '底部变化值取自已核验体测单；照片阶段仍沿用原审核状态。' : ''].filter(Boolean) : [];
+    stage.innerHTML = `${notices.length ? `<p class="review-note">${notices.map(esc).join(' ')}</p>` : ''}<div class="product-grid">${c.comparisons.map((p,i) => productCard(c,p,i)).join('')}</div>`;
   } else {
     stage.innerHTML = ['训练前','训练后'].map((phase,line) => `<h3 class="phase-heading">${phase} <span aria-hidden="true">／</span> 正面 · 侧面 · 背面</h3><div class="product-grid">${c.singles.slice(line*3,line*3+3).map((p,i) => productCard(c,p,line*3+i,true)).join('')}</div>`).join('');
   }

@@ -9,6 +9,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from scripts.body_scan_contracts.labels import family
+from .presentation import resolve, public_presentation
+from .vs_layout import draw_vs, VERSION as VS_RENDERER
 
 RED='#E70012';BG='#F3F0EA';INK='#25382F'
 VIEWS={'front':'正视','side':'侧视','back':'后视'}
@@ -93,38 +95,28 @@ def seamless_grid(rows,photos):
     return canvas
 
 
-def draw_product(product,rows,photos,font):
+def draw_product(product,rows,photos,font,context=None):
     if product['kind']=='three_views':
         return seamless_grid(rows,photos)
+    if product['kind']=='vs':
+        return draw_vs(rows,photos,font,context or resolve(product),product['view'])
     canvas=Image.new('RGB',(1080,1440),BG);draw=ImageDraw.Draw(canvas)
     if product['kind']=='single':
         row=rows[0];place(canvas,photos[row['asset_id']],(0,0,1080,1320))
         draw.rectangle((0,1320,1080,1440),fill='white')
         text(draw,(540,1370),VIEWS[family(row['view'])]+' · '+row['label'],font,40)
-    elif product['kind']=='vs':
-        draw.rectangle((0,0,1080,184),fill=RED)
-        text(draw,(540,65),'UP健身私教馆',font,58,'white')
-        text(draw,(540,140),'体测'+VIEWS[product['view']]+'图',font,40,'white')
-        for index,row in enumerate(rows):
-            place(canvas,photos[row['asset_id']],(index*540+8,192,index*540+532,1220))
-        draw.rectangle((0,1220,1080,1440),fill=RED)
-        for index,row in enumerate(rows):
-            text(draw,(270+index*540,1273),row['label'],font,39,'white')
-        member=product['member'];masked=member[:1]+'**'
-        text(draw,(540,1380),product['store']+'  ·  '+masked,font,32,'white')
-        draw.ellipse((489,658,591,760),fill=RED,outline='white',width=5)
-        text(draw,(540,709),'VS',font,42,'white')
     else:raise ValueError('unsupported_product_kind')
     return canvas
 
 
-def render(plans,rows,photos,dest,font,previous=None):
+def render(plans,rows,photos,dest,font,previous=None,presentation=None,reports=None):
     dest=Path(dest);(dest/'outputs').mkdir(parents=True,exist_ok=True)
     lookup={r['asset_id']:r for r in rows};outputs=[];old={}
     if previous:
         old={p['product_id']:p for p in json.loads((Path(previous)/'result.json').read_text())['outputs']}
     for product in plans:
         selected=[lookup[k] for k in product['asset_ids']]
+        context=resolve(product,presentation,reports) if product['kind']=='vs' else None
         flags=[]
         if product['kind']=='vs' and product['view']=='side' and len({r['view'] for r in selected})>1:
             flags.append('side_direction_labels_differ_verify_view')
@@ -136,6 +128,8 @@ def render(plans,rows,photos,dest,font,previous=None):
         else:
             identity={'renderer':'body-delivery-v1','product':product,'labels':dependencies,
                       'photo_hashes':photo_hashes,'font_sha256':sha(font)}
+        if context:
+            identity.update(renderer=VS_RENDERER,presentation=public_presentation(context))
         signature=hashlib.sha256(json.dumps(identity,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
         relative=product_file(product,selected);path=dest/relative;path.parent.mkdir(parents=True,exist_ok=True)
         reused=False
@@ -144,12 +138,14 @@ def render(plans,rows,photos,dest,font,previous=None):
             if sha(source)!=old[product['product_id']]['sha256']:raise ValueError('previous_product_changed')
             shutil.copy2(source,path);reused=True
         else:
-            image=draw_product(product,selected,photos,font)
+            image=draw_product(product,selected,photos,font,context)
             if product['kind']=='three_views':image.save(path,format='PNG')
             else:image.save(path,quality=92,subsampling=0)
         with Image.open(path) as image:width,height=image.size
         layout=({'renderer_version':GRID_RENDERER,'layout':'seamless-3x2','image_annotations':False}
                 if product['kind']=='three_views' else {})
+        if context:
+            layout.update(renderer_version=VS_RENDERER,layout='reference-vs',presentation=public_presentation(context))
         outputs.append({**product,**layout,'file':relative,'width':width,'height':height,'sha256':sha(path),
             'dependency_sha256':signature,'reused':reused,'labels':[{k:r[k] for k in ('asset_id','phase','label','requires_review')} for r in selected],
             'requires_review':any(r['requires_review'] for r in selected),

@@ -9,7 +9,8 @@ from PIL import Image,ImageChops
 
 from scripts.body_scan_contracts.labels import family
 from .pipeline import current,read,sha,digest_json,save
-from .render import GRID_RENDERER
+from .render import GRID_RENDERER,VS_RENDERER
+from .vs_layout import geometry
 
 
 class Links(HTMLParser):
@@ -49,6 +50,15 @@ def verify(root):
                         x=(index%3)*tile_width;y=(index//3)*tile_height
                         if ImageChops.difference(image.crop((x,y,x+tile_width,y+tile_height)).convert('RGB'),original.convert('RGB')).getbbox():
                             raise ValueError('grid_frame_pixels_changed')
+            elif output.get('renderer_version')==VS_RENDERER:
+                sizes=[]
+                for row in selected:
+                    with Image.open(source['photos'][row['asset_id']]) as original:sizes.append(original.size)
+                context=output['presentation']
+                layout=geometry(sizes,context['width'],len(context['metrics']))
+                if image.size!=(layout['width'],layout['height']):raise ValueError('wrong_vs_canvas_size')
+                for (w,h),box in zip(sizes,layout['photo_boxes']):
+                    if abs((box[2]-box[0])-(box[3]-box[1])*w/h)>1.01:raise ValueError('vs_photo_aspect_changed')
             elif image.size!=(1080,1440):raise ValueError('wrong_legacy_canvas_size')
         if output['kind']=='single':single_ids.extend(output['asset_ids'])
         elif output['kind']=='vs':
