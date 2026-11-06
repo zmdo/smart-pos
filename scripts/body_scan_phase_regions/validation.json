@@ -1,0 +1,212 @@
+{
+  "version": "body-scan-phase-regions-v1",
+  "date": "2026-11-06",
+  "runtime": "/root/apps/non-grid-calibration/.venv/bin/python",
+  "remote_result": "/root/autodl-fs/case-studio/experiments/body-scan-phase-regions-v1-20261106/final-reviewed",
+  "input_scope": "All 82 eligible store photos, 16 members; 28 use approved group-display-v3 overrides; 54 retain previous references. Upstream rejections are not newly processed.",
+  "test_counts": {
+    "new_regional_report_tests": 40,
+    "session_regression": 33,
+    "phase_regression": 20,
+    "total": 93
+  },
+  "counts": {
+    "baseline": {
+      "phases": {
+        "unknown": 36,
+        "before": 22,
+        "after": 24
+      },
+      "evidence_kinds": {
+        "needs_review": 36,
+        "source_rule": 29,
+        "inferred": 17
+      },
+      "tentative": 15
+    },
+    "regional": {
+      "phases": {
+        "unknown": 34,
+        "before": 23,
+        "after": 25
+      },
+      "evidence_kinds": {
+        "needs_review": 34,
+        "source_rule": 29,
+        "inferred": 19
+      },
+      "tentative": 12
+    },
+    "fused": {
+      "phases": {
+        "unknown": 34,
+        "before": 23,
+        "after": 25
+      },
+      "evidence_kinds": {
+        "needs_review": 34,
+        "source_rule": 29,
+        "inferred": 19
+      },
+      "tentative": 12
+    },
+    "total": 82,
+    "groups": 16,
+    "comparisons": 27,
+    "reports": {
+      "matched": 4,
+      "verified_transcriptions": 4,
+      "unmatched_store_reports": 1
+    },
+    "pair_decisions": {
+      "baseline": {
+        "unknown": 8,
+        "B": 11,
+        "A": 8
+      },
+      "regional": {
+        "unknown": 10,
+        "B": 10,
+        "A": 7
+      },
+      "fused": {
+        "unknown": 10,
+        "B": 10,
+        "A": 7
+      }
+    },
+    "negative_controls": 3,
+    "original_source_rules": 29,
+    "note": "Adoption and evidence coverage, not accuracy: true photo chronology is not available.",
+    "model_calls": {
+      "new_requests": 0,
+      "cached_stages": 99,
+      "failed_stages": 0,
+      "reused_baseline_pairs": 19
+    }
+  },
+  "independent_verification": {
+    "passed": true,
+    "rows": 82,
+    "groups": 16,
+    "comparisons": 27,
+    "stable_cues_checked": 24,
+    "fixed_source_labels_preserved": 29,
+    "input_files_unchanged": 246,
+    "preview_links_checked": 475,
+    "negative_controls_blocked": 3,
+    "verified_photo_chronology": false,
+    "scope": "artifact, provenance and policy audit; not human-verified phase accuracy"
+  },
+  "changes": [
+    {
+      "asset_id": "a0091",
+      "store": "石厦店",
+      "member": "吴显昉",
+      "old_phase": "unknown",
+      "new_phase": "after",
+      "reason": "consistent_visual_evidence"
+    },
+    {
+      "asset_id": "a0098",
+      "store": "石厦店",
+      "member": "吴显昉",
+      "old_phase": "unknown",
+      "new_phase": "before",
+      "reason": "consistent_visual_evidence"
+    },
+    {
+      "asset_id": "a0151",
+      "store": "石厦店",
+      "member": "李禹衡",
+      "old_phase": "unknown",
+      "new_phase": "before",
+      "reason": "consistent_visual_evidence"
+    },
+    {
+      "asset_id": "a0159",
+      "store": "石厦店",
+      "member": "李禹衡",
+      "old_phase": "unknown",
+      "new_phase": "after",
+      "reason": "consistent_visual_evidence"
+    },
+    {
+      "asset_id": "a0161",
+      "store": "石厦店",
+      "member": "潘艺文",
+      "old_phase": "before",
+      "new_phase": "unknown",
+      "reason": "single_subtle_view"
+    },
+    {
+      "asset_id": "a0162",
+      "store": "石厦店",
+      "member": "潘艺文",
+      "old_phase": "after",
+      "new_phase": "unknown",
+      "reason": "single_subtle_view"
+    }
+  ],
+  "negative_controls": [
+    {
+      "view": "front",
+      "asset_id": "a0109",
+      "raw_probe": {
+        "raw_directional_claims": 0,
+        "would_assign_without_identity_guard": false
+      },
+      "final_after": null
+    },
+    {
+      "view": "back",
+      "asset_id": "a0113",
+      "raw_probe": {
+        "raw_directional_claims": 2,
+        "would_assign_without_identity_guard": false
+      },
+      "final_after": null
+    },
+    {
+      "view": "side",
+      "asset_id": "a0050__p01",
+      "raw_probe": {
+        "raw_directional_claims": 0,
+        "would_assign_without_identity_guard": false
+      },
+      "final_after": null
+    }
+  ],
+  "report_matched_members": [
+    "何彦霖",
+    "吴显昉",
+    "潘艺文",
+    "郑远晨"
+  ],
+  "report_inventory": {
+    "eligible_store_documents": 5,
+    "matched": 4,
+    "unmatched_member_without_eligible_photos": "candy",
+    "reference_template_and_standards_excluded": true
+  },
+  "limits": [
+    "No verified photo chronology; adoption is not accuracy.",
+    "Reports do not prove photo-to-stage linkage.",
+    "Same-image back view elicited directional claims, blocked by swap and source identity guards.",
+    "No changes to best-practice snapshots, source photos, existing results or website."
+  ],
+  "final_inference_sweep_new_requests": 57,
+  "final_cache_replay_new_requests": 0,
+  "source_files_sha256": {
+    "__init__.py": "cc3d8c7e5ade63958a26c86cc8fd10552026cc6f75fab256658d93945781c44e",
+    "__main__.py": "b0660dee143da3fbc370458bc401677b4fda8f22f1c5a86e2cb6ee2205bc60f9",
+    "crops.py": "7c1a0415326b284cfa748b0b3b16ecadd792b654ad92214b30e8e358fdb54152",
+    "evidence.py": "e2db37e75ec0658c26fea4fc2ac0a3775fd2f9a51fe23389b25fbe409dc20f48",
+    "fusion.py": "3c15a26c551a47c4ff8168b5a580fb9ac7739a10b3b804183b1edee4ed7ea4f8",
+    "pipeline.py": "421c6b1efa26264d433184bcacf0361adc3a3ac43ff1d3624962746eb81399e3",
+    "preview.py": "14bc8e6f13c71ef70a0554fda496aede4f3b7ddfb4999f823af61962a8a3380d",
+    "reports.py": "bfb44044786dc2165591920cda26f0904bbd24e77a7c2c7da8492b51d445921d",
+    "tests/test_regions.py": "2c0170a18edc717e3d0248e9a2449188d38e802d96aad3066b6fff51c379e941",
+    "verify.py": "3aae6d566cd5153aa5eab61f7c8ebaa7275df0fbb4dba51e1aaedc09b0d8377b"
+  }
+}

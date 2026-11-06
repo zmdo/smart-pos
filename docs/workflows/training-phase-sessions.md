@@ -2,6 +2,8 @@
 
 2026-11-06。用户批准“同人按拍摄批次分组 → 同姿势比较 → 综合多个朝向判断”。实现为新增独立节点 [scripts/body_scan_phase_sessions](../../scripts/body_scan_phase_sessions/README.md)。上一版 [逐对标注](training-phase.md) 保留，旧0.8置信度门槛只适用于旧版。
 
+后续独立实验见[局部观察与训练报告辅助](training-phase-regions.md)。该实验复用本节点的批次和跨朝向约束，但将照片整体可比性细化到各部位，并在视觉盲评之后匹配报告变化模式。本文件与脚本继续保留作为对照。
+
 ## 流程
 
 ```mermaid
