@@ -145,7 +145,8 @@ def render(plans,rows,photos,dest,font,previous=None,presentation=None,reports=N
         layout=({'renderer_version':GRID_RENDERER,'layout':'seamless-3x2','image_annotations':False}
                 if product['kind']=='three_views' else {})
         if context:
-            layout.update(renderer_version=VS_RENDERER,layout='reference-vs',presentation=public_presentation(context))
+            layout.update(renderer_version=VS_RENDERER,layout='reference-vs',stage_annotations=False,
+                          presentation=public_presentation(context))
         outputs.append({**product,**layout,'file':relative,'width':width,'height':height,'sha256':sha(path),
             'dependency_sha256':signature,'reused':reused,'labels':[{k:r[k] for k in ('asset_id','phase','label','requires_review')} for r in selected],
             'requires_review':any(r['requires_review'] for r in selected),

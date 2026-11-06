@@ -3,7 +3,7 @@ import math
 from PIL import Image, ImageDraw, ImageFont
 from .logo import load_logo
 
-VERSION = 'body-same-view-reference-v3'
+VERSION = 'body-same-view-reference-v5'
 RED = '#E70012'
 TITLES = {'front':'体测正视图','side':'体测侧视图','back':'体测后视图'}
 
@@ -43,13 +43,14 @@ def draw_vs(rows, photos, font, context, view):
         # The only aspect error is integer-pixel rounding (at most one pixel).
         canvas.paste(source.resize((box[2]-box[0],box[3]-box[1]),Image.Resampling.LANCZOS),box[:2])
 
-    def label(value,box,size=40,color=RED,bold=True):
+    def label(value,box,size=40,color=RED,bold=True,align='center'):
         x1,y1,x2,y2=box;stroke=0
         for fs in range(px(size),0,-1):
             f=typeface(font,fs,700 if bold else 400)
             bounds=draw.textbbox((0,0),value,font=f,stroke_width=stroke)
             if bounds[2]-bounds[0]<=x2-x1 and bounds[3]-bounds[1]<=y2-y1:break
-        draw.text(((x1+x2)/2,(y1+y2)/2),value,font=f,anchor='mm',fill=color,
+        x=x2 if align=='right' else (x1+x2)/2
+        draw.text((x,(y1+y2)/2),value,font=f,anchor='rm' if align=='right' else 'mm',fill=color,
                   stroke_width=stroke,stroke_fill=color)
 
     def capsule(box,fill='white',outline=RED,stroke=6):
@@ -61,7 +62,7 @@ def draw_vs(rows, photos, font, context, view):
     else:
         label(context['brand_name'],(px(200),px(45),width-px(200),px(150)),60,'white')
     if context.get('consent_text'):
-        label(context['consent_text'],(px(690),px(186),width-px(16),px(212)),18,'white',False)
+        label(context['consent_text'],(px(690),px(186),width-px(16),px(212)),18,'white',False,align='right')
 
     # The title overlaps only the top edge of the photo, as in the supplied reference.
     box=(width//2-px(135),px(173),width//2+px(135),px(270))
@@ -78,14 +79,12 @@ def draw_vs(rows, photos, font, context, view):
     canvas.paste(mark,(width//2-mark.width//2,center_y-mark.height//2),mark)
 
     bottom=layout['header']+layout['photo_height'];y1=bottom-px(125);y2=bottom-px(25)
-    for index,(row,photo_box) in enumerate(zip(rows,layout['photo_boxes'])):
+    for index,photo_box in enumerate(layout['photo_boxes']):
         center=(photo_box[0]+photo_box[2])//2
         half=min(px(120),(photo_box[2]-photo_box[0])*.38)
         b=(round(center-half),y1,round(center+half),y2)
         capsule(b)
-        suffix={'inferred':'（推断）','pending':'（待审）'}.get(row['label_kind'],'')
-        label(('Before','After')[index],(b[0]+px(18),y1+px(6),b[2]-px(18),y2-px(28 if suffix else 6)),43)
-        if suffix:label(suffix,(b[0]+px(18),y2-px(33),b[2]-px(18),y2-px(9)),21,bold=False)
+        label(('Before','After')[index],(b[0]+px(18),y1+px(6),b[2]-px(18),y2-px(6)),43)
     cx=width//2;cy=(y1+y2)//2
     points=[(cx-px(56),cy-px(27)),(cx+px(16),cy-px(27)),(cx+px(16),cy-px(54)),
             (cx+px(77),cy),(cx+px(16),cy+px(54)),(cx+px(16),cy+px(27)),(cx-px(56),cy+px(27))]
@@ -104,7 +103,4 @@ def draw_vs(rows, photos, font, context, view):
         x=round(margin+col*(cell+gap));y=bottom+px(171+90*line)
         box=(x,y,round(x+cell),y+px(72));capsule(box,outline='white',stroke=1)
         label(metric['text'],(box[0]+px(20),y+px(8),box[2]-px(20),y+px(64)),41)
-    scope='围度' if all(m['key'] in ('waist','hip','arm','chest') for m in context['metrics']) else '数据'
-    label(scope+'变化来自体测单 · 训练后 − 训练前',
-          (px(100),layout['height']-px(60),width-px(100),layout['height']-px(27)),20,'white',False)
     return canvas

@@ -78,11 +78,12 @@ def build(source, out, default_case=None, default_category=None):
     counts = {'cases':len(cases), 'stores':len({c['store'] for c in cases}),
               'three_views':len(cases),'vs':len(cases)*3,'single':len(cases)*6}
     seamless = all(p.get('layout')=='seamless-3x2' for p in grids)
-    reference_vs = all(p.get('renderer_version')=='body-same-view-reference-v3' for c in cases for p in c['comparisons'])
+    reference_vs = all(p.get('renderer_version') in ('body-same-view-reference-v3','body-same-view-reference-v5') for c in cases for p in c['comparisons'])
+    clean_vs = all(p.get('renderer_version')=='body-same-view-reference-v5' for c in cases for p in c['comparisons'])
     if default_case and default_case not in {c['group_id'] for c in cases}:raise ValueError('unknown_default_case')
     if default_category and default_category not in ('three_views','vs','single'):raise ValueError('unknown_default_category')
     default_case=default_case or cases[0]['group_id']
-    data = {'title':'三视图体测 · 当前成品样式','version':'reference-v3' if reference_vs else 'seamless-v2' if seamless else 'current-v1',
+    data = {'title':'三视图体测 · 当前成品样式','version':'reference-v5' if clean_vs else 'reference-v3' if reference_vs else 'seamless-v2' if seamless else 'current-v1',
             'vs_style':'reference' if reference_vs else 'basic','default_category':default_category or ('vs' if reference_vs else 'three_views'),
             'grid_style':'seamless' if seamless else 'labeled',
             'source_delivery':result['delivery_id'],'source_revision':result['revision'],

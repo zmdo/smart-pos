@@ -2,7 +2,7 @@
 
 消费训练阶段分类节点已经补齐的标签包，生成单图、同朝向 VS、完整三视图，并附带独立报告节点的标准 HTML 对比表和 JSON。此节点不调用模型、不重新判断阶段、不读取原始体检文档。
 
-推断/待审标签按输入原样渲染并进入审核返回；用户确认后移除对应标记，保留旧版本，仅重生成受影响的成品。
+推断/待审标签按输入保留在审核返回和单图中；同朝向 VS 只显示英文阶段，三视图不加文字。用户确认后移除对应标记，保留旧版本，仅重生成受影响的成品。
 
 完整协议与流程：[工作流文档](../../docs/workflows/body-scan-delivery-review.md)。
 
@@ -85,7 +85,7 @@ python -m scripts.body_scan_delivery.restyle --delivery /path/to/existing-delive
 
 ## 同朝向参考版 v3
 
-参照用户提供的红白版式：品牌 logo、居中悬浮标题、两图无缝并排、中央 VS、Before/After 与箭头、姓氏称谓及地址、体测单变化胶囊。图片保留推断/待审标记，结果 JSON 与审核队列继续返回不确定项。三视图与单图不受此次改版影响。
+参照用户提供的红白版式：品牌 logo、居中悬浮标题、两图无缝并排、中央 VS、Before/After 与箭头、姓氏称谓及地址、体测单变化胶囊。v3/v4 图片曾保留推断/待审标记；当前 v5 在 VS 图片中移除这些小字，结果 JSON 与审核队列继续返回不确定项。三视图与单图不受此次改版影响。
 
 宽度默认 1080，可配置为 540–4320。两张照片统一显示高度 `H = W / (w1/h1 + w2/h2)`，分别等比缩放，整数像素舍入误差不超过一像素；不裁剪、不新增人物拉伸。总高度为照片高度加按宽度缩放的页眉页脚，不再固定 1440。标题、VS、阶段胶囊是参照图要求的覆盖元素。
 
@@ -96,7 +96,7 @@ python -m scripts.body_scan_delivery.restyle --delivery /path/to/existing-delive
 - `address`：默认地址；`stores[店名].address`：按门店配置；`members[店名/会员].address` 可单独覆盖。未配置仅显示门店名称。
 - `members[店名/会员].gender`：来自报告明确文字或用户资料的“男/女”；或用 `honorific` 明确指定“先生/女士/会员”，复姓及特殊姓名可用 `surname`。不从人物外貌、名字猜性别。缺少依据用“某会员”。报告数据将来提供明确 `gender` 字段时也可直接读取。
 - `members[店名/会员].report_id`：同名同店存在多份报告时明确选用哪份；否则仅自动使用唯一一份可用报告。
-- `consent_text`：可选已确认声明，默认空，不自动生成“经本人同意”等声明。
+- `consent_text`：可配置页眉声明。通用读取默认空；当前配置示例及本次成品按用户明确指定填写“*案例真实有效，经会员本人同意使用”。
 
 ```bash
 python -m scripts.body_scan_delivery create \
@@ -129,3 +129,14 @@ python -m scripts.body_scan_delivery create \
 新结果：`/root/autodl-fs/case-studio/experiments/body-scan-vs-logo-v4-20261106/delivery-v4`；本机预览：`artifacts/body-scan-vs-logo-v4/index.html`。
 
 本轮 45 项成品测试、15 项来源测试、1 项代理登录测试通过；266 个绑定文件与全部原审核标签校验通过。新域名健康与登录、Secure Cookie、旧来源拒绝均实测通过，四个 GPU 模型在新实例完成单样本推理。详见 [validation-logo-v4.json](validation-logo-v4.json) 和[迁移记录](../../docs/deployment-weste-20261106.md)。
+
+
+### 同朝向文案调整 v5（2026-11-06）
+
+按用户要求去掉底部“围度变化……”说明行；Before/After 胶囊只保留英文并垂直居中，移除“推断/待审”等小字。顶部红色区域右下角显示配置的 `*案例真实有效，经会员本人同意使用`，按画布宽度同比缩放、右对齐，不压住居中标题。
+
+照片、Logo、数据胶囊和画布尺寸保持不变。阶段判断与待审状态保存在结果 JSON、审核返回及 HTML 中，移除图片标注不代表审核通过。VS 像素版本升级为 `body-same-view-reference-v5`，保证旧缓存失效；核验器和图库继续识别旧 v3/v4 图片。当前成品输出 `stage_annotations: false`。
+
+远程重绘 39 张 VS，91 张其他成品逐字节复用；82 张输入的阶段信息和 53 张待审核队列均保持不变。45 项现有测试、268 个绑定源文件和 183 个预览链接核验通过，未调用模型。详见 [validation-clean-v5.json](validation-clean-v5.json)。
+
+远程结果：`/root/autodl-fs/case-studio/experiments/body-scan-vs-clean-v5-20261106/delivery-v5`。本机预览：`/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-vs-clean-v5/index.html`，保留 9 组完整案例的分类展示，默认打开潘艺文的同朝向对比。

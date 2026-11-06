@@ -50,7 +50,7 @@ def verify(root):
                         x=(index%3)*tile_width;y=(index//3)*tile_height
                         if ImageChops.difference(image.crop((x,y,x+tile_width,y+tile_height)).convert('RGB'),original.convert('RGB')).getbbox():
                             raise ValueError('grid_frame_pixels_changed')
-            elif output.get('renderer_version')==VS_RENDERER:
+            elif output.get('renderer_version') in (VS_RENDERER,'body-same-view-reference-v3'):
                 sizes=[]
                 for row in selected:
                     with Image.open(source['photos'][row['asset_id']]) as original:sizes.append(original.size)

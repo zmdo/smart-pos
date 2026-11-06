@@ -84,7 +84,7 @@ function renderStage(c) {
     stage.innerHTML = ['训练前','训练后'].map((phase,line) => `<h3 class="phase-heading">${phase} <span aria-hidden="true">／</span> 正面 · 侧面 · 背面</h3><div class="product-grid">${c.singles.slice(line*3,line*3+3).map((p,i) => productCard(c,p,line*3+i,true)).join('')}</div>`).join('');
   }
   for (const trigger of stage.querySelectorAll('[data-zoom]')) trigger.onclick = () => openZoom(trigger.dataset.zoom,trigger);
-  document.getElementById('review-note').textContent = c.review_count ? '“（推断）”和“（待审）”均沿用现有标签，尚待人工核对；本页只用于成品样式预览。' : '图片直接来自已有成品。切换分类可查看同一套六张照片的其他输出形式。';
+  document.getElementById('review-note').textContent = c.review_count ? '推断与待审状态仍需人工核对；VS 的阶段标签仅显示英文，审核状态保留在本页和结果数据中。' : '图片直接来自已有成品。切换分类可查看同一套六张照片的其他输出形式。';
 }
 function openZoom(id, trigger) {
   const c = currentCase(), product = [c.grid,...c.comparisons,...c.singles].find(p => p.product_id === id);
