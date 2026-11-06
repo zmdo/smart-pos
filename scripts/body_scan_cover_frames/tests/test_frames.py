@@ -41,12 +41,31 @@ class FrameTests(unittest.TestCase):
             m['group_plan'] = {'H_normalized_to_display': [[1, 0, 0], [0, 4, 0], [0, 0, 1]]}
         self.assertEqual(expected, plan_pair(pair))
 
-    def test_original_cut_head_does_not_cut_other_complete_head(self):
+    def test_original_cut_head_pair_uses_same_shoulder_and_partial_crop(self):
         cut = meta(top=350); cut['visibility']['head'] = 'cut'
         plans = plan_pair([cut, meta('a2')])
-        self.assertTrue(plans[0]['shoulder_alignment_relaxed'])
+        self.assertFalse(plans[0]['shoulder_alignment_relaxed'])
         self.assertTrue(plans[0]['head_already_incomplete'])
-        self.assertFalse(plans[1]['new_head_crop'])
+        self.assertEqual(plans[0]['neutral_shoulder_output'], plans[1]['neutral_shoulder_output'])
+        self.assertEqual(plans[0]['crop_xyxy_normalized'], plans[1]['crop_xyxy_normalized'])
+        self.assertTrue(plans[1]['new_head_crop'])
+        self.assertTrue(all(p['partial_head_pair'] and p['review_reasons'] for p in plans))
+
+    def test_full_source_targets_hips_instead_of_maximum_area(self):
+        plans = plan_pair([meta(width=2000), meta('a2', width=2000)])
+        for p in plans:
+            self.assertTrue(p['hip_target_reached'])
+            self.assertAlmostEqual(p['crop_xyxy_normalized'][3], 450*1.25, places=2)
+            self.assertGreater(p['hip_output'][1], 478*.80)
+            self.assertLess(p['hip_output'][1], 478*.92)
+            self.assertLess(p['hip_output'][1], 478)
+            self.assertFalse(p['new_head_crop'])
+
+    def test_narrow_full_source_reports_coverage_limit_without_stretch_or_misalignment(self):
+        plans = plan_pair([meta(width=650), meta('a2', width=650)])
+        self.assertEqual(plans[0]['neutral_shoulder_output'], plans[1]['neutral_shoulder_output'])
+        self.assertTrue(all(not p['hip_target_reached'] and p['review_reasons'] for p in plans))
+        self.assertTrue(all(p['scale_x']==p['scale_y'] for p in plans))
 
     def test_perspective_footprint_and_real_pixels(self):
         with tempfile.TemporaryDirectory() as d:

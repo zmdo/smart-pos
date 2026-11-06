@@ -11,7 +11,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "52df3e93ac852a5fb8dde1c0121d917e40b9cea80946c63775b03e447b327a5e",
+      "sha256": "f1fd1de628afa5ec6f54667b8d4837372575d5732e8b5f904b81b8e8b4293eed",
       "role": "archive_support"
     },
     {
@@ -415,7 +415,7 @@
     },
     {
       "path": "source-files.json",
-      "sha256": "f3241ec9928a39e51d26fde7bddf0cdd5c690b7b34555fc143dad34e0fa356b4",
+      "sha256": "4f18a8993f3e8ab7e267442bb6e573dd2a1454679e52d47866366b3907365085",
       "role": "archive_support"
     },
     {
@@ -442,15 +442,15 @@
     {
       "path": "scripts/body_scan_cover_frames/__init__.py",
       "source": "scripts/body_scan_cover_frames/__init__.py",
-      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
-      "source_sha256": "96e056d6a2572ed1292d49b18b676cdfd19c1280c4549a6ca6942e48be14bc46",
+      "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
+      "source_sha256": "e1cb40470d4072b9800e370e3fc92c1a2300f184991b279baadf990385e7bea6",
       "role": "cover_branch_source",
-      "sha256": "96e056d6a2572ed1292d49b18b676cdfd19c1280c4549a6ca6942e48be14bc46"
+      "sha256": "e1cb40470d4072b9800e370e3fc92c1a2300f184991b279baadf990385e7bea6"
     },
     {
       "path": "scripts/body_scan_cover_frames/pipeline.py",
       "source": "scripts/body_scan_cover_frames/pipeline.py",
-      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+      "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
       "source_sha256": "3f15fb85fbeca195941e3850ac75b1e6158457a9d29df74618ee43800c56aefd",
       "role": "cover_branch_source",
       "sha256": "3f15fb85fbeca195941e3850ac75b1e6158457a9d29df74618ee43800c56aefd"
@@ -458,15 +458,15 @@
     {
       "path": "scripts/body_scan_cover_frames/geometry.py",
       "source": "scripts/body_scan_cover_frames/geometry.py",
-      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
-      "source_sha256": "d86caff13111b79e0df98b0f8ef6e0622583310da5b474dc5da13873e930889a",
+      "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
+      "source_sha256": "a8c4e46af4cc00f0d9daaf61ff6ff1a4cd2ca4ad584df4906696d11f795c7edf",
       "role": "cover_branch_source",
-      "sha256": "d86caff13111b79e0df98b0f8ef6e0622583310da5b474dc5da13873e930889a"
+      "sha256": "a8c4e46af4cc00f0d9daaf61ff6ff1a4cd2ca4ad584df4906696d11f795c7edf"
     },
     {
       "path": "scripts/body_scan_cover_frames/__main__.py",
       "source": "scripts/body_scan_cover_frames/__main__.py",
-      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+      "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
       "source_sha256": "4b74158738f3985cfdb1928791d12d3252ecb98463e33cf1012261c79b11a07b",
       "role": "cover_branch_source",
       "sha256": "4b74158738f3985cfdb1928791d12d3252ecb98463e33cf1012261c79b11a07b"
@@ -474,10 +474,10 @@
     {
       "path": "scripts/body_scan_cover_frames/tests/test_frames.py",
       "source": "scripts/body_scan_cover_frames/tests/test_frames.py",
-      "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
-      "source_sha256": "7d9ce1d56cc450ad39f13bd00934d1b900a7be9d71bad226aeb5df6b60cfd9d5",
+      "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
+      "source_sha256": "39d4f50af3931fd68250801854a8f149f9ad163d1334e6ef88dd9acf934441ca",
       "role": "cover_branch_source",
-      "sha256": "7d9ce1d56cc450ad39f13bd00934d1b900a7be9d71bad226aeb5df6b60cfd9d5"
+      "sha256": "39d4f50af3931fd68250801854a8f149f9ad163d1334e6ef88dd9acf934441ca"
     },
     {
       "path": "cover_workflow.py",
@@ -492,17 +492,17 @@
     {
       "path": "cover-validation.json",
       "role": "archive_support",
-      "sha256": "8bb63a01d4656b46ab1cb2cf3da2b881a9256679cd000ea374a6afd5a161bc63"
+      "sha256": "4d79fbe83fcc01443b6dd8822914851e7e621a7a4561dc44a217343a21f930be"
     }
   ],
   "previous_snapshot_status": "retired; path exists only in Git history",
   "previous_snapshot_checkout_commit": "ec5dcb4cda00534b7547dbaaa54177b4d5cfe503",
   "cover_branch": {
-    "version": "body-scan-cover-frames-v1",
+    "version": "body-scan-cover-frames-v2",
     "entrypoint": "run_cover.sh",
     "policy": "optional two-front-frame branch; no changes to existing processing kernels",
-    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
     "input_contract": "cover-frame-request-v1 with bound stage rows, display summaries and original sources",
-    "output_contract": "body-scan-cover-frames-v1; two equal-sized isotropic frames and inherited labels"
+    "output_contract": "body-scan-cover-frames-v2; head-to-hip composition, locked shoulder frame, explicit partial/width limits; inherited labels"
   }
 }

@@ -301,32 +301,32 @@
   },
   "scripts/body_scan_cover_frames/__init__.py": {
     "source": "scripts/body_scan_cover_frames/__init__.py",
-    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
-    "source_sha256": "96e056d6a2572ed1292d49b18b676cdfd19c1280c4549a6ca6942e48be14bc46",
+    "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
+    "source_sha256": "e1cb40470d4072b9800e370e3fc92c1a2300f184991b279baadf990385e7bea6",
     "role": "cover_branch_source"
   },
   "scripts/body_scan_cover_frames/pipeline.py": {
     "source": "scripts/body_scan_cover_frames/pipeline.py",
-    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
     "source_sha256": "3f15fb85fbeca195941e3850ac75b1e6158457a9d29df74618ee43800c56aefd",
     "role": "cover_branch_source"
   },
   "scripts/body_scan_cover_frames/geometry.py": {
     "source": "scripts/body_scan_cover_frames/geometry.py",
-    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
-    "source_sha256": "d86caff13111b79e0df98b0f8ef6e0622583310da5b474dc5da13873e930889a",
+    "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
+    "source_sha256": "a8c4e46af4cc00f0d9daaf61ff6ff1a4cd2ca4ad584df4906696d11f795c7edf",
     "role": "cover_branch_source"
   },
   "scripts/body_scan_cover_frames/__main__.py": {
     "source": "scripts/body_scan_cover_frames/__main__.py",
-    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
+    "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
     "source_sha256": "4b74158738f3985cfdb1928791d12d3252ecb98463e33cf1012261c79b11a07b",
     "role": "cover_branch_source"
   },
   "scripts/body_scan_cover_frames/tests/test_frames.py": {
     "source": "scripts/body_scan_cover_frames/tests/test_frames.py",
-    "source_base_commit": "333c15204a1eb42bced5defd2472d59a38774096",
-    "source_sha256": "7d9ce1d56cc450ad39f13bd00934d1b900a7be9d71bad226aeb5df6b60cfd9d5",
+    "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
+    "source_sha256": "39d4f50af3931fd68250801854a8f149f9ad163d1334e6ef88dd9acf934441ca",
     "role": "cover_branch_source"
   }
 }

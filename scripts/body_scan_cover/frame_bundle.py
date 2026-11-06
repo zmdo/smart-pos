@@ -6,7 +6,7 @@ from scripts.body_scan_contracts.io import read, sha, bind
 
 def load_frames(root, result_sha, bindings):
     root = Path(root).resolve(); data = read(bind(root/'frames.json', bindings))
-    if data.get('version') != 'body-scan-cover-frames-v1' or data['phase_result_sha256'] != result_sha:
+    if data.get('version') not in ('body-scan-cover-frames-v1', 'body-scan-cover-frames-v2') or data['phase_result_sha256'] != result_sha:
         raise ValueError('cover_frames_belong_to_another_phase_revision')
     if data['output_size'] != [500, 478]:
         raise ValueError('cover_frame_size_does_not_match_template')

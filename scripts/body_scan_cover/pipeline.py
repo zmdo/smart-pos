@@ -92,8 +92,12 @@ def run(delivery, out, config_path=None, cover_frames=None, legacy_display_crop=
                 notes.append('报告填写天数与日期跨度不一致，封面不写具体训练天数。')
             if any(p['head_already_incomplete'] for p in plans):
                 notes.append('已有完整度记录提示部分头部不完整；已尽量使用原图有效区域，请核对当前取景。' if bundle else '部分输入照片头部本来不完整，本版以上半身取景。')
-            if frame_case and frame_case['framing_requires_review']:
-                notes.append('原图顶部可用范围不同，为保留现有头部，双图垂直取景有偏移；请复核取景。')
+            if any(p.get('partial_head_pair') for p in plans):
+                notes.append('配对含缺头原图，统一使用肩颈到胯部的共同取景，两张图保持相同肩线及尺度。')
+            if any(p.get('hip_target_reached') is False for p in plans):
+                notes.append('原图较窄，当前固定窗口在等比缩放下无法同时保留头部到胯部，已标记取景受限。')
+            if any(p.get('shoulder_alignment_relaxed') for p in plans):
+                notes.append('该旧版双图包存在垂直取景偏移；请使用新版双图节点重新生成。')
             if any(r['requires_review'] for r in pair):notes.append('照片前后阶段沿用现有推断或待审结果，可回原任务修正。')
             cases.append({**product,'file':filename,'sha256':sha(out/filename),'width':1080,'height':1440,
                           'asset_ids':[r['asset_id'] for r in pair],

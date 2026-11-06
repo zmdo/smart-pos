@@ -1,8 +1,55 @@
 {
   "passed": true,
   "date": "2026-11-07",
+  "version": "body-member-cover-v3",
+  "frames_version": "body-scan-cover-frames-v2",
   "covers": 15,
-  "frames": 30,
+  "isotropic_valid_frames": 30,
+  "shared_shoulder_pairs": 15,
+  "max_shoulder_coordinate_error_px": 2.5579538487363607e-13,
+  "hip_target_reached_pairs": 10,
+  "width_limited_pairs": [
+    {
+      "group_id": "g002",
+      "member": "卢家俊"
+    },
+    {
+      "group_id": "g003",
+      "member": "张小飞"
+    },
+    {
+      "group_id": "g005",
+      "member": "杜明钢"
+    },
+    {
+      "group_id": "g006",
+      "member": "董彦琦"
+    },
+    {
+      "group_id": "g007",
+      "member": "蒋先亮"
+    }
+  ],
+  "partial_head_pairs": [
+    {
+      "group_id": "g009",
+      "member": "何彦霖"
+    },
+    {
+      "group_id": "g011",
+      "member": "吴显昉"
+    }
+  ],
+  "intentional_head_crops_in_partial_pairs": [
+    "a0133",
+    "a0092"
+  ],
+  "he_yanlin_previous_shoulder_error_px": 107.62816843621803,
+  "he_yanlin_current_shoulder_error_px": 2.842170943040401e-14,
+  "stage_rows_unchanged": 30,
+  "original_products_unchanged": 130,
+  "bound_input_files_unchanged": 310,
+  "report_copy_and_selection_unchanged": 15,
   "gaps": [
     {
       "group_id": "g008",
@@ -12,59 +59,44 @@
     }
   ],
   "model_requests": 0,
-  "inherited_stage_rows_exact": 30,
-  "isotropic_frames": 30,
-  "valid_original_rectangles": 30,
-  "shared_shoulder_pairs": 14,
-  "framing_review_groups": [
-    "g009"
-  ],
-  "source_files_unchanged": 310,
-  "original_products_unchanged": 130,
-  "legacy_covers_byte_identical": 15,
-  "visual_checked_contact_cases": 15,
-  "final_covers_equal_inspected_pixels": 15,
-  "unit_tests_passed": 71,
+  "unit_tests": 73,
   "test_suites": [
     19,
     32,
-    9,
+    11,
     11
   ],
   "source_result_sha256": "0dc46d401caa9cf8cc22abd1f24d56c18fb7e86108dc65618ef334b48d0940c8",
-  "frames_manifest_sha256": "b221b2d9fa12c0bea866461fa74f9626854f933d95d577dd9817cf88cb2650bf",
-  "cover_cases_sha256": "9ff58b460861c84e5d116149c111f226d3adea573c1c2447d5617e104414ef4a",
-  "remote_preview": "/root/autodl-fs/case-studio/experiments/body-scan-cover-pair-v2-20261107/validated-v2",
-  "remote_frames": "/root/autodl-fs/case-studio/experiments/body-scan-cover-pair-v2-20261107/frames-v2",
+  "frames_manifest_sha256": "78293b7e2d692f266e4b2b58f75ff45a9b9f617493d8a36971f3f708ceb200f5",
+  "cover_cases_sha256": "70dc4266e6eee3d2f029a9b5f3e1c2ebb57795e89be6ba2515155a1aab658b6b",
+  "remote_preview": "/root/autodl-fs/case-studio/experiments/body-scan-cover-head-hip-v3-20261107/validated",
+  "remote_frames": "/root/autodl-fs/case-studio/experiments/body-scan-cover-head-hip-v3-20261107/frames-final",
+  "local_preview": "/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-cover-head-hip-v3/validated/index.html",
   "checks": [
-    "exact phase/confidence/review inheritance",
-    "unchanged report text and selected pairs",
-    "no six-image display stretch",
-    "pair-only shared frame and scale",
-    "head estimate preservation",
-    "all valid masks 255; cubic interpolation inside source content",
-    "approved geometry composed once",
-    "unchanged 130 existing products and 15 legacy rerenders",
-    "snapshot import isolation",
-    "15 old/new visual inspections"
+    "locked shared crop and shoulder origin",
+    "head-to-hip target with 0.25 torso pelvis margin",
+    "explicit partial-head pair crop",
+    "explicit narrow-source limitation",
+    "unchanged inherited stages and report copy",
+    "isotropic transforms and real rectangular pixels",
+    "130 old products unchanged"
   ],
-  "existing_frozen_python_files_unchanged": 46,
   "ui": {
     "passed": true,
-    "mode": "offline_jsdom_no_browser_execution",
+    "mode": "offline_jsdom",
     "cases": 15,
-    "report_filter": 4,
-    "missing_report_filter": 11,
+    "coverage_limit_notes": 5,
+    "partial_pair_notes": 2,
     "checks": [
-      "case selection",
-      "15 local image hashes",
-      "report filters",
-      "search empty state",
-      "zoom dialog",
-      "custom text export",
-      "15 comparisons and linked images"
+      "case switching",
+      "image hashes",
+      "coverage notes",
+      "filters and empty state",
+      "zoom",
+      "config export",
+      "comparison links"
     ]
   },
-  "local_preview": "/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-cover-pair-v2/validated-v2/index.html",
-  "local_comparison": "/Users/zhangming/Projects/FP16-Speed/artifacts/body-scan-cover-pair-v2/validated-v2/comparison.html"
+  "visual_checked_cases": 15,
+  "unchanged_existing_frozen_core_modules": 46
 }

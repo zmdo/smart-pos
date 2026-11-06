@@ -58,6 +58,7 @@ def measure(meta, inset=3):
     desired_top = max(head-.045*torso, top)
     return {'H': H, 'polygon': polygon, 'bounds': bounds, 'torso': float(torso),
             'head_top': float(head), 'desired_top': float(desired_top),
+            'source_top': float(top),
             'shoulder': shoulder.tolist(), 'hip': hip.tolist(),
             'visibility_scope': 'original_source_recovered_with_existing_geometry',
             'head_status': meta['visibility']['head']}
@@ -75,14 +76,16 @@ def halfplanes(polygon):
     return rows
 
 
-def constraints_for(measurement, ratio, cap, center_x=0, minimum_top=None):
+def constraints_for(measurement, ratio, cap, center_x=0, minimum_top=None, top_limit=None, bottom_limit=None):
     # Rectangle near the approved neutral shoulder x=0. Variables are
     # (top, height). Each polygon constraint uses the worst rectangle corner.
     rows = [[b, abs(a)*ratio/2+max(b, 0), c-a*center_x]
             for a, b, c in halfplanes(measurement['polygon'])]
-    rows += [[0, -1, 0], [0, 1, cap], [1, 0, measurement['desired_top']]]
+    rows += [[0, -1, 0], [0, 1, cap], [1, 0, measurement['desired_top'] if top_limit is None else top_limit]]
     if minimum_top is not None:
         rows.append([-1, 0, -minimum_top])
+    if bottom_limit is not None:
+        rows.append([1, 1, bottom_limit])
     return np.asarray(rows, float)
 
 
@@ -127,39 +130,60 @@ def plan_pair(metadata, target=(500, 478), max_torso_heights=2.8):
     measured = [measure(m) for m in metadata]
     ratio = target[0]/target[1]
     torso = float(np.median([m['torso'] for m in measured]))
-    cap = max_torso_heights*torso
+    # Pose hip joints sit above the visible bottom of the pelvis. Leave a
+    # quarter torso of room below them so the crop includes the hips, not just
+    # the waistband, while avoiding the previous mid-thigh composition.
+    bottom_target = max(m['hip'][1] for m in measured)+.25*torso
     preferred = min(m['desired_top'] for m in measured)
-    # First solve the joint frame. Near-vertical edges must not move the whole
-    # portrait by hundreds of pixels just to gain a fraction of a pixel in width.
-    # A bounded horizontal adjustment can retain asymmetric original margins.
-    candidates = []
-    for center_x in np.linspace(-.15*torso, .15*torso, 9):
-        rows = [constraints_for(m, ratio, cap, center_x, preferred-.04*torso) for m in measured]
-        try:
-            candidates.append((largest_height(np.concatenate(rows)), float(center_x), rows))
-        except ValueError:
-            continue
-    joint = bool(candidates)
-    if joint:
-        height, center_x, constraints = max(candidates, key=lambda c: (round(c[0], 4), -abs(c[1])))
-        # Prefer exactly centred when a shift offers less than a 2% improvement.
-        centred = next((c for c in candidates if abs(c[1]) < 1e-6), None)
-        if centred and height <= centred[0]*1.02:
-            height, center_x, constraints = centred
-    else:
-        center_x = 0.
-        constraints = [constraints_for(m, ratio, cap, 0, m['desired_top']-.04*torso) for m in measured]
-        height = min(largest_height(rows) for rows in constraints)
+
+    def candidates_for(top, partial):
+        # The hips determine the desired bottom. Available image area is only
+        # a constraint, not a reason to shrink a person to show extra legs.
+        cap = min(max_torso_heights*torso, bottom_target-top)
+        candidates = []
+        for center_x in np.linspace(-.15*torso, .15*torso, 9):
+            rows = [constraints_for(m, ratio, cap, center_x,
+                                    top if partial else top-.04*torso,
+                                    top+.04*torso if partial else None, bottom_target)
+                    for m in measured]
+            try:
+                candidates.append((largest_height(np.concatenate(rows)), float(center_x), rows))
+            except ValueError:
+                continue
+        return candidates
+
+    partial = any(m['head_status'] not in ('complete', 'touching_border') for m in measured)
+    if partial:
+        preferred = max(m['source_top'] for m in measured)
+    candidates = candidates_for(preferred, partial)
+    if not candidates and not partial:
+        partial = True
+        preferred = max(m['source_top'] for m in measured)
+        candidates = candidates_for(preferred, partial)
+    if not candidates:
+        raise ValueError('no_common_cover_frame_with_locked_shoulders')
+    height, center_x, constraints = max(candidates, key=lambda c: (round(c[0], 4), -abs(c[1])))
+    centred = next((c for c in candidates if abs(c[1]) < 1e-6), None)
+    if centred and height <= centred[0]*1.02:
+        height, center_x, constraints = centred
     available = [largest_height(rows) for rows in constraints]
     height -= 1e-4; width = height*ratio
     ranges = [interval(rows, height) for rows in constraints]
     lower = max(r[0] for r in ranges); upper = min(r[1] for r in ranges)
-    shared = lower <= upper
+    if lower > upper+1e-6:
+        raise ValueError('cover_pair_cannot_use_independent_vertical_offsets')
+    top = float(np.clip(preferred, lower, max(lower, upper)))
+    actual_bottom = top+height
+    hip_target_reached = actual_bottom >= max(m['hip'][1] for m in measured)-.025*torso
+    review_reasons = []
+    if partial:
+        review_reasons.append('partial_head_source_pair_uses_common_shoulder_to_hip_crop')
+    if not hip_target_reached:
+        review_reasons.append('narrow_source_limits_head_to_hip_in_fixed_isotropic_window')
     scale = target[1]/height
     plans = []
-    for m, bounds, maximum in zip(measured, ranges, available):
-        lo, hi = (lower, upper) if shared else bounds
-        top = float(np.clip(preferred, lo, hi)); left = center_x-width/2
+    for m, maximum in zip(measured, available):
+        left = center_x-width/2
         # Pixel-centre convention; the frame edges map to [-.5,w-.5].
         T = np.array([[scale, 0, -scale*left-.5], [0, scale, -scale*top-.5], [0, 0, 1]])
         plans.append({'crop_xyxy_normalized': [left, top, left+width, top+height],
@@ -169,15 +193,21 @@ def plan_pair(metadata, target=(500, 478), max_torso_heights=2.8):
                       'source_valid_polygon_normalized': m['polygon'].tolist(),
                       'shared_pair_size': [width, height], 'available_height': float(maximum),
                       'horizontal_center_normalized': center_x,
-                      'headroom_limit_torsos': .04, 'joint_frame_feasible': joint,
+                      'headroom_limit_torsos': .04, 'joint_frame_feasible': True,
                       'shoulder_output': project([m['shoulder']], T)[0].tolist(),
                       'neutral_shoulder_output': project([[0, 0]], T)[0].tolist(),
                       'head_top_normalized': m['head_top'], 'new_head_crop': top > m['head_top']+1e-5,
                       'head_already_incomplete': m['head_status'] not in ('complete', 'touching_border'),
                       'head_evidence_scope': 'reused_evidence_not_new_full_head_certification',
-                      'shoulder_alignment_relaxed': not shared,
-                      'review_reasons': [] if shared else ['original_top_boundary_conflicts_with_common_shoulder_and_head_preservation'],
+                      'shoulder_alignment_relaxed': False,
+                      'review_reasons': list(review_reasons),
+                      'framing_policy': 'head_to_hip_locked_pair',
+                      'hip_target_reached': bool(hip_target_reached),
+                      'hip_output': project([m['hip']], T)[0].tolist(),
+                      'bottom_target_normalized': float(bottom_target),
+                      'hip_margin_torsos': .25,
+                      'partial_head_pair': partial,
                       'body_extent_torsos': (top+height-m['shoulder'][1])/m['torso'],
-                      'mode': 'pair_original_upper_body',
+                      'mode': 'shared_shoulder_to_hip' if partial else 'head_to_hip',
                       'method': 'two_front_sources_approved_geometry_uniform_scale'})
     return plans

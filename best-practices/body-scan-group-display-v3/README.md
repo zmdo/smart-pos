@@ -67,6 +67,8 @@ bash /root/apps/case-studio/best-practices/body-scan-group-display-v3/run_cover.
 
 请求协议 `cover-frame-request-v1` 由开发目录的封面适配器 `python -m scripts.body_scan_cover.prepare --delivery ... --out ...` 生成，也可由服务按同一协议提交。输入含阶段结果路径/SHA、两张正面素材完整阶段行、各自展示摘要路径/SHA；本节点不导入该适配器、分类节点或成品生成器。冻结代码位于本目录 `scripts/body_scan_cover_frames`，无开发目录回退依赖。原图和几何来自已绑定摘要，原始单图来源的有效边界完整保留。
 
-输出 `frames.json`、每组 `before.png` / `after.png` / `pair.png`、全有效像素掩码和私有输入指纹。阶段与审核标记按素材 ID 原样继承，新增模型调用为 0。`--width` / `--height` 默认 500×478，`--max-torso-heights` 默认 2.8；当前封面模板只接收 500×478，修改该尺寸需同步调整模板。
+封面分支 v2（2026-11-07 构图修订）：全身/头胯可用照片优先展示头部到胯部；缺头配对统一肩颈到胯部，相同肩部框为硬约束，不再允许独立垂直偏移。固定窗口容纳不了头胯的窄图标记范围受限。
 
-双图矩形遵守原图有效区域，保留既有几何及人物尺度，只等比缩放。共同肩线优先；原图缺失与保头冲突时独立记录取景待审，不能伪装成已对齐。该分支允许扩展至六图裁剪前的有效原像素，不受旧单图 768 宽取景窗口限制。具体规则和数据流见[封面工作流](../../docs/workflows/member-cover.md)，本轮验收见[cover-validation.json](cover-validation.json)。
+输出 `frames.json`、每组 `before.png` / `after.png` / `pair.png`、全有效像素掩码和私有输入指纹。阶段与审核标记按素材 ID 原样继承，新增模型调用为 0。`--width` / `--height` 默认 500×478，`--max-torso-heights` 默认 2.8，仅作为安全上限，正常下沿由髋点及 0.25 个肩髋距离余量决定；当前封面模板只接收 500×478，修改该尺寸需同步调整模板。
+
+双图矩形遵守原图有效区域，保留既有几何及人物尺度，只等比缩放。共同肩线必须满足；原图缺头时两侧统一裁成局部对比，新增头部裁切有单独记录。该分支允许扩展至六图裁剪前的有效原像素，不受旧单图 768 宽取景窗口限制。具体规则和数据流见[封面工作流](../../docs/workflows/member-cover.md)，本轮验收见[cover-validation.json](cover-validation.json)。
