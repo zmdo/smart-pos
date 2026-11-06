@@ -1,0 +1,26 @@
+{
+  "reports": 4,
+  "verified_metric_rows": 32,
+  "missing_rows": 4,
+  "unmatched_reports": 1,
+  "source_values_preserved": true,
+  "calculated_deltas_verified": true,
+  "member_filter_verified": true,
+  "source_expansion_verified": true,
+  "mobile_document_overflow": false,
+  "console_errors": [],
+  "date": "2026-11-06",
+  "format": "standalone_html",
+  "generation_host": "remote_gpu_server",
+  "new_model_requests": 0,
+  "visual_review": [
+    "desktop",
+    "source-expanded",
+    "mobile"
+  ],
+  "source_report_sha256": "2d02bbde816ad38d01d28fe7627cc19c0ac9ba5e71efe3f941d9f46e4ae3ee6a",
+  "html_sha256": "ac2f70a24ade494ba71ed37e7c3f386c64e6e7c6a24f94ee2eae4bfc0c8cdbd0",
+  "remote_output": "/root/autodl-fs/case-studio/experiments/training-report-standard-table-20261106/index.html",
+  "local_output": "/Users/zhangming/Projects/FP16-Speed/artifacts/training-report-standard-table-20261106/index.html",
+  "exporter_sha256": "20683a7560e1e6cda3649c7046bb60108cbe9a08b69f231e4777d075379b009d"
+}

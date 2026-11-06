@@ -39,6 +39,18 @@ PYTHONPATH=/root/apps/phase-evidence-deps:/root/apps/case-studio \
 - `controls.json`：正/背/侧同图负对照及模型原始误报记录。生产身份哈希保护始终阻止同图排序。
 - `sources.json`、`verification.json`：输入绑定和完整性检查。
 
+## 导出报告标准表（HTML）
+
+```bash
+/root/apps/non-grid-calibration/.venv/bin/python -m scripts.body_scan_phase_regions.report_table \
+  --reports /path/to/final-reviewed/reports \
+  --out /path/to/new-report-table/index.html
+```
+
+输出为独立HTML，可离线按会员筛选、查看标准化数值及原文、打印。变化量统一后减前，体脂变化使用百分点；双项臂围按原顺序保留，不猜左右。未记录指标显示缺失，BMI/变化量/天数异常保留原值并标明；未匹配或未通过核验的门店报告另列。导出只消费既有结果，不调用模型、不修改报告或照片阶段，输出文件必须不存在。
+
+本轮HTML包含4份报告、32项已提取指标、4项骨骼肌量缺失占位，以及1份尚未匹配的门店报告。逐项数值、差值、原填值和筛选/原文展开检查通过；桌面及移动端展示已核对。记录见[validation-report-table.json](validation-report-table.json)。
+
 ## 验证
 
 ```bash
