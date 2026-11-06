@@ -1,0 +1,265 @@
+{
+  "version": "body-scan-geometry-guard-v1",
+  "counts": {
+    "rectangular": 28
+  },
+  "groups": 5,
+  "changed_asset_ids": [
+    "a0036__p01"
+  ],
+  "byte_identical_asset_ids": [
+    "a0101",
+    "a0102",
+    "a0103",
+    "a0104",
+    "a0105",
+    "a0107",
+    "a0108",
+    "a0109",
+    "a0110",
+    "a0111",
+    "a0112",
+    "a0113",
+    "a0140",
+    "a0141",
+    "a0142",
+    "a0146",
+    "a0148",
+    "a0149",
+    "a0161",
+    "a0162",
+    "a0163",
+    "a0166",
+    "a0167",
+    "a0168",
+    "a0036__p02",
+    "a0038__p01",
+    "a0038__p02"
+  ],
+  "byte_identical_grid_asset_ids": [
+    "a0102",
+    "a0105",
+    "a0107",
+    "a0108",
+    "a0110",
+    "a0112",
+    "a0036__p02",
+    "a0038__p02"
+  ],
+  "source_and_baseline_unchanged": true,
+  "new_model_requests": 0,
+  "decisions": {
+    "no_suspect_transform": 19,
+    "outside_non_grid_scope": 8,
+    "verified_wall_regression": 1
+  },
+  "displayed": 28,
+  "display_byte_identical_ids": [
+    "a0101",
+    "a0102",
+    "a0103",
+    "a0104",
+    "a0105",
+    "a0107",
+    "a0108",
+    "a0109",
+    "a0110",
+    "a0111",
+    "a0112",
+    "a0113",
+    "a0140",
+    "a0141",
+    "a0142",
+    "a0146",
+    "a0148",
+    "a0149",
+    "a0161",
+    "a0162",
+    "a0163",
+    "a0166",
+    "a0167",
+    "a0168",
+    "a0036__p02",
+    "a0038__p01",
+    "a0038__p02"
+  ],
+  "display_changed_ids": [
+    "a0036__p01"
+  ],
+  "changed_group_names": [
+    [
+      "景田店",
+      "张小飞"
+    ]
+  ],
+  "measurements": {
+    "a0036__p01": {
+      "original_torso_axis_deg": -0.15723640805794095,
+      "previous_torso_axis_deg": -5.811090715804336,
+      "new_torso_axis_deg": -0.15723640805794095,
+      "wall_metrics": {
+        "horizontal": {
+          "ids": [
+            1,
+            2,
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "source_errors_deg": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.02025337936943572,
+            1.3503173237323836
+          ],
+          "corrected_errors_deg": [
+            7.623814371109873,
+            7.596664440267588,
+            7.516356025701242,
+            7.513046462416327,
+            7.48996041069644,
+            7.62381437110993,
+            7.596664440267702,
+            7.566735899250418,
+            5.8859912017748
+          ],
+          "coverage": 0.8133086876155268,
+          "source_median_deg": 0.0,
+          "corrected_median_deg": 7.566735899250418,
+          "corrected_p90_deg": 7.62381437110993,
+          "regression_share": 0.951909709940726,
+          "position_spread": 0.02962962962962963,
+          "strong_regression": true,
+          "supports_correction": false
+        }
+      },
+      "decision": "verified_wall_regression"
+    }
+  },
+  "unaffected_group_display_byte_identical": true,
+  "experiment_directory": "/root/autodl-fs/case-studio/experiments/body-scan-geometry-guard-v1-20261106",
+  "tested_on": "2026-11-06",
+  "tests": {
+    "geometry_guard": 13,
+    "body_scan": 47,
+    "group_display": 32,
+    "total": 92,
+    "passed": true
+  },
+  "default_pipeline_changed": false,
+  "frozen_best_practices_changed": false,
+  "display_verification": {
+    "passed": true,
+    "source_hashes_checked": 28,
+    "baseline_copies_checked": 28,
+    "person_formats": [
+      {
+        "group_id": "g001",
+        "store": "景田店",
+        "member": "张小飞",
+        "output_size": [
+          768,
+          1984
+        ],
+        "displayed_images": 4,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g002",
+        "store": "石厦店",
+        "member": "冯雪奕",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g003",
+        "store": "石厦店",
+        "member": "潘艺文",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g004",
+        "store": "石厦店",
+        "member": "郑远晨",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      },
+      {
+        "group_id": "g005",
+        "store": "石厦店",
+        "member": "黎国萍",
+        "output_size": [
+          768,
+          1792
+        ],
+        "displayed_images": 6,
+        "single_crop_scale_and_shoulder": true
+      }
+    ],
+    "derivative_images_checked": 56,
+    "displayed_asset_ids": [
+      "a0101",
+      "a0102",
+      "a0103",
+      "a0104",
+      "a0105",
+      "a0107",
+      "a0108",
+      "a0109",
+      "a0110",
+      "a0111",
+      "a0112",
+      "a0113",
+      "a0140",
+      "a0141",
+      "a0142",
+      "a0146",
+      "a0148",
+      "a0149",
+      "a0161",
+      "a0162",
+      "a0163",
+      "a0166",
+      "a0167",
+      "a0168",
+      "a0036__p01",
+      "a0036__p02",
+      "a0038__p01",
+      "a0038__p02"
+    ],
+    "needs_review_asset_ids": [],
+    "max_observed_vertical_stretch": 1.0424665503199535,
+    "checks": [
+      "unchanged original and approved output",
+      "one output size, crop, scale and shoulder origin per person",
+      "complete rectangular source coverage",
+      "bounded per-step crop and vertical stretch",
+      "isotropic uniform reference",
+      "single composed source transform",
+      "output dimensions and hashes"
+    ],
+    "presentation_only": true
+  }
+}
