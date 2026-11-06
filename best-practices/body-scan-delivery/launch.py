@@ -1,4 +1,4 @@
-"""Isolated CLI shared by the suite and its three product directories."""
+"""Isolated CLI shared by the suite and its four product directories."""
 import os
 import runpy
 import sys
@@ -15,10 +15,15 @@ if command == 'check':
     print(verify_integrity(root))
 elif command == 'test':
     suite = unittest.TestSuite()
-    for folder in ('scripts/body_scan_contracts/tests', 'scripts/body_scan_delivery/tests', 'tests'):
+    for folder in ('scripts/body_scan_contracts/tests', 'scripts/body_scan_delivery/tests', 'member_cover/tests', 'tests'):
         suite.addTests(unittest.TestLoader().discover(folder))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(not result.wasSuccessful())
+elif command in ('cover', 'cover-prepare', 'cover-compare'):
+    del sys.argv[1]
+    module = {'cover':'member_cover', 'cover-prepare':'member_cover.prepare',
+              'cover-compare':'member_cover.compare'}[command]
+    runpy.run_module(module, run_name='__main__')
 elif command in ('restyle', 'verify', 'category'):
     del sys.argv[1]
     module = 'category' if command == 'category' else 'scripts.body_scan_delivery.'+command

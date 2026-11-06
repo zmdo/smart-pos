@@ -2,7 +2,7 @@
 
 2026-11-06：新增独立封面实验 [scripts/body_scan_cover](../../scripts/body_scan_cover/README.md)，先以 HTML 展示供用户微调，尚不归档为最佳实践，也不改变三视图、各朝向 VS 和单图。
 
-2026-11-07：取景升级为独立的封面双图分支，加入[同组展示最佳实践](../../best-practices/body-scan-group-display-v3/README.md)的 `run_cover.sh`。封面版式仍在实验目录，原三类体测成品不变。
+2026-11-07：取景升级为独立的封面双图分支，加入[同组展示最佳实践](../../best-practices/body-scan-group-display-v3/README.md)的 `run_cover.sh`。封面版式随后归档到成品最佳实践，原三类体测成品不变。
 
 既有阶段结果 → 按素材 ID 选择同会员正面训练前/后 → 生成双图请求 → 封面双图节点复用原图的已确认镜头校正、共同人物尺度及肩部基准 → 只对这两张图求共同有效取景框 → 等比输出封面专用双图 → 封面生成器读取双图、报告及文案 → 1080×1440 封面及 HTML 预览。
 
@@ -21,3 +21,14 @@
 固定右上“会员案例”；头部缺失不补画，配对缺失不凑图，数字缺失不填示例。报告天数冲突时不渲染具体训练天数。新增模型请求为 0，所有图像处理在远程执行。
 
 用户文字可以通过 `--config` 提供，HTML 编辑区也可以导出同一格式。分别支持主标题、副标题、成果标题、正文及强调片段、教练、地址；优先级为自动值 → 全局默认 → 单会员覆盖。每次生成新目录，回传取景、素材和报告来源以及原有训练阶段的审核目标。
+
+## 成品最佳实践归档（2026-11-07）
+
+当前权威封面入口：[member_cover/run.sh](../../best-practices/body-scan-delivery/member_cover/run.sh)，与 `three_views`、`view_comparison`、`single_view` 并列。绘图、文案、HTML、配置及数据适配均冻结在同一成品包内，开发目录仅用于后续实验。
+
+- `member_cover/prepare.sh`：读取已有阶段结果，输出双图请求，不调用模型。
+- `body-scan-group-display-v3/run_cover.sh`：独立上游取景节点，维护共同肩线和头胯范围，输出 v2 双图包。
+- `member_cover/run.sh --delivery ... --cover-frames ... --out ... [--config ...]`：只校验数据和排版，强制 v2 双图输入，保留阶段及取景审核信息。
+- `member_cover/compare.sh`：可选生成相同素材的新旧 HTML 对比。
+
+两个最佳实践通过 JSON 与文件指纹连接，不互相导入处理代码。根成品 `create` / `restyle` 仍负责原三类体测图；封面独立生成。来源基线为提交 `eaf9964`，不更改已确认的版式或取景算法。归档验证见[封面验收记录](../../best-practices/body-scan-delivery/member_cover/validation.json)。

@@ -1,19 +1,20 @@
 {
-  "version": "body-scan-delivery-best-practice-v1",
-  "authority": "user-approved three-family product generation",
+  "version": "body-scan-delivery-best-practice-v2",
+  "authority": "user-approved four-family product generation",
   "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
   "entrypoint": "run.sh",
   "components": {
     "three_views": "body-three-views-seamless-v2",
     "view_comparison": "body-same-view-reference-v5",
-    "single_view": "body-delivery-v1"
+    "single_view": "body-delivery-v1",
+    "member_cover": "body-member-cover-v3"
   },
-  "dependencies": "Frozen local scripts and three sibling renderer packages only; no upstream models or development imports",
+  "dependencies": "Frozen local scripts and four sibling renderer packages; data-only upstream frame contract, no development imports",
   "excluded_tests": "14 classification/ranking tests remain with the classification node; revision fixtures now use preclassified labels",
   "files": [
     {
       "path": "README.md",
-      "sha256": "1f4def0eaae1a48e0564d0839d919ebb3b997be59c4d53474412b45f1c770405"
+      "sha256": "6f2e77f84db42efe6c5b6bd024ada174143db195773e3ff74dae63bf543fc6fc"
     },
     {
       "path": "category.py",
@@ -21,7 +22,184 @@
     },
     {
       "path": "launch.py",
-      "sha256": "879f93c61ee0dca8658bfaa799e3a8b38011a23131ae159d0d050a0f655bdfc3"
+      "sha256": "33c91e577e07519db69507e71484d0ce5f7bc102863b547d99582592511486db"
+    },
+    {
+      "path": "member_cover/README.md",
+      "source": "scripts/body_scan_cover/README.md",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "1c211122db5dab7ac413b1e902b8eb4666e8fa55ddece195407c6388744feb92",
+      "unchanged": false,
+      "adaptation": "Archive documentation",
+      "sha256": "9e1a0e2a6b2ab1c6eeeb77a5494594c429327e8c1048e566a67acc5bc3a7bce6"
+    },
+    {
+      "path": "member_cover/__init__.py",
+      "source": "scripts/body_scan_cover/__init__.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "4dd890ddf3a0f7b8e3e81a150c7b291bfdc4518dec9d77c34d79ec5a5a776767",
+      "unchanged": true,
+      "sha256": "4dd890ddf3a0f7b8e3e81a150c7b291bfdc4518dec9d77c34d79ec5a5a776767"
+    },
+    {
+      "path": "member_cover/__main__.py",
+      "source": "scripts/body_scan_cover/__main__.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "3d73e618ecd2af2534bb102fc976dd4ee90ab297a1db5ac4a0d6009fe26ad2fa",
+      "unchanged": false,
+      "adaptation": "Approved archive CLI requires v2 cover frames; test imports relocated to member_cover",
+      "sha256": "1d4f04a348ead2487dcc54ca10adbf45fb8901856d2a6b259e5e66a18dffad09"
+    },
+    {
+      "path": "member_cover/compare.py",
+      "source": "scripts/body_scan_cover/compare.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "8cfc08d731459a832f025b768abca9dcaa9c6e2367e0fd10b0a72f0ac5393247",
+      "unchanged": true,
+      "sha256": "8cfc08d731459a832f025b768abca9dcaa9c6e2367e0fd10b0a72f0ac5393247"
+    },
+    {
+      "path": "member_cover/compare.sh",
+      "role": "archive_support",
+      "sha256": "b7f71944618f9b64d55a74de27bc3e56418c24aef45c654c93052060bcfaf4d8"
+    },
+    {
+      "path": "member_cover/copy.py",
+      "source": "scripts/body_scan_cover/copy.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "2fc6b8757d45c0a7be3d07165d3bbb48f8048324e8e7cbb0af1fbf6b7764a3ce",
+      "unchanged": true,
+      "sha256": "2fc6b8757d45c0a7be3d07165d3bbb48f8048324e8e7cbb0af1fbf6b7764a3ce"
+    },
+    {
+      "path": "member_cover/cover.example.json",
+      "source": "scripts/body_scan_cover/cover.example.json",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "a126c099f234cd3037eb0a6325f980fa969cb1b6a1a46774179441371c91a5f5",
+      "unchanged": true,
+      "sha256": "a126c099f234cd3037eb0a6325f980fa969cb1b6a1a46774179441371c91a5f5"
+    },
+    {
+      "path": "member_cover/frame_bundle.py",
+      "source": "scripts/body_scan_cover/frame_bundle.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "878d03d8921be8c66bf591341baec0438c012491d7cf27293d2c9d9bac0aa46e",
+      "unchanged": true,
+      "sha256": "878d03d8921be8c66bf591341baec0438c012491d7cf27293d2c9d9bac0aa46e"
+    },
+    {
+      "path": "member_cover/framing.py",
+      "source": "scripts/body_scan_cover/framing.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "7c77097add2720caa96305e120632712f3452c8f22efdea42b68281cfb703030",
+      "unchanged": true,
+      "sha256": "7c77097add2720caa96305e120632712f3452c8f22efdea42b68281cfb703030"
+    },
+    {
+      "path": "member_cover/gallery.css",
+      "source": "scripts/body_scan_cover/gallery.css",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "15e658db42fcd03e52ba6ad49d282b7dc33613d3dd930a5b341733b512a3e298",
+      "unchanged": true,
+      "sha256": "15e658db42fcd03e52ba6ad49d282b7dc33613d3dd930a5b341733b512a3e298"
+    },
+    {
+      "path": "member_cover/gallery.js",
+      "source": "scripts/body_scan_cover/gallery.js",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "cad40350fc8451cef2eeb8c71ddeeed8cccb395c27902c1a0b02e9d03fd39038",
+      "unchanged": true,
+      "sha256": "cad40350fc8451cef2eeb8c71ddeeed8cccb395c27902c1a0b02e9d03fd39038"
+    },
+    {
+      "path": "member_cover/pipeline.py",
+      "source": "scripts/body_scan_cover/pipeline.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "f3f5523da3dad750717f0551b70a27312d10e21cf1afeb5b6ef18112b2d385ce",
+      "unchanged": true,
+      "sha256": "f3f5523da3dad750717f0551b70a27312d10e21cf1afeb5b6ef18112b2d385ce"
+    },
+    {
+      "path": "member_cover/prepare.py",
+      "source": "scripts/body_scan_cover/prepare.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "9c5d6ffd745fd1cbcf1a2b879e42392930e86e86c028031692d9ff6498a2013a",
+      "unchanged": true,
+      "sha256": "9c5d6ffd745fd1cbcf1a2b879e42392930e86e86c028031692d9ff6498a2013a"
+    },
+    {
+      "path": "member_cover/prepare.sh",
+      "role": "archive_support",
+      "sha256": "843e0268eb45bf179d5dd805552f7c66c232ca3ef63550e11580d177a8c33292"
+    },
+    {
+      "path": "member_cover/render.py",
+      "source": "scripts/body_scan_cover/render.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "b0b7b1c2fb128046051239b52c37f0c0b9f03bc89a187450697ecaff6e7c62ec",
+      "unchanged": true,
+      "sha256": "b0b7b1c2fb128046051239b52c37f0c0b9f03bc89a187450697ecaff6e7c62ec"
+    },
+    {
+      "path": "member_cover/run.sh",
+      "role": "archive_support",
+      "sha256": "05fd55a4ef3b8cf51ec2043a90e4f056585c666da61b617c13260fadec356451"
+    },
+    {
+      "path": "member_cover/selection.py",
+      "source": "scripts/body_scan_cover/selection.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "f472e110c07745bd759133670d82c913198d88717f53674741799cb0f0824502",
+      "unchanged": true,
+      "sha256": "f472e110c07745bd759133670d82c913198d88717f53674741799cb0f0824502"
+    },
+    {
+      "path": "member_cover/source-validation.json",
+      "source": "scripts/body_scan_cover/validation.json",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "4d79fbe83fcc01443b6dd8822914851e7e621a7a4561dc44a217343a21f930be",
+      "unchanged": true,
+      "sha256": "4d79fbe83fcc01443b6dd8822914851e7e621a7a4561dc44a217343a21f930be"
+    },
+    {
+      "path": "member_cover/template.html",
+      "source": "scripts/body_scan_cover/template.html",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "551906de67afe101b029df3fb4b5110b3d579ddd9cefe0b63769984fc5785490",
+      "unchanged": true,
+      "sha256": "551906de67afe101b029df3fb4b5110b3d579ddd9cefe0b63769984fc5785490"
+    },
+    {
+      "path": "member_cover/tests/test_archive_entry.py",
+      "role": "archive_support",
+      "sha256": "276f8b55908891af4848c1803333dede297065985b0482ff2e67a3e3b7e11463"
+    },
+    {
+      "path": "member_cover/tests/test_cover.py",
+      "source": "scripts/body_scan_cover/tests/test_cover.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "a3cdf67e4fe60df937549b5c4ea5a064d618eb47aecd99e6362772a4281a94ef",
+      "unchanged": false,
+      "adaptation": "Approved archive CLI requires v2 cover frames; test imports relocated to member_cover",
+      "sha256": "34d98f2e52638e6ab765bdae412fcb35e0a53c82c046f5e26561b83f3ec83fe5"
+    },
+    {
+      "path": "member_cover/tests/test_frame_bundle.py",
+      "source": "scripts/body_scan_cover/tests/test_frame_bundle.py",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "f9820f87e6971fd4f0d6c541b41f085865dc5706913e66d074d8b84d879c3cc0",
+      "unchanged": false,
+      "adaptation": "Approved archive CLI requires v2 cover frames; test imports relocated to member_cover",
+      "sha256": "260e0d9f009cef630adc54ce2ba5d100cecb6633ed9b299aaece28c3c1351449"
+    },
+    {
+      "path": "member_cover/validation.json",
+      "source": "scripts/body_scan_cover/validation.json",
+      "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+      "source_sha256": "4d79fbe83fcc01443b6dd8822914851e7e621a7a4561dc44a217343a21f930be",
+      "unchanged": false,
+      "adaptation": "Archive documentation",
+      "sha256": "e60edeeec24465aec7787e9bee58fcd42f3cb0bb897be13b37fdbd2ebd75328f"
     },
     {
       "path": "requirements.verified.txt",
@@ -298,5 +476,13 @@
       "path": "view_comparison/run.sh",
       "sha256": "f33c53dc23f04cb75f4246181ee903f2d692f439ed2c16788fea29880ed91dda"
     }
-  ]
+  ],
+  "component_sources": {
+    "three_views": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+    "view_comparison": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+    "single_view": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
+    "member_cover": "eaf9964b24ed85e52b70dfaae348ef54c572996c"
+  },
+  "cover_entrypoint": "member_cover/run.sh",
+  "cover_input_contract": "existing verified delivery + body-scan-cover-frames-v2 + optional text overrides"
 }

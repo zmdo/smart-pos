@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+  "tests_passed": 57,
+  "isolated_copy_without_development_code": true,
+  "upstream_and_network_imports_blocked_in_fresh_process": true,
+  "covers_re_rendered": 15,
+  "all_cover_images_byte_identical": true,
+  "cases_json_byte_identical": true,
+  "gallery_js_css_byte_identical": true,
+  "stage_confidence_and_review_records_unchanged": true,
+  "request_adapter_output_identical": true,
+  "custom_copy_changed_only": [
+    "g013"
+  ],
+  "other_14_covers_byte_identical": true,
+  "old_v1_frame_bundle_rejected": true,
+  "cover_frames_argument_required": true,
+  "old_product_and_shared_files_unchanged": 35,
+  "original_130_products_unchanged": true,
+  "bound_input_files_unchanged": 310,
+  "preview_links_checked": 80,
+  "model_requests": 0,
+  "head_to_hip_pairs": 10,
+  "narrow_source_limit_pairs": 5,
+  "partial_head_pair_crop_records_preserved": true,
+  "gap_count": 1,
+  "source_result_sha256": "0dc46d401caa9cf8cc22abd1f24d56c18fb7e86108dc65618ef334b48d0940c8",
+  "source_cover_cases_sha256": "70dc4266e6eee3d2f029a9b5f3e1c2ebb57795e89be6ba2515155a1aab658b6b",
+  "source_frames_manifest_sha256": "78293b7e2d692f266e4b2b58f75ff45a9b9f617493d8a36971f3f708ceb200f5",
+  "remote_validation_root": "/root/autodl-fs/case-studio/experiments/body-scan-delivery-cover-best-practice-20261107",
+  "remote_isolated_package": "/root/autodl-fs/case-studio/experiments/body-scan-delivery-cover-best-practice-20261107/package",
+  "remote_preview": "/root/autodl-fs/case-studio/experiments/body-scan-delivery-cover-best-practice-20261107/validated",
+  "test_scope": {
+    "existing_product_and_contract_tests": 43,
+    "copied_cover_tests": 11,
+    "archive_entry_and_isolation_tests": 3
+  }
+}
