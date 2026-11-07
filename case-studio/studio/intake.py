@@ -16,6 +16,24 @@ IMAGE_EXT = {
     ".heif",
 }
 EXCLUDED = ("参考模板", "参考模版", "生产标准", "说明文件")
+FILENAME_ERROR = "压缩包文件名编码无法识别，请使用 UTF-8 重新压缩后上传"
+
+
+def decode_filename(info):
+    # orig_filename preserves NULs that ZipInfo.filename truncates; validate the
+    # complete decoded name before using it as an output path.
+    name = info.orig_filename
+    if info.flag_bits & 0x800:
+        return name
+    raw = name.encode("cp437")
+    # Some macOS ZIP writers store UTF-8 bytes without setting the language flag.
+    # Prefer strict UTF-8; legacy Chinese Windows archives may use GBK/GB18030.
+    for encoding in ("utf-8", "gb18030"):
+        try:
+            return raw.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    raise ValueError(FILENAME_ERROR)
 
 
 def extract(archive, dest, max_bytes=12 * 1024**3, max_files=10000):
@@ -24,17 +42,16 @@ def extract(archive, dest, max_bytes=12 * 1024**3, max_files=10000):
     total = 0
     seen = set()
     skipped = []
-    with zipfile.ZipFile(archive) as z:
+    try:
+        archive_file = zipfile.ZipFile(archive)
+    except UnicodeError as exc:
+        raise ValueError(FILENAME_ERROR) from exc
+    with archive_file as z:
         entries = z.infolist()
         if len(entries) > max_files:
             raise ValueError("压缩包文件数量超过上限")
         for info in entries:
-            name = info.filename
-            if not info.flag_bits & 0x800:
-                try:
-                    name = name.encode("cp437").decode("gb18030")
-                except (UnicodeError, LookupError):
-                    pass
+            name = decode_filename(info)
             p = PurePosixPath(name)
             if (
                 "\\" in name

@@ -51,4 +51,6 @@ STUDIO_REPO=$PWD OPENBLAS_NUM_THREADS=1 /root/apps/non-grid-calibration/.venv/bi
 
 上传最大 4 GB，解包最大 12 GB、10000 个条目、单文件 512 MB；拒绝路径穿越、符号链接和加密 ZIP。仅扫描 `xxx店/会员目录`，排除模板与说明。Logo 可在设置上传，也可随素材放入 `logo/` 目录。会话有效期 7 天，所有媒体与下载均需登录。
 
+ZIP 文件名支持有标记的 UTF-8、无标记的 UTF-8 及 GBK/GB18030。无法识别时给出编码错误；解码后的路径仍执行安全与重名检查。已修复部分 macOS 压缩包中文目录变乱码、误报缺少门店的情况，见 [ZIP 编码验证](../docs/design/case-studio-review-v2/ZIP_ENCODING.md)。
+
 画面固定宽度与预览布局跟随各最佳实践：VS 等比缩放、三视图无缝、封面 1080×1440、报告默认原图宽度两倍、感言固定相册版式、训练照与生活照保留各自的批准规则。

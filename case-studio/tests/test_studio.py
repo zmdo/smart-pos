@@ -12,6 +12,13 @@ import app
 
 
 class IntakeTests(unittest.TestCase):
+    def raw_name(self, raw, utf8_flag=False):
+        class RawName(zipfile.ZipInfo):
+            def _encodeFilenameFlags(self):
+                return raw, self.flag_bits | (0x800 if utf8_flag else 0)
+
+        return RawName(raw.decode("cp437"))
+
     def zip(self, entries):
         folder = Path(tempfile.mkdtemp(dir=TEMP.name))
         path = folder / "in.zip"
@@ -58,6 +65,62 @@ class IntakeTests(unittest.TestCase):
         a, b = self.zip([("large", b"x" * 100)])
         with self.assertRaises(ValueError):
             intake.extract(a, b, max_bytes=99)
+
+    def test_chinese_zip_filename_encodings(self):
+        directory = "景田店/教练-会员/"
+        name = directory + "体测.jpg"
+        for encoding, flag in (("utf-8", True), ("utf-8", False), ("gbk", False)):
+            with self.subTest(encoding=encoding, utf8_flag=flag):
+                a, b = self.zip(
+                    [
+                        (self.raw_name(directory.encode(encoding), flag), b""),
+                        (self.raw_name(name.encode(encoding), flag), b"photo"),
+                    ]
+                )
+                intake.extract(a, b)
+                self.assertEqual((b / name).read_bytes(), b"photo")
+                result = intake.inventory(b, b.parent / "dataset")
+                self.assertEqual(len(result["assets"]), 1)
+                self.assertEqual(result["groups"][0]["store"], "景田店")
+                self.assertEqual(result["groups"][0]["member"], "会员")
+
+    def test_utf8_preferred_when_legacy_decoder_also_accepts_bytes(self):
+        name = "甲店/会员/照片.jpg"
+        raw = name.encode("utf-8")
+        # This byte sequence also decodes as GB18030, but to a different name.
+        self.assertNotEqual(raw.decode("gb18030"), name)
+        a, b = self.zip([(self.raw_name(raw), b"photo")])
+        intake.extract(a, b)
+        self.assertEqual((b / name).read_bytes(), b"photo")
+
+    def test_unknown_filename_encoding_has_specific_error(self):
+        a, b = self.zip([(self.raw_name(b"\xff/a.jpg"), b"photo")])
+        with self.assertRaisesRegex(ValueError, "文件名编码无法识别"):
+            intake.extract(a, b)
+
+    def test_invalid_flagged_utf8_has_specific_error(self):
+        a, b = self.zip([(self.raw_name(b"\xff/a.jpg", True), b"photo")])
+        with self.assertRaisesRegex(ValueError, "文件名编码无法识别"):
+            intake.extract(a, b)
+
+    def test_decoded_duplicate_names_rejected(self):
+        name = "景田店/会员/照片.jpg"
+        a, b = self.zip(
+            [
+                (self.raw_name(name.encode("utf-8")), b"first"),
+                (self.raw_name(name.encode("gbk")), b"second"),
+            ]
+        )
+        with self.assertRaisesRegex(ValueError, "重名路径"):
+            intake.extract(a, b)
+        self.assertEqual((b / name).read_bytes(), b"first")
+
+    def test_decoded_unsafe_paths_and_nuls_rejected(self):
+        for name in ("景田店/../outside.jpg", "景田店/会员\x00/a.jpg"):
+            with self.subTest(name=name):
+                a, b = self.zip([(self.raw_name(name.encode("utf-8")), b"photo")])
+                with self.assertRaisesRegex(ValueError, "不安全路径"):
+                    intake.extract(a, b)
 
 
 def sample():
