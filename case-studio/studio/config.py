@@ -16,6 +16,7 @@ DEFAULTS = {
     "logo_path": None,
     "model": {"base_url": "", "model": "", "api_key": ""},
     "model_workers": 3,
+    "gender_confidence_threshold": 0.90,
 }
 
 
@@ -34,7 +35,10 @@ def load():
             ) or secrets.token_urlsafe(18)
             result["session_secret"] = secrets.token_hex(32)
             save(path, result, True)
-        return read(path)
+        result = read(path)
+        for key, default in DEFAULTS.items():
+            result.setdefault(key, copy.deepcopy(default))
+        return result
 
 
 def public(config=None):
@@ -72,6 +76,10 @@ def update(values):
                 }[key]
                 if type(value) != int or not bounds[0] <= value <= bounds[1]:
                     raise ValueError("尺寸或并发数超出允许范围")
+                cfg[key] = value
+            elif key == "gender_confidence_threshold":
+                if type(value) not in (int, float) or not 0.5 <= value <= 0.99:
+                    raise ValueError("性别采用阈值应在 0.50 到 0.99 之间")
                 cfg[key] = value
             elif key == "titles":
                 if (

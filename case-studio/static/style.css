@@ -1243,6 +1243,92 @@ progress {
   padding: 24px;
   backdrop-filter: blur(5px);
 }
+.ai-dialog {
+  width: min(780px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border-radius: 22px;
+  background: #faf9f6;
+  padding: clamp(20px, 4vw, 36px);
+  box-shadow: 0 24px 80px #0003;
+}
+.ai-dialog .section-title {
+  align-items: flex-start;
+}
+.ai-dialog .section-title p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.ai-dialog form > label {
+  margin-top: 18px;
+}
+.ai-dialog fieldset {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 18px 0;
+}
+.ai-dialog legend {
+  font-size: 13px;
+  padding: 0 6px;
+}
+.ai-checks {
+  display: flex;
+  gap: 12px 22px;
+  flex-wrap: wrap;
+}
+.ai-checks .check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px !important;
+  margin: 0 !important;
+}
+.ai-checks input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+.ai-template-save {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+.ai-template-save label {
+  margin-top: 16px;
+}
+.ai-template-save .row-actions {
+  flex-wrap: wrap;
+}
+.preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.preview-actions span {
+  font-size: 12px;
+}
+.identity-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.identity-summary details {
+  font-size: 12px;
+  flex: 1;
+  min-width: 180px;
+  background: #f7f5f1;
+  padding: 12px;
+  border-radius: 9px;
+}
+.identity-summary p {
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
 .crop-dialog {
   background: #faf8f4;
   border-radius: 16px;

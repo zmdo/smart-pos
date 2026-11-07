@@ -41,6 +41,7 @@ NAMES = {
     "testimonial_layout": "感言取景与隐私遮盖",
     "testimonial": "会员感言输出",
     "life": "筛选生活照",
+    "identity": "补全会员与教练信息",
     "review": "准备人工审核",
 }
 
@@ -140,7 +141,15 @@ def command(jid, args, log):
                 raise RuntimeError("服务正在重启，请稍后重试")
             proc = subprocess.Popen(
                 [str(x) for x in args],
-                cwd=REPO,
+                # Python puts cwd ahead of PYTHONPATH. The frozen snapshot may
+                # also contain an older studio package during staged deploys.
+                cwd=(
+                    APP_ROOT
+                    if len(args) > 2
+                    and args[1] == "-m"
+                    and str(args[2]).startswith("studio.")
+                    else REPO
+                ),
                 env=env,
                 stdout=output,
                 stderr=subprocess.STDOUT,
@@ -547,6 +556,18 @@ def preprocess(jid):
         phase=str(phase) if phase else None,
         products={k: str(v) if v else None for k, v in products.items()},
     )
+    save(base / "paths.json", paths)
+
+    identity = node(
+        jid,
+        "identity",
+        lambda out: command(
+            jid,
+            [PYTHON, "-m", "studio.identity", "extract", jid, out],
+            out.with_suffix(".log"),
+        ),
+    )
+    paths["identity"] = str(identity)
     save(base / "paths.json", paths)
 
     def prepare(out):

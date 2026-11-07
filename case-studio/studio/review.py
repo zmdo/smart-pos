@@ -2,7 +2,7 @@
 
 import copy, math, threading, uuid, zipfile
 from pathlib import Path
-from .common import read, save, job_dir, clean_name, now, PYTHON
+from .common import read, save, job_dir, clean_name, now, PYTHON, signature
 from . import store
 
 PREVIEW_LOCK = threading.Lock()
@@ -30,7 +30,13 @@ COVER_LIMITS = {
 
 def public(data):
     if isinstance(data, dict):
-        return {k: public(v) for k, v in data.items() if not k.startswith("_")}
+        result = {k: public(v) for k, v in data.items() if not k.startswith("_")}
+        if "_engine" in data and "photos" in data:
+            result["preview_keys"] = {
+                section: preview_key(data, section)
+                for section in ("vs", "cover", "table")
+            }
+        return result
     if isinstance(data, list):
         return [public(v) for v in data]
     return data
@@ -78,6 +84,28 @@ def honorific(profile):
     return surname + {"男": "先生", "女": "女士"}.get(profile["gender"], "会员")
 
 
+def sync_profile(member, old):
+    if old["profile"] != member["profile"]:
+        before = honorific(old["profile"])
+        after = honorific(member["profile"])
+        # The nickname always follows member identity; custom surrounding copy is retained.
+        member["vs"]["nickname"] = after
+        for key in ("title", "subtitle", "headline", "story"):
+            member["cover"][key] = member["cover"][key].replace(before, after)
+        if (
+            old["profile"]["coach"]
+            and old["profile"]["coach"] != member["profile"]["coach"]
+        ):
+            member["cover"]["story"] = member["cover"]["story"].replace(
+                old["profile"]["coach"] + " 教练",
+                (
+                    (member["profile"]["coach"] + " 教练")
+                    if member["profile"]["coach"]
+                    else "教练"
+                ),
+            )
+
+
 def update(jid, mid, payload):
     expected = payload.get("version")
     data = store.review(jid)
@@ -94,6 +122,12 @@ def update(jid, mid, payload):
         p = fields(incoming["profile"], PROFILE_LIMITS)
         if not p["name"].strip() or p["gender"] not in ("", "男", "女"):
             raise ValueError("请填写会员名，性别请选择男、女或未设置")
+        manual = member["_engine"].setdefault("manual_profile", {})
+        for field in PROFILE_LIMITS:
+            if old["profile"][field] != p[field]:
+                manual[field] = True
+                if field in member.get("identity", {}):
+                    member["identity"][field]["status"] = "manual"
         member["profile"] = p
     if "photos" in incoming:
         values = incoming["photos"]
@@ -185,25 +219,7 @@ def update(jid, mid, payload):
             fields(r, dict(type=24, key=40, before=40, after=40, delta=40, unit=20))
             for r in t["rows"]
         ]
-    if old["profile"] != member["profile"]:
-        before = honorific(old["profile"])
-        after = honorific(member["profile"])
-        # The nickname always follows member identity; custom surrounding copy is retained.
-        member["vs"]["nickname"] = after
-        for key in ("title", "subtitle", "headline", "story"):
-            member["cover"][key] = member["cover"][key].replace(before, after)
-        if (
-            old["profile"]["coach"]
-            and old["profile"]["coach"] != member["profile"]["coach"]
-        ):
-            member["cover"]["story"] = member["cover"]["story"].replace(
-                old["profile"]["coach"] + " 教练",
-                (
-                    (member["profile"]["coach"] + " 教练")
-                    if member["profile"]["coach"]
-                    else "教练"
-                ),
-            )
+    sync_profile(member, old)
     return store.save_review(jid, data, expected)
 
 
@@ -214,7 +230,101 @@ def output_public(jid, result):
     return result
 
 
-def preview(jid, mid, version):
+def preview_key(member, section):
+    if section not in ("vs", "cover", "table"):
+        raise ValueError("预览区域无效")
+    engine = member["_engine"]
+    data = {
+        "renderer": "studio-section-preview-v2",
+        "section": section,
+        "values": member[section],
+    }
+    if section in ("vs", "cover"):
+        data["photos"] = [
+            {
+                k: p.get(k)
+                for k in ("asset_id", "phase", "view", "confirmed", "preferred")
+            }
+            for p in member["photos"]
+        ]
+        data["sources"] = {k: engine.get(k) for k in ("rows", "photos", "logo")}
+        if section == "vs":
+            data["width"] = engine.get("width")
+        else:
+            data["geometry"] = {k: engine.get(k) for k in ("metadata", "editors")}
+            data["store"] = member.get("store")
+    else:
+        data["sources"] = {
+            k: engine.get(k) for k in ("table", "report_images", "report_width")
+        }
+    return signature(data)
+
+
+def preview_latest(jid, mid):
+    data = store.review(jid)
+    member = next((m for m in data["members"] if m["id"] == mid), None)
+    if not member:
+        raise KeyError("会员不存在")
+    latest = read(job_dir(jid) / "previews-v2" / mid / "latest.json", {})
+    return {
+        "review_version": data["version"],
+        "keys": {s: preview_key(member, s) for s in ("vs", "cover", "table")},
+        "sections": latest,
+    }
+
+
+def section_preview(jid, mid, version, section):
+    from .workflow import command
+
+    data = store.review(jid, version)
+    member = next((m for m in data["members"] if m["id"] == mid), None)
+    if not member:
+        raise KeyError("会员不存在")
+    key = preview_key(member, section)
+    root = job_dir(jid) / "previews-v2" / mid
+    base = root / section / key
+    with PREVIEW_LOCK:
+        base.mkdir(parents=True, exist_ok=True)
+        dest = base / "output"
+        cached = (dest / "result.json").exists()
+        if not cached:
+            if dest.exists():
+                import shutil
+
+                shutil.rmtree(dest)
+            save(base / "review.json", data, True)
+            command(
+                jid,
+                [
+                    PYTHON,
+                    "-m",
+                    "studio.bridge",
+                    "render",
+                    base / "review.json",
+                    mid,
+                    dest,
+                    section,
+                ],
+                base / "render.log",
+            )
+        result = dict(
+            output_public(jid, read(dest / "result.json")),
+            section=section,
+            fingerprint=key,
+            review_version=version,
+            cached=cached,
+        )
+        # A slow render from an older tab must not replace the latest pointer.
+        if store.get(jid)["review_version"] == version:
+            latest = read(root / "latest.json", {})
+            latest[section] = result
+            save(root / "latest.json", latest, True)
+        return result
+
+
+def preview(jid, mid, version, section=None):
+    if section is not None:
+        return section_preview(jid, mid, version, section)
     from .workflow import command
 
     with PREVIEW_LOCK:

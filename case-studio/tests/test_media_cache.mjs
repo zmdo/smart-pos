@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { imageURL, clearMediaCache } from '../static/media-cache.js';
+
+let requests = 0;
+globalThis.fetch = async () => { requests++; return new Response('image', {headers: {'Content-Type': 'image/png'}}); };
+const urls = await Promise.all([imageURL('/one'), imageURL('/one'), imageURL('/one')]);
+assert.equal(new Set(urls).size, 1);
+assert.equal(requests, 1, 'concurrent tabs share a download');
+await imageURL('/two'); await imageURL('/one'); await imageURL('/two');
+assert.equal(requests, 2, 'orientation switching never re-downloads');
+await clearMediaCache();
+await imageURL('/one'); assert.equal(requests, 3, 'logout invalidates the local session cache');
+await clearMediaCache();
+globalThis.fetch = async () => { requests++; return new Response('login', {status:401, headers: {'Content-Type': 'application/json'}}); };
+await assert.rejects(imageURL('/private'));
+await assert.rejects(imageURL('/private'));
+assert.equal(requests, 5, 'authentication failures are not cached');
+let release;
+globalThis.fetch = () => new Promise(resolve => release = resolve);
+const pending = imageURL('/pending');
+await new Promise(resolve => setImmediate(resolve));
+await clearMediaCache();
+release(new Response('image', {headers: {'Content-Type':'image/png'}}));
+await assert.rejects(pending, /登录状态/);
+console.log('5 browser-cache behavior checks passed');

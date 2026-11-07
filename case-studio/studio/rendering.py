@@ -150,6 +150,11 @@ def prepare(jid, out):
         else {}
     )
     tables = read(Path(paths["tables"]) / "tables.json", [])
+    identities = (
+        read(Path(paths["identity"]) / "identity.json", {}).get("members", {})
+        if paths.get("identity")
+        else {}
+    )
     report_records = {
         r["source_id"]: r for r in read(Path(paths["tables"]) / "records.json", [])
     }
@@ -199,10 +204,11 @@ def prepare(jid, out):
             ),
             None,
         )
+        identity = identities.get(directory, {})
         profile = {
             "name": (table or {}).get("display_member") or group["member"],
-            "gender": "",
-            "coach": group.get("coach", ""),
+            "gender": identity.get("profile", {}).get("gender", ""),
+            "coach": identity.get("profile", {}).get("coach") or group.get("coach", ""),
         }
         nick = nickname(profile["name"], profile)
         report = table_report(table)
@@ -374,6 +380,11 @@ def prepare(jid, out):
                 store=group["store"],
                 directory=directory,
                 profile=profile,
+                identity={
+                    "version": "member-identity-text-v1",
+                    **identity.get("evidence", {}),
+                    "issue": identity.get("issue"),
+                },
                 photos=published,
                 vs=vs,
                 cover=cover,
@@ -401,7 +412,9 @@ def prepare(jid, out):
     )
 
 
-def render(review_path, mid, out):
+def render(review_path, mid, out, section=None):
+    if section not in (None, "vs", "cover", "table"):
+        raise ValueError("预览区域无效")
     review = read(review_path)
     m = next(m for m in review["members"] if m["id"] == mid)
     eng = m["_engine"]
@@ -443,6 +456,8 @@ def render(review_path, mid, out):
         )
 
     for p in plans:
+        if section is not None and not (section == "vs" and p["kind"] == "vs"):
+            continue
         selected = [lookup[a] for a in p["asset_ids"]]
         im = draw_product(p, selected, eng["photos"], FONT, context)
         labels = {"front": "正面", "side": "侧面", "back": "背面", "all": "完整三视图"}
@@ -462,70 +477,76 @@ def render(review_path, mid, out):
         )
         file = out / name
         im.save(file, **({"quality": 94} if file.suffix == ".jpg" else {}))
-        product(file, p["kind"], name, asset_ids=p["asset_ids"])
+        product(file, p["kind"], name, asset_ids=p["asset_ids"], view=p["view"])
     fronts = next(
         (p for p in plans if p["kind"] == "vs" and p["view"] == "front"), None
     )
     cover_sources = []
-    if fronts and all(a in eng["editors"] for a in fronts["asset_ids"]):
-        ids = fronts["asset_ids"]
-        metas = [eng["metadata"][a] for a in ids]
-        try:
-            defaults = plan_pair(metas)
-            ims = []
-            for aid, meta, frame in zip(ids, metas, defaults):
-                ed = eng["editors"][aid]
-                rect = m["cover"]["crops"].get(aid)
-                image = (
-                    manual_frame(meta, ed, rect)
-                    if rect
-                    else render_frame(meta, frame)[0]
-                )
-                ims.append(Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)))
-                cover_sources.append(
-                    dict(
-                        asset_id=aid,
-                        crop=rect or crop_from_plan(frame, ed["H"], ed["size"]),
+    if section in (None, "cover"):
+        if fronts and all(a in eng["editors"] for a in fronts["asset_ids"]):
+            ids = fronts["asset_ids"]
+            metas = [eng["metadata"][a] for a in ids]
+            try:
+                defaults = plan_pair(metas)
+                ims = []
+                for aid, meta, frame in zip(ids, metas, defaults):
+                    ed = eng["editors"][aid]
+                    rect = m["cover"]["crops"].get(aid)
+                    image = (
+                        manual_frame(meta, ed, rect)
+                        if rect
+                        else render_frame(meta, frame)[0]
                     )
+                    ims.append(Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)))
+                    cover_sources.append(
+                        dict(
+                            asset_id=aid,
+                            crop=rect or crop_from_plan(frame, ed["H"], ed["size"]),
+                        )
+                    )
+                c = m["cover"]
+                c = dict(c, segments=[{"text": c["story"], "emphasis": False}])
+                im, _ = draw_cover(
+                    ims,
+                    c,
+                    dict(brand_name=c["brand_name"], logo_path=eng.get("logo")),
+                    FONT,
+                    m["store"],
                 )
-            c = m["cover"]
-            c = dict(c, segments=[{"text": c["story"], "emphasis": False}])
-            im, _ = draw_cover(
-                ims,
-                c,
-                dict(brand_name=c["brand_name"], logo_path=eng.get("logo")),
-                FONT,
-                m["store"],
+                file = out / "会员案例封面.jpg"
+                im.save(file, quality=94)
+                product(file, "cover", file.name, asset_ids=ids)
+            except ValueError as e:
+                if m["cover"]["crops"]:
+                    raise ValueError(
+                        "封面取景不可用，请调整到有效原图范围内：" + str(e)
+                    )
+                gaps.append(dict(product="cover", reason=str(e)))
+        else:
+            gaps.append(
+                dict(
+                    product="cover", reason="缺少可用的正面训练前后配对或可靠的肩胯标定"
+                )
             )
-            file = out / "会员案例封面.jpg"
-            im.save(file, quality=94)
-            product(file, "cover", file.name, asset_ids=ids)
-        except ValueError as e:
-            if m["cover"]["crops"]:
-                raise ValueError("封面取景不可用，请调整到有效原图范围内：" + str(e))
-            gaps.append(dict(product="cover", reason=str(e)))
-    else:
-        gaps.append(
-            dict(product="cover", reason="缺少可用的正面训练前后配对或可靠的肩胯标定")
-        )
-    if m["table"]["rows"]:
-        case = dict(
-            eng.get("table") or {"rows": [], "pair": {}},
-            **m["table"],
-            reviewed_rows=m["table"]["rows"],
-        )
-        file = out / "体测报告对比.png"
-        draw_report(
-            case,
-            eng["report_images"],
-            eng.get("report_width", eng["width"]),
-            FONT,
-            file,
-        )
-        product(file, "report", file.name)
-    else:
-        gaps.append(dict(product="report", reason="没有可输出的表格数据"))
-    for e in eng["extras"]:
+    if section in (None, "table"):
+        if m["table"]["rows"]:
+            case = dict(
+                eng.get("table") or {"rows": [], "pair": {}},
+                **m["table"],
+                reviewed_rows=m["table"]["rows"],
+            )
+            file = out / "体测报告对比.png"
+            draw_report(
+                case,
+                eng["report_images"],
+                eng.get("report_width", eng["width"]),
+                FONT,
+                file,
+            )
+            product(file, "report", file.name)
+        else:
+            gaps.append(dict(product="report", reason="没有可输出的表格数据"))
+    for e in eng["extras"] if section is None else []:
         file = out / e["name"]
         shutil.copy2(e["path"], file)
         product(file, e["kind"], e["name"])

@@ -1,4 +1,6 @@
 import { openCrop } from "./crop.js";
+import { openCoverAI } from "./cover-ai.js";
+import { imageURL, clearMediaCache } from "./media-cache.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 export const escape = (s) =>
@@ -25,6 +27,19 @@ const state = {
 let timer,
   poll,
   previewSeq = 0;
+const previewBooks = new Map();
+function previewBook(jid = state.job.id, mid = state.member) {
+  const key = jid + "/" + mid;
+  if (!previewBooks.has(key))
+    previewBooks.set(key, {
+      results: {},
+      local: new Set(),
+      busy: new Set(),
+      sequence: {},
+      selectedView: null,
+    });
+  return previewBooks.get(key);
+}
 const stages = {
   uploading: "上传中",
   queued: "等待处理",
@@ -100,11 +115,17 @@ function shell(content, active = state.page) {
       )}</nav><button class="quiet" id="logout">退出工作台 ↗</button></header><main>${content}</main><footer class="site-foot"><span>UP FITNESS · 每一份改变，都值得被记录。</span><span>会员案例制作工作流</span></footer>`;
   $("#logout").onclick = async () => {
     await api("/session", { method: "DELETE" });
+    await clearMediaCache();
+    previewBooks.clear();
     showLogin();
   };
 }
 function showLogin() {
   clearInterval(poll);
+  clearMediaCache();
+  previewBooks.clear();
+  $("#modal").innerHTML = "";
+  document.body.classList.remove("modal-open");
   $("#app").innerHTML =
     `<div class="login-layout"><div class="login-art"><b>UP↗</b><p>把改变，<br>留在镜头里。</p><small>MEMBER CASE STUDIO / 会员案例工作台</small><div class="art-lines"></div></div><form id="login" class="login-card"><span class="eyebrow">WELCOME BACK</span><h1>开始创作会员案例</h1><p>连接你的素材、审核记录与成品。</p><label>工作台访问码<input name="code" type="password" autocomplete="current-password" required autofocus placeholder="输入访问码"></label><button class="primary">进入工作台 <span>↗</span></button><p id="login-error" class="error-text" role="alert"></p></form></div>`;
   $("#login").onsubmit = async (e) => {
@@ -254,7 +275,7 @@ async function settings() {
       )
       .join(
         "",
-      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section></form>`,
+      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section></form>`,
   );
   $("#settings").onsubmit = async (e) => {
     e.preventDefault();
@@ -270,7 +291,12 @@ async function settings() {
       "vs_text",
     ])
       body[k] = v[k];
-    for (const k of ["width", "display_width", "model_workers"])
+    for (const k of [
+      "width",
+      "display_width",
+      "model_workers",
+      "gender_confidence_threshold",
+    ])
       body[k] = Number(v[k]);
     body.titles = {
       front: v.title_front,
@@ -319,9 +345,13 @@ async function refreshJob() {
       j.review_version !== state.job.review_version;
     state.job = j;
     if (changed && !state.dirty && !state.saving) {
-      if (j.review_version && !state.review) {
+      if (
+        j.review_version &&
+        (!state.review || j.review_version !== state.review.version)
+      ) {
         state.review = await api(`/jobs/${j.id}/review`);
-        state.member = state.review.members[0]?.id;
+        if (!state.review.members.some((m) => m.id === state.member))
+          state.member = state.review.members[0]?.id;
       }
       if (j.status === "complete") {
         state.versions = await api(`/jobs/${j.id}/versions`);
@@ -424,6 +454,25 @@ function sidebar() {
 function section(n, title, hint, body) {
   return `<section class="card review-section"><div class="section-title"><span class="number">${n}</span><div><h2>${title}</h2><p>${hint}</p></div></div>${body}</section>`;
 }
+function updateAction(section) {
+  return `<div class="preview-actions"><button type="button" class="outline-red" data-refresh="${section}">更新展示效果 ↗</button><span class="muted" data-preview-status="${section}"></span></div>`;
+}
+function identitySummary(m) {
+  return `<div class="identity-summary">${["gender", "coach"]
+    .map((field) => {
+      const info = m.identity?.[field];
+      if (!info) return "";
+      const label = field === "gender" ? "性别" : "教练";
+      const status =
+        info.status === "manual"
+          ? "人工填写"
+          : info.status === "adopted"
+            ? "自动采用"
+            : "待确认";
+      return `<details><summary>${label}：${status}${info.status !== "manual" && typeof info.confidence === "number" ? ` · 参考置信度 ${Math.round(info.confidence * 100)}%` : ""}</summary><p>${E(info.reason)}${info.candidate && info.status === "needs_review" ? "；候选：" + E(info.candidate) : ""}</p><p>${E(info.evidence?.source || "暂无文字依据")} ${E(info.evidence?.quote || "")}</p>${field === "gender" ? `<small>自动采用阈值 ${Math.round((info.threshold || 0.9) * 100)}%。置信度为模型参考值，可人工修正。</small>` : ""}</details>`;
+    })
+    .join("")}</div>`;
+}
 function field(label, path, value, area = false) {
   return `<label>${E(label)}${area ? `<textarea data-field="${path}" rows="4">${E(value)}</textarea>` : `<input data-field="${path}" value="${E(value)}">`}</label>`;
 }
@@ -448,14 +497,14 @@ ${section(
     )
     .join(
       "",
-    )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>`,
+    )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>${identitySummary(m)}`,
 )}
 ${section("02", "体测图训练阶段", "拖动照片调整前后顺序；同朝向多张时，可选择首选图用于对比与封面。", `<div class="phase-boards" id="boards"></div><div class="row-actions"><button id="confirm-photos">确认本会员所有阶段标记</button><span class="muted">推断与待审结果会保留在下载包的审核说明中。</span></div>`)}
 ${section(
   "03",
   "审核同朝向对比图",
-  "所有文字都可编辑。保存后使用实际成品渲染器更新预览。",
-  `<div class="edit-with-preview"><div><div class="field-grid">${field("会员称呼", "vs.nickname", m.vs.nickname)}${field("品牌名称", "vs.brand_name", m.vs.brand_name)}</div>${field("地址", "vs.address", m.vs.address)}${field("案例说明", "vs.consent_text", m.vs.consent_text)}<div class="field-grid three">${field("训练前", "vs.before_text", m.vs.before_text)}${field("训练后", "vs.after_text", m.vs.after_text)}${field("中央文字", "vs.vs_text", m.vs.vs_text)}</div><div class="field-grid three">${Object.keys(
+  "修改会自动保存；点击更新展示效果后刷新本区域图片。",
+  `${updateAction("vs")}<div class="edit-with-preview"><div><div class="field-grid">${field("会员称呼", "vs.nickname", m.vs.nickname)}${field("品牌名称", "vs.brand_name", m.vs.brand_name)}</div>${field("地址", "vs.address", m.vs.address)}${field("案例说明", "vs.consent_text", m.vs.consent_text)}<div class="field-grid three">${field("训练前", "vs.before_text", m.vs.before_text)}${field("训练后", "vs.after_text", m.vs.after_text)}${field("中央文字", "vs.vs_text", m.vs.vs_text)}</div><div class="field-grid three">${Object.keys(
     m.vs.titles,
   )
     .map((v) =>
@@ -469,8 +518,8 @@ ${section(
       "",
     )}</div><label>底部指标文字</label><div id="metrics"></div><button class="small" id="add-metric">＋ 添加一项</button></div><div class="preview-pane" id="vs-preview"><div class="empty">正在准备成品预览…</div></div></div>`,
 )}
-${section("04", "审核会员案例封面", "封面独立取景：从正面原图选取头部至胯部，保持人物比例。", `<div class="edit-with-preview"><div><div class="field-grid">${field("主标题", "cover.title", m.cover.title)}${field("角标", "cover.badge", m.cover.badge)}</div>${field("副标题", "cover.subtitle", m.cover.subtitle)}${field("成果标题", "cover.headline", m.cover.headline)}${field("内容介绍", "cover.story", m.cover.story, true)}<div class="field-grid">${field("品牌名称", "cover.brand_name", m.cover.brand_name)}${field("地址", "cover.address", m.cover.address)}</div>${field("地址第二行 / 门店", "cover.store_text", m.cover.store_text)}<button id="crop" class="outline-red">调整左右照片取景 ↗</button><p class="muted">也可点击右侧封面。左右取景框独立调整，可即时查看组合效果。</p></div><div class="preview-pane cover-preview" id="cover-preview"><div class="empty">正在准备封面预览…</div></div></div>`)}
-${section("05", "审核体测对比表", "原始体测数据优先，汇总表补充缺项。可修改五列内容、增加或删除行。", `<div class="field-grid">${field("表格标题", "table.table_title", m.table.table_title)}${field("报告标题", "table.report_title", m.table.report_title)}</div><div class="field-grid">${field("报告左标签", "table.before_label", m.table.before_label)}${field("报告右标签", "table.after_label", m.table.after_label)}</div><div id="table-editor" class="table-scroll"></div><button id="add-row" class="small">＋ 增加一行</button><div class="table-preview" id="table-preview"></div>`)}
+${section("04", "审核会员案例封面", "封面独立取景：从正面原图选取头部至胯部，保持人物比例。", `${updateAction("cover")}<div class="row-actions"><button id="cover-ai" class="outline-red">AI生成 ✦</button><span class="muted">选择生成项与资料，套用你的提示词模板。</span></div><div class="edit-with-preview"><div><div class="field-grid">${field("主标题", "cover.title", m.cover.title)}${field("角标", "cover.badge", m.cover.badge)}</div>${field("副标题", "cover.subtitle", m.cover.subtitle)}${field("成果标题", "cover.headline", m.cover.headline)}${field("内容介绍", "cover.story", m.cover.story, true)}<div class="field-grid">${field("品牌名称", "cover.brand_name", m.cover.brand_name)}${field("地址", "cover.address", m.cover.address)}</div>${field("地址第二行 / 门店", "cover.store_text", m.cover.store_text)}<button id="crop" class="outline-red">调整左右照片取景 ↗</button><p class="muted">也可点击右侧封面。左右取景框独立调整，可即时查看组合效果。</p></div><div class="preview-pane cover-preview" id="cover-preview"><div class="empty">正在准备封面预览…</div></div></div>`)}
+${section("05", "审核体测对比表", "原始体测数据优先，汇总表补充缺项。可修改五列内容、增加或删除行。", `${updateAction("table")}<div class="field-grid">${field("表格标题", "table.table_title", m.table.table_title)}${field("报告标题", "table.report_title", m.table.report_title)}</div><div class="field-grid">${field("报告左标签", "table.before_label", m.table.before_label)}${field("报告右标签", "table.after_label", m.table.after_label)}</div><div id="table-editor" class="table-scroll"></div><button id="add-row" class="small">＋ 增加一行</button><div class="table-preview" id="table-preview"></div>`)}
 <details class="card sources"><summary>查看原始素材分类与跳过信息 · ${m.sources.length} 张</summary><div class="source-grid">${m.sources.map((s) => `<figure><a href="${media(j.id, s.media)}" target="_blank"><img loading="lazy" src="${media(j.id, s.media)}"></a><figcaption><b>${kinds[s.kind] || s.kind}</b><small>${E(s.reason)}</small></figcaption></figure>`).join("")}</div><div id="gaps"></div></details><div class="review-bottom"><div><b>确认这一批案例</b><small>共 ${state.review.members.length} 位会员 · 可以保留待审标记生成，之后再修正</small></div><button id="generate" class="primary" ${["queued", "processing", "generating"].includes(j.status) ? "disabled" : ""}>${j.status === "generating" ? "正在生成…" : "生成整批成品"} ↗</button></div>`;
   renderBoards();
   renderMetrics();
@@ -482,13 +531,13 @@ ${section("05", "审核体测对比表", "原始体测数据优先，汇总表�
         let obj = m;
         for (const p of parts.slice(0, -1)) obj = obj[p];
         obj[parts.at(-1)] = el.value;
-        dirty();
+        dirty(parts[0]);
         if (parts[0] === "profile") sidebar();
       }),
   );
   $("#confirm-photos").onclick = () => {
     m.photos.forEach((p) => (p.confirmed = true));
-    dirty();
+    dirty("photos");
     renderBoards();
   };
   $("#add-row").onclick = () => {
@@ -502,18 +551,22 @@ ${section("05", "审核体测对比表", "原始体测数据优先，汇总表�
       unit: "",
     });
     renderTable();
-    dirty();
+    dirty("table");
   };
   $("#add-metric").onclick = () => {
     if (m.vs.metrics.length >= 6) return toast("最多 6 项", true);
     m.vs.metrics.push({ text: "", key: "custom" });
     renderMetrics();
-    dirty();
+    dirty("vs");
   };
   $("#crop").onclick = crop;
+  $("#cover-ai").onclick = aiCover;
+  $$("[data-refresh]").forEach(
+    (b) => (b.onclick = () => updatePreview(b.dataset.refresh)),
+  );
   $("#generate").onclick = generate;
   $("#regen") && ($("#regen").onclick = generate);
-  loadPreview();
+  loadPreviews();
 }
 function renderBoards() {
   const m = member();
@@ -576,7 +629,7 @@ function renderBoards() {
         p.view = s.value;
         p.confirmed = true;
         p.preferred = false;
-        dirty();
+        dirty("photos");
       }),
   );
   $$("[data-prefer]").forEach(
@@ -594,7 +647,7 @@ function renderBoards() {
           });
         p.preferred = b.checked;
         renderBoards();
-        dirty();
+        dirty("photos");
       }),
   );
 }
@@ -606,7 +659,7 @@ function move(id, phase) {
   p.preferred = false;
   renderBoards();
   sidebar();
-  dirty();
+  dirty("photos");
 }
 function renderMetrics() {
   $("#metrics").innerHTML = member()
@@ -619,7 +672,7 @@ function renderMetrics() {
     (el) =>
       (el.oninput = () => {
         member().vs.metrics[el.dataset.metric].text = el.value;
-        dirty();
+        dirty("vs");
       }),
   );
   $$("[data-remove-metric]").forEach(
@@ -627,7 +680,7 @@ function renderMetrics() {
       (el.onclick = () => {
         member().vs.metrics.splice(+el.dataset.removeMetric, 1);
         renderMetrics();
-        dirty();
+        dirty("vs");
       }),
   );
 }
@@ -640,14 +693,14 @@ function renderTable() {
       (el.oninput = () => {
         const [i, k] = el.dataset.cell.split(":");
         t.rows[i][k] = el.value;
-        dirty();
+        dirty("table");
       }),
   );
   $$("[data-header]").forEach(
     (el) =>
       (el.oninput = () => {
         t.headers[el.dataset.header] = el.value;
-        dirty();
+        dirty("table");
       }),
   );
   $$("[data-remove-row]").forEach(
@@ -655,20 +708,23 @@ function renderTable() {
       (b.onclick = () => {
         t.rows.splice(+b.dataset.removeRow, 1);
         renderTable();
-        dirty();
+        dirty("table");
       }),
   );
 }
 let saveTimer;
-function dirty() {
+function dirty(part) {
+  const sections =
+    part === "profile" || part === "photos"
+      ? ["vs", "cover"]
+      : [part || "cover"];
+  sections.forEach((s) => previewBook().local.add(s));
+  previewButtons();
   state.dirty = true;
   $("#save-status") && ($("#save-status").textContent = "尚未保存…");
   clearTimeout(saveTimer);
   saveTimer = setTimeout(
-    () =>
-      flush()
-        .then(() => loadPreview())
-        .catch((e) => toast(e.message, true)),
+    () => flush().catch((e) => toast(e.message, true)),
     800,
   );
 }
@@ -705,78 +761,232 @@ async function flush() {
       state.dirty = false;
       const updated = r.members.find((x) => x.id === m.id);
       Object.assign(m, updated);
+      previewBook().local.clear();
       $("#save-status") && ($("#save-status").textContent = "所有修改已保存");
-      $$('[data-field="vs.nickname"]').forEach(
-        (e) => (e.value = m.vs.nickname),
-      );
+      for (const path of [
+        "vs.nickname",
+        "cover.title",
+        "cover.subtitle",
+        "cover.headline",
+        "cover.story",
+      ]) {
+        const [group, key] = path.split("."),
+          input = $(`[data-field="${path}"]`);
+        if (input && input.value !== m[group][key]) input.value = m[group][key];
+      }
+      const identity = $(".identity-summary");
+      if (identity) identity.outerHTML = identitySummary(m);
     }
     sidebar();
+    previewButtons();
   } finally {
     state.saving = null;
   }
   if (state.dirty) await flush();
 }
-async function loadPreview(strict = false) {
-  if (state.output || !state.review) return;
-  const mid = state.member,
-    seq = ++previewSeq;
+function previewButtons() {
+  if (!member() || state.output) return;
+  const b = previewBook(),
+    m = member();
+  for (const section of ["vs", "cover", "table"]) {
+    const button = $(`[data-refresh="${section}"]`),
+      label = $(`[data-preview-status="${section}"]`);
+    if (!button) continue;
+    const pending =
+      b.local.has(section) ||
+      !b.results[section] ||
+      b.results[section].fingerprint !== m.preview_keys?.[section];
+    button.disabled = b.busy.has(section) || !pending;
+    button.textContent = b.busy.has(section) ? "正在更新…" : "更新展示效果 ↗";
+    if (label)
+      label.textContent = b.busy.has(section)
+        ? "正在生成本区域预览"
+        : pending
+          ? "展示效果待更新"
+          : "展示效果已更新";
+  }
+}
+function mergePreview() {
+  const results = previewBook().results;
+  state.preview = {
+    products: Object.values(results).flatMap((r) => r.products),
+    cover_sources: results.cover?.cover_sources || [],
+  };
+}
+function showPreview(section, result, jid, mid) {
+  if (state.job?.id !== jid || state.member !== mid || state.output) return;
+  const b = previewBook(),
+    target = $(`#${section}-preview`);
+  if (!target) return;
+  async function showImage(img, product) {
+    img.dataset.media = product.media;
+    try {
+      const url = await imageURL(media(jid, product.media));
+      if (img.isConnected && img.dataset.media === product.media) img.src = url;
+    } catch (e) {
+      if (img.isConnected) toast(e.message, true);
+    }
+  }
+  if (section === "vs") {
+    const items = result.products.filter((p) => p.kind === "vs");
+    target.innerHTML = items.length
+      ? `<div class="preview-tabs">${items.map((v, i) => `<button data-vstab="${i}">${E(v.name.replace("对比图.jpg", ""))}</button>`).join("")}</div><img id="vs-image" alt="同朝向对比图预览">`
+      : '<div class="empty">需要同朝向的训练前后照片，才能生成对比图。</div>';
+    if (items.length) {
+      const select = (i) => {
+        b.selectedView = items[i].view || items[i].name;
+        showImage($("#vs-image"), items[i]);
+        $$("[data-vstab]").forEach((el) =>
+          el.classList.toggle("active", +el.dataset.vstab === i),
+        );
+      };
+      $$("[data-vstab]").forEach(
+        (el) => (el.onclick = () => select(+el.dataset.vstab)),
+      );
+      select(
+        Math.max(
+          0,
+          items.findIndex((p) => (p.view || p.name) === b.selectedView),
+        ),
+      );
+      items.forEach((p) => imageURL(media(jid, p.media)).catch(() => {}));
+    }
+  } else {
+    const product = result.products.find(
+      (p) => p.kind === (section === "table" ? "report" : "cover"),
+    );
+    target.innerHTML = product
+      ? section === "cover"
+        ? '<button class="image-button" id="open-cover"><img alt="会员案例封面预览"><span>点击调整照片取景 ↗</span></button>'
+        : '<img alt="体测对比表预览">'
+      : `<div class="empty">${section === "cover" ? "暂无可用封面，需要正面前后配对与可靠肩胯标定。" : "没有表格数据时，不生成体测报告成品。"}</div>`;
+    if (product) showImage(target.querySelector("img"), product);
+    if (section === "cover" && $("#open-cover"))
+      $("#open-cover").onclick = crop;
+  }
+  mergePreview();
+  previewButtons();
+}
+async function loadPreviews() {
+  const jid = state.job.id,
+    mid = state.member,
+    b = previewBook(jid, mid);
+  previewSeq++;
+  for (const [section, result] of Object.entries(b.results))
+    showPreview(section, result, jid, mid);
+  previewButtons();
+  try {
+    const summary = await api(`/jobs/${jid}/previews/${mid}`);
+    if (state.job?.id !== jid || state.member !== mid || state.output) return;
+    for (const section of ["vs", "cover", "table"]) {
+      const result = summary.sections[section];
+      if (
+        result &&
+        (!b.results[section] ||
+          result.review_version >= b.results[section].review_version)
+      ) {
+        b.results[section] = result;
+        showPreview(section, result, jid, mid);
+      }
+    }
+    // Only the first ever preview is automatic. Existing images stay visible until explicitly updated.
+    for (const section of ["vs", "cover", "table"]) {
+      if (!b.results[section] && !b.local.has(section) && !state.dirty)
+        updatePreview(section, true);
+    }
+    previewButtons();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+async function updatePreview(section, initial = false) {
+  const jid = state.job.id,
+    mid = state.member,
+    b = previewBook(jid, mid);
+  if (b.busy.has(section)) return;
+  if (initial && (b.local.has(section) || state.dirty)) return;
+  b.busy.add(section);
+  previewButtons();
+  const seq = (b.sequence[section] || 0) + 1;
+  b.sequence[section] = seq;
   try {
     await flush();
-    const p = await send(`/jobs/${state.job.id}/preview/${mid}`, {
+    if (
+      state.job?.id !== jid ||
+      state.member !== mid ||
+      (initial && b.local.has(section))
+    )
+      return;
+    const result = await send(`/jobs/${jid}/preview/${mid}`, {
       version: state.review.version,
+      section,
     });
-    if (mid !== state.member || seq !== previewSeq || state.output) return;
-    state.preview = p;
-    const vs = p.products.filter((p) => p.kind === "vs");
-    $("#vs-preview").innerHTML = vs.length
-      ? `<div class="preview-tabs">${vs.map((v, i) => `<button data-vstab="${i}" class="${i === 0 ? "active" : ""}">${E(v.name.replace("对比图.jpg", ""))}</button>`).join("")}</div><img id="vs-image" src="${media(state.job.id, vs[0].media)}">`
-      : '<div class="empty">需要同朝向的训练前后照片，才能生成对比图。</div>';
-    $$("[data-vstab]").forEach(
-      (b) =>
-        (b.onclick = () => {
-          $("#vs-image").src = media(state.job.id, vs[+b.dataset.vstab].media);
-          $$("[data-vstab]").forEach((x) =>
-            x.classList.toggle("active", x === b),
-          );
-        }),
-    );
-    const cover = p.products.find((p) => p.kind === "cover");
-    $("#cover-preview").innerHTML = cover
-      ? `<button class="image-button" id="open-cover"><img src="${media(state.job.id, cover.media)}"><span>点击调整照片取景 ↗</span></button>`
-      : '<div class="empty">暂无可用封面。需要正面前后配对和可靠的肩胯标定。</div>';
-    $("#open-cover") && ($("#open-cover").onclick = crop);
-    const table = p.products.find((p) => p.kind === "report");
-    $("#table-preview").innerHTML = table
-      ? `<img loading="lazy" src="${media(state.job.id, table.media)}">`
-      : '<p class="muted">没有表格数据时，不生成体测报告成品。</p>';
-    $("#gaps").innerHTML = p.gaps.length
-      ? `<h3>暂未生成的项目</h3>${p.gaps.map((g) => `<p class="muted">${E(products[g.product] || g.product)}：${E(g.reason)}</p>`).join("")}`
-      : "所有可用素材已纳入成品。";
+    if (seq !== b.sequence[section]) return;
+    b.results[section] = result;
+    showPreview(section, result, jid, mid);
+    if (!initial && state.member === mid && state.job?.id === jid)
+      toast("展示效果已更新");
   } catch (e) {
-    if (mid === state.member && seq === previewSeq) {
-      toast(e.message, true);
-      $("#save-status") &&
-        ($("#save-status").textContent = "预览未更新，请检查后重试");
-      $("#vs-preview") &&
-        ($("#vs-preview").innerHTML =
-          `<div class="empty">${E(e.message)}<button id="retry-preview">重试预览</button></div>`);
-      $("#retry-preview") && ($("#retry-preview").onclick = loadPreview);
-    }
-    if (strict === true) throw e;
+    if (state.member === mid && state.job?.id === jid) toast(e.message, true);
+  } finally {
+    b.busy.delete(section);
+    if (state.member === mid && state.job?.id === jid) previewButtons();
+  }
+}
+async function aiCover() {
+  try {
+    await flush();
+    const jid = state.job.id,
+      m = member();
+    await openCoverAI({
+      api,
+      send,
+      job: jid,
+      member: m,
+      getVersion: () => state.review.version,
+      apply: async (result) => {
+        if (
+          state.job?.id !== jid ||
+          state.member !== m.id ||
+          result.review_version !== state.review.version ||
+          state.dirty
+        )
+          throw new Error("审核内容已变化，请重新生成");
+        Object.assign(m.cover, result.fields);
+        for (const [key, value] of Object.entries(result.fields)) {
+          const input = $(`[data-field="cover.${key}"]`);
+          if (input) input.value = value;
+        }
+        dirty("cover");
+        await flush();
+        toast("AI 文案已填入，点击更新展示效果查看封面");
+      },
+    });
+  } catch (e) {
+    toast(e.message, true);
   }
 }
 async function crop() {
   try {
     await flush();
-    if (!state.preview) await loadPreview();
+    if (!state.preview) await loadPreviews();
     const ids = state.preview?.cover_sources?.map((c) => c.asset_id) || [];
     const m = member();
     let pics = ids.map((id) => m.photos.find((p) => p.asset_id === id));
-    if (pics.length !== 2) {
-      pics = ["before", "after"].map((phase) =>
-        m.photos.find(
-          (p) => p.phase === phase && p.view === "front" && p.cover_media,
-        ),
+    if (
+      pics.length !== 2 ||
+      pics.some(
+        (p, i) =>
+          !p || p.view !== "front" || p.phase !== (i ? "after" : "before"),
+      )
+    ) {
+      pics = ["before", "after"].map(
+        (phase) =>
+          m.photos
+            .filter(
+              (p) => p.phase === phase && p.view === "front" && p.cover_media,
+            )
+            .sort((a, b) => Number(b.preferred) - Number(a.preferred))[0],
       );
     }
     if (pics.some((p) => !p)) return toast("需要两张可取景的正面照片", true);
@@ -792,14 +1002,16 @@ async function crop() {
       })),
       async (crops) => {
         Object.assign(m.cover.crops, crops);
-        dirty();
+        dirty("cover");
         await flush();
-        await loadPreview(true);
+        toast("取景已保存，点击更新展示效果查看最新封面");
       },
       state.preview?.products.find((p) => p.kind === "cover")
-        ? media(
-            state.job.id,
-            state.preview.products.find((p) => p.kind === "cover").media,
+        ? await imageURL(
+            media(
+              state.job.id,
+              state.preview.products.find((p) => p.kind === "cover").media,
+            ),
           )
         : null,
     );

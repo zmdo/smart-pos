@@ -7,7 +7,9 @@ from pathlib import Path
 APP_ROOT = Path(__file__).resolve().parents[1]
 REPO = Path(os.environ.get("STUDIO_REPO", APP_ROOT.parent)).resolve()
 DATA = Path(os.environ.get("CASE_DATA", "/root/autodl-fs/case-studio")).resolve()
-WEB_DATA = DATA / "website"
+WEB_DATA = Path(os.environ.get("STUDIO_WEB_DATA", str(DATA / "website"))).resolve()
+if not WEB_DATA.is_relative_to(DATA):
+    raise ValueError("网站数据目录必须位于 CASE_DATA 内")
 PYTHON = os.environ.get(
     "CASE_PYTHON", "/root/apps/non-grid-calibration/.venv/bin/python"
 )

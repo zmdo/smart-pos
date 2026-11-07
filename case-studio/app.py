@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from studio import store, config, review, workflow
+from studio import store, config, review, workflow, copywriter
 from studio.common import APP_ROOT, DATA, WEB_DATA, PUBLIC_URL, job_dir, read, save
 
 
@@ -225,9 +225,47 @@ async def preview(jid: str, mid: str, request: Request):
     if type(version) is not int:
         raise ValueError("缺少审核版本")
     try:
-        return await asyncio.to_thread(review.preview, jid, mid, version)
+        return await asyncio.to_thread(
+            review.preview, jid, mid, version, body.get("section")
+        )
     except RuntimeError:
         raise HTTPException(422, "预览生成失败，请检查封面取景范围与文字长度后重试")
+
+
+@app.get("/api/jobs/{jid}/previews/{mid}")
+def latest_previews(jid: str, mid: str):
+    return review.preview_latest(jid, mid)
+
+
+@app.get("/api/cover-ai/templates")
+def copy_templates():
+    return copywriter.templates()
+
+
+@app.post("/api/cover-ai/templates")
+async def add_copy_template(request: Request):
+    return copywriter.save_template(await request.json())
+
+
+@app.put("/api/cover-ai/templates/{tid}")
+async def update_copy_template(tid: str, request: Request):
+    return copywriter.save_template(await request.json(), tid)
+
+
+@app.delete("/api/cover-ai/templates/{tid}")
+def delete_copy_template(tid: str):
+    copywriter.delete_template(tid)
+    return {"ok": True}
+
+
+@app.post("/api/jobs/{jid}/members/{mid}/cover-ai")
+async def cover_ai(jid: str, mid: str, request: Request):
+    try:
+        return await asyncio.to_thread(
+            copywriter.generate, jid, mid, await request.json()
+        )
+    except RuntimeError as exc:
+        raise HTTPException(502, str(exc))
 
 
 @app.post("/api/jobs/{jid}/generate")
