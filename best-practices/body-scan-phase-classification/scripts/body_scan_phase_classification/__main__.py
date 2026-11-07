@@ -6,6 +6,7 @@ p = argparse.ArgumentParser(description='独立训练阶段分类；输出所有
 commands = p.add_subparsers(dest='command',required=True)
 new = commands.add_parser('run')
 new.add_argument('--input',type=Path,required=True)
+new.add_argument('--source-manifest',type=Path,help='Explicit source jobs and split reports with hashes; supports combined workflow jobs')
 new.add_argument('--override',type=Path,action='append',default=[])
 new.add_argument('--baseline',type=Path)
 new.add_argument('--member',action='append',default=[])

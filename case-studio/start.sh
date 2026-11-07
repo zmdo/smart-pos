@@ -1,10 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
-cd /root/apps/case-studio
-mkdir -p run /root/autodl-fs/case-studio/logs
-export PATH="/root/apps/portrait-studio/.venv/bin:$PATH"
-if supervisorctl -c supervisord.conf status >/dev/null 2>&1; then
-  supervisorctl -c supervisord.conf restart case-studio
-else
-  supervisord -c supervisord.conf
-fi
+cd "$(dirname "${BASH_SOURCE[0]}")"
+export PYTHONUTF8=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+CASE_PYTHON=${CASE_PYTHON:-/root/apps/non-grid-calibration/.venv/bin/python}
+exec "$CASE_PYTHON" -m uvicorn app:app --host 0.0.0.0 --port "${PORT:-6008}" --workers 1 --proxy-headers --forwarded-allow-ips='*'

@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-07",
+  "test_suites": {
+    "website": 23,
+    "delivery": 108,
+    "phase": 22
+  },
+  "source_images": 24,
+  "members": 3,
+  "standardized_images": 12,
+  "product_count": 29,
+  "full_historical_dataset_rerun": false,
+  "e2e": {
+    "job": "c22c7c32f20230fc71690d20",
+    "checks": {
+      "identity_and_honorific": true,
+      "stale_review_rejected": true,
+      "phase_changes_vs_and_cover_order": true,
+      "custom_table_row_same_canvas": true,
+      "three_view_uses_reviewed_order_without_labels": true,
+      "independent_uniform_cover_crops": true,
+      "outside_crop_rejected": true,
+      "member_and_store_zip_layout": true,
+      "return_to_review": true,
+      "new_immutable_version": true,
+      "previous_version_remains_unchanged": true,
+      "generation_model_calls": 0
+    },
+    "versions": [
+      "2026-11-07T125238565567+0000-814799",
+      "2026-11-07T125401639506+0000-748f7a"
+    ],
+    "product_count": 28,
+    "kinds": [
+      "cover",
+      "life",
+      "report",
+      "single",
+      "three_views",
+      "training",
+      "vs"
+    ]
+  },
+  "testimonial-e2e": {
+    "job": "8256a30a9d4a6ffd2320ad47",
+    "product_count": 1,
+    "kind": "testimonial",
+    "size": [
+      1080,
+      1440
+    ],
+    "no_body_pipeline": true,
+    "zip": true,
+    "version": "2026-11-07T125529254604+0000-89c9f8"
+  },
+  "cover-coordinate-check": [
+    {
+      "asset": "a0009",
+      "in_bounds": true,
+      "max_pixel_difference": 0
+    },
+    {
+      "asset": "a0014",
+      "in_bounds": true,
+      "max_pixel_difference": 0
+    },
+    {
+      "asset": "a0019__p01",
+      "in_bounds": true,
+      "max_pixel_difference": 0
+    },
+    {
+      "asset": "a0019__p02",
+      "in_bounds": true,
+      "max_pixel_difference": 0
+    }
+  ],
+  "deployment-after": {
+    "public_health": true,
+    "https_login_origin": true,
+    "auth_required": true,
+    "no_key_echo": true,
+    "cross_site_rejected": true,
+    "public_zip": true,
+    "portrait_unchanged": true,
+    "backup": "/root/autodl-fs/case-studio/deploy-backups/website-before-rebuild-20261107-205550.tar.gz"
+  },
+  "browser": {
+    "public_login": true,
+    "three_pages": true,
+    "profile_sidebar_sync": true,
+    "independent_cover_save": true,
+    "product_gallery": true,
+    "screenshots": "artifacts/case-studio-rebuild/{home,review}.jpg (outside repository)"
+  },
+  "website_source_sha256": {
+    "case-studio/app.py": "5bf99735c568e97237015e1bcdfb7b96415d401456cb29a967cb5395e7e1a1ec",
+    "case-studio/start.sh": "5105330622c90c356d6eec0708c5facced9b844961b112ced2df207986b1ef7f",
+    "case-studio/static/app.js": "92247c6d4398615ab55b0d74a918cb6570a1913b2dba31630020ad747773aafa",
+    "case-studio/static/crop.js": "cda193d1176aaeaa866293177f28240161386193eafa5eb2836bfc2050afad6a",
+    "case-studio/static/index.html": "b9c9798b59904974a76af7ee65cd7835ea567c7dd0724e979c4fd18856762a92",
+    "case-studio/static/style.css": "45267b72374b7953a69c1cf559b8c090449ad4ddf92410fc7fffa12048a6bc43",
+    "case-studio/studio/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "case-studio/studio/bridge.py": "c5ceaf70d60253d8b157ac6055e418182d5d360181b13ad3de6459258f32905f",
+    "case-studio/studio/classification.py": "871f9b96726c2e13852d5082aabe7a448b43eebedcb8d0fa8de350c834d9cf77",
+    "case-studio/studio/common.py": "4427e20081d8bdf3a58d4494888625fa596f24be648ab12b4ec2e7368c1e902d",
+    "case-studio/studio/config.py": "c60d878c7f0caa8f13c06831210471c303782a95e2bc1e5a6121a7457f41fd01",
+    "case-studio/studio/intake.py": "06bf8e6ee885ae11140ff1cd8c94c7c975ad1031a76f732467bd3873f9ddb6a0",
+    "case-studio/studio/prompts.py": "ca2420dcc61bbb35789df3b373077d4b546a64d2006e13db299a7268fba89095",
+    "case-studio/studio/rendering.py": "f20b7d9edfc997fe88a8e25f547991b18728f770f1a0e9d0f746a1940d445c8e",
+    "case-studio/studio/report_bridge.py": "028399e31dd896dbd7717a747830571cc05e74d24f1800e4deba1e53dd8b5671",
+    "case-studio/studio/review.py": "e4b5fae521db7ae79cc42ccdcb6f637810a8f221127df08523be0116ae28c5b5",
+    "case-studio/studio/store.py": "b481f20dbe6fc89ca90da096ba7692626aead597c65f767b085c8db61ff1bc21",
+    "case-studio/studio/workflow.py": "dc045e7ea9b14d88a25a88b74b3f6dd471630d236a67de259a8f447eee7c74ef",
+    "case-studio/supervisord.conf": "126c9a91ae95a3547260b4358ae3d823acd326ab7cd64bfc18dc84b32ea9ea65",
+    "case-studio/tests/e2e_remote.py": "99ab86fe4acffbd36a4893773257614d3483d4c8a808912eb13895412413719e",
+    "case-studio/tests/test_render_contracts.py": "9b59273e1ba6149ae192a73d2c74a1fb05fcd57397a53f7269bee0d8a19d90c5",
+    "case-studio/tests/test_studio.py": "69d2f368cd67ade4274d7f5ddae7c80e419e63ae8027433f9e26400c343bb60d"
+  }
+}

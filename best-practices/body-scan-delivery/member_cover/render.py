@@ -44,7 +44,7 @@ def story_lines(segments, path, size, width):
 def draw_cover(images, copy, presentation, path, store):
     canvas=Image.new('RGB',SIZE,BG);draw=ImageDraw.Draw(canvas)
     draw.rounded_rectangle((692,26,1050,130),radius=54,outline=RED,width=8)
-    line(draw,'会员案例',(716,35,1028,119),path,63,RED,900,center=True)
+    line(draw,copy.get('badge','会员案例'),(716,35,1028,119),path,63,RED,900,center=True)
     heading=line(draw,copy['title'],(30,81,664,211),path,119,RED,900,minimum=60)
     draw.rectangle((30,214,min(664,30+heading['width']),220),fill=RED)
     line(draw,copy['subtitle'],(32,244,1048,318),path,67,BROWN,800)
@@ -68,9 +68,9 @@ def draw_cover(images, copy, presentation, path, store):
     cd.ellipse((555,540,573,558),fill=RED)
     address=copy.get('address') or presentation.get('address') or 'UP 健身私教馆'
     if address=='UP 健身私教馆':
-        address_lines=[address,store]
+        address_lines=[address,copy.get('store_text',store)]
     else:
-        address_lines=[address[:15],address[15:]] if len(address)>15 else [address,store]
+        address_lines=[address[:15],address[15:]] if len(address)>15 else [address,copy.get('store_text',store)]
     line(cd,address_lines[0],(614,514,982,554),path,32,'white',700)
     line(cd,address_lines[1],(614,557,982,599),path,32,'white',700)
     mask=Image.new('L',card.size);ImageDraw.Draw(mask).rounded_rectangle((0,0,1015,621),radius=54,fill=255)

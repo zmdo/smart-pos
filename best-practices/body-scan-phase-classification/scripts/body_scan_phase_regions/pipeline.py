@@ -28,11 +28,11 @@ def read(path):
     return json.loads(Path(path).read_text(encoding='utf-8'))
 
 
-def inputs(directory, overrides):
+def inputs(directory, overrides, source_manifest=None):
     bindings = {}; selected = {}; metadata = {}; excluded = []
     for index, path in enumerate([directory, *overrides]):
         if index == 0:
-            rows, omitted, sources = load(path)
+            rows, omitted, sources = load(path, source_manifest)
         else:
             # Newer approved display snapshots inherit several upstream jobs.
             # The base adapter already verified each original and split rule;
@@ -169,7 +169,7 @@ def process_group(gid, original, metadata, reports, client, baseline, out):
 
 def run(args):
     out = args.out.resolve(); out.mkdir(parents=True, exist_ok=False)
-    items, metadata, excluded, bindings = inputs(args.input, args.override)
+    items, metadata, excluded, bindings = inputs(args.input, args.override, getattr(args,'source_manifest',None))
     if args.member:
         chosen = set(args.member)
         if chosen - {r['member'] for r in items}:

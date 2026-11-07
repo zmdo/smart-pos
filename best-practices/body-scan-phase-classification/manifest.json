@@ -6,7 +6,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "99aa8bb9bcf4321b1936dcdfb06904e74020e3becbe4a7959dfded7fe36c6e06"
+      "sha256": "2b4a5ce13d3130041f106fd4190828bd9972eb168d7d374a7ca450d800a6dacb"
     },
     {
       "path": "launch.py",
@@ -128,7 +128,7 @@
     },
     {
       "path": "scripts/body_scan_phase/inputs.py",
-      "sha256": "58ef6d801b2137dc8b04aad30df9d1f6896e477da6277504d677652e11355784",
+      "sha256": "c2bf57d82f727adecb3551bdbf3ec7a01571b6a6936cb4020fb4c31b7bfac3eb",
       "source": "scripts/body_scan_phase/inputs.py",
       "source_commit": "2b62aefc3656ed5ea54fc99325540269f6c0e7e4",
       "source_sha256": "58ef6d801b2137dc8b04aad30df9d1f6896e477da6277504d677652e11355784"
@@ -149,7 +149,7 @@
     },
     {
       "path": "scripts/body_scan_phase_classification/__main__.py",
-      "sha256": "efc754e47c79623eb2f38f5e268302eb572346d342456cf8fb0415348667061a",
+      "sha256": "59da3ad886a001bc7577c6ce819da940533561bb4be27f93c3a78ddabdac1178",
       "source": "scripts/body_scan_phase_classification/__main__.py",
       "source_commit": "2b62aefc3656ed5ea54fc99325540269f6c0e7e4",
       "source_sha256": "efc754e47c79623eb2f38f5e268302eb572346d342456cf8fb0415348667061a"
@@ -191,7 +191,7 @@
     },
     {
       "path": "scripts/body_scan_phase_classification/tests/test_classification.py",
-      "sha256": "4a7087da995c7c7a906b84bbd9f8bd49a07819c437f0145b5738afef86e96ab3",
+      "sha256": "e48f6853ab494e1481162d2738477601c73d0eda9b3e37b9dd94cafc9bb82e42",
       "source": "scripts/body_scan_phase_classification/tests/test_classification.py",
       "source_commit": "2b62aefc3656ed5ea54fc99325540269f6c0e7e4",
       "source_sha256": "4a7087da995c7c7a906b84bbd9f8bd49a07819c437f0145b5738afef86e96ab3"
@@ -226,7 +226,7 @@
     },
     {
       "path": "scripts/body_scan_phase_regions/pipeline.py",
-      "sha256": "ba9e697478af36ba891ff5385b0d53b7ec471dac5e6db6d485b1cfdd8843044d",
+      "sha256": "aa46e66df2707eecd2551052fdbcac9669e7e51fece84b9231806c74dde6fc7d",
       "source": "scripts/body_scan_phase_regions/pipeline.py",
       "source_commit": "2b62aefc3656ed5ea54fc99325540269f6c0e7e4",
       "source_sha256": "ba9e697478af36ba891ff5385b0d53b7ec471dac5e6db6d485b1cfdd8843044d"

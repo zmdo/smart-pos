@@ -67,13 +67,13 @@ def draw_vs(rows, photos, font, context, view):
     # The title overlaps only the top edge of the photo, as in the supplied reference.
     box=(width//2-px(135),px(173),width//2+px(135),px(270))
     draw.rounded_rectangle(box,radius=px(25),fill='white',outline=RED,width=px(6))
-    label(TITLES[view],(box[0]+px(18),box[1]+px(15),box[2]-px(18),box[3]-px(14)),42)
+    label(context.get('titles',TITLES)[view],(box[0]+px(18),box[1]+px(15),box[2]-px(18),box[3]-px(14)),42)
 
     # Italic, outlined lettering drawn at the native output resolution.
     mark=Image.new('RGBA',(px(240),px(140)));md=ImageDraw.Draw(mark)
     f=typeface(font,px(96),900)
-    md.text((px(119),px(66)),'VS',font=f,anchor='mm',fill=RED,stroke_width=px(10),stroke_fill='white')
-    md.text((px(119),px(66)),'VS',font=f,anchor='mm',fill=RED,stroke_width=px(2),stroke_fill=RED)
+    md.text((px(119),px(66)),context.get('vs_text','VS'),font=f,anchor='mm',fill=RED,stroke_width=px(10),stroke_fill='white')
+    md.text((px(119),px(66)),context.get('vs_text','VS'),font=f,anchor='mm',fill=RED,stroke_width=px(2),stroke_fill=RED)
     mark=mark.transform(mark.size,Image.Transform.AFFINE,(1,.23,-px(18),0,1,0),Image.Resampling.BICUBIC)
     center_y=layout['header']+round(layout['photo_height']*.40)
     canvas.paste(mark,(width//2-mark.width//2,center_y-mark.height//2),mark)
@@ -84,7 +84,7 @@ def draw_vs(rows, photos, font, context, view):
         half=min(px(120),(photo_box[2]-photo_box[0])*.38)
         b=(round(center-half),y1,round(center+half),y2)
         capsule(b)
-        label(('Before','After')[index],(b[0]+px(18),y1+px(6),b[2]-px(18),y2-px(6)),43)
+        label((context.get('before_text','Before'),context.get('after_text','After'))[index],(b[0]+px(18),y1+px(6),b[2]-px(18),y2-px(6)),43)
     cx=width//2;cy=(y1+y2)//2
     points=[(cx-px(56),cy-px(27)),(cx+px(16),cy-px(27)),(cx+px(16),cy-px(54)),
             (cx+px(77),cy),(cx+px(16),cy+px(54)),(cx+px(16),cy+px(27)),(cx-px(56),cy+px(27))]

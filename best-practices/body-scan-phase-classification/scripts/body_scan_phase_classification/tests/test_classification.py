@@ -8,6 +8,46 @@ from scripts.body_scan_phase_classification.ranking import parse,rank
 from scripts.body_scan_phase_classification.pipeline import finalize
 from scripts.body_scan_contracts.io import save,read,sha
 
+class WorkflowSourceTests(unittest.TestCase):
+    def test_explicit_job_binding_accepts_v4_lineage_and_rejects_changed_job(self):
+        from scripts.body_scan_phase.inputs import load
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);job=root/'combined/job.json';source=job.parent/'input/a.png';source.parent.mkdir(parents=True);source.write_bytes(b'source')
+            display=root/'display';uniform=display/'images/a/uniform.png';uniform.parent.mkdir(parents=True);uniform.write_bytes(b'uniform')
+            standard=root/'standard';save(standard/'config.json',{'inputs':['approved-v4']})
+            asset=dict(id='a',path='a.png',store='测试店',member='会员')
+            save(job,{'assets':[asset]});save(display/'config.json',{'version':'body-scan-group-display-v2'})
+            save(display/'summary.json',[dict(asset_id='a',store='测试店',member='会员',status='displayed',source=str(source),source_sha256=sha(source),input_directory=str(standard),output={'uniform_sha256':sha(uniform)},upstream_report={'classification':{'kind':'body_scan','view':'front'}})])
+            manifest=root/'source-manifest.json';save(manifest,{'schema':'body-scan-source-jobs-v1','assets':{'a':{'job':str(job),'job_sha256':sha(job)}}})
+            rows,_,bindings=load(display,manifest);self.assertEqual(len(rows),1);self.assertIn(str(manifest),bindings)
+            save(job,{'assets':[dict(asset,member='被修改')]})
+            with self.assertRaisesRegex(ValueError,'input_fingerprint_changed'):load(display,manifest)
+
+    def test_relocated_pair_requires_exact_source_bytes_and_parent_crop(self):
+        import cv2
+        import numpy as np
+        from scripts.body_scan_phase.inputs import split_assignment
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);image=np.zeros((20,30,3),np.uint8);image[:,15:]=220
+            source=root/'parent.png';cv2.imwrite(str(source),image);children=[]
+            for i,rect in enumerate(([0,0,15,20],[15,0,30,20]),1):
+                path=root/f'child{i}.png';cv2.imwrite(str(path),image[:,(i-1)*15:i*15])
+                children.append(dict(asset_id=f'a__p0{i}',panel_index=i,crop_parent_xyxy=rect,source=str(path),source_sha256=sha(path),status='ready'))
+            report=root/'report.json';save(report,dict(asset_id='a',status='split_ready',store='测试店',member='会员',layout={'seam':{'kind':'hard'},'layout':'left_right','axis':0},children=children,
+                attempts=[{'accepted':True,'review':{'result':{'accept':True,'independent_photos':True,'residual_other_photo':False,'residual_blend':False,'new_subject_cut':False}}}],source=str(source),source_sha256=sha(source),rectangles_parent_xyxy=[c['crop_parent_xyxy'] for c in children]))
+            copied=root/'relocated.png';copied.write_bytes(Path(children[0]['source']).read_bytes())
+            row=dict(asset_id='a__p01',store='测试店',member='会员',source=str(copied),source_sha256=sha(copied));asset={'pair_source':dict(parent_asset_id='a',panel_index=1,crop_parent_xyxy=[0,0,15,20])};override={'split_report':str(report),'split_report_sha256':sha(report)}
+            phase,evidence=split_assignment(asset,root/'job.json',row,{},override)
+            self.assertEqual(phase,'before');self.assertEqual(evidence['source'],'comparison_position_rule')
+            cv2.imwrite(str(copied),np.ones((20,15,3),np.uint8))
+            with self.assertRaisesRegex(ValueError,'input_fingerprint_changed'):split_assignment(asset,root/'job.json',row,{},override)
+
+    def test_source_manifest_schema_is_required(self):
+        from scripts.body_scan_phase.inputs import load
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);save(root/'config.json',{'version':'body-scan-group-display-v2'});save(root/'manifest.json',{'assets':{}})
+            with self.assertRaisesRegex(ValueError,'invalid_source_job_manifest'):load(root,root/'manifest.json')
+
 def row(aid,view='front',phase='unknown',kind='needs_review',suggestion=None):
     value={'asset_id':aid,'store':'测试店','member':'测试人','group_id':'g001','source_sha256':aid+'-sha',
            'view':view,'phase':phase,'evidence_kind':kind,'reason':'test','phase_source':'unresolved','confidence':None}

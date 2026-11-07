@@ -17,6 +17,8 @@
 
 ## 环境与独立性
 
+2026-11-07 网站审核接入：VS 绘图 context 可覆盖朝向标题、Before/After 和中央文字；封面 copy 可覆盖角标与门店文字；报告 case 可使用 `reviewed_rows`、自定义表头和标题。未提供参数时保留批准版默认行为。来源裁剪与阶段标记由网站审核快照提供，不在成品绘图中调用模型；详见 [网站实施记录](../../docs/design/case-studio-workflow-rebuild/IMPLEMENTATION.md)。
+
 在远程服务器运行，默认 Python 为 `/root/apps/non-grid-calibration/.venv/bin/python`；可用 `CASE_PYTHON` 指定。渲染使用 Pillow，SVG Logo 需要 CairoSVG 和系统 Cairo；会员感言的独立识别与隐私标注入口使用 NumPy、OpenCV、httpx；可选 API 适配器及其测试使用 FastAPI/httpx，已验证版本见 [requirements.verified.txt](requirements.verified.txt)。字体、Logo、照片、报告包和配置均由外部数据路径提供，不归档用户素材或密钥。
 
 `run.sh` 清空外部 `PYTHONPATH`，固定到本快照目录，从 `manifest.json` 校验全部文件及 Python 模块集合。所有 `scripts.*` 导入均来自本目录，不依赖开发树或其他最佳实践。体测成品输入是已完成的阶段分类包，或既有成品任务；封面还需对应的专用双图包。训练日常消费动作证据包，生活照直接消费已有图片分类与原文件。成品排版不运行拆分、标准化、OCR 或大模型。感言的 `evidence.sh` / `annotate.sh` 和训练照的 `evidence.sh` 是另行显式运行的模型准备节点，不由渲染隐式调用。

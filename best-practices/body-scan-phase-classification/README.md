@@ -2,6 +2,8 @@
 
 独立节点消费批准的同组展示输出和可选体检表对比 bundle。视觉判断使用原图及等比参考，保持当前局部观察、换序复核、可靠拍摄批次和多朝向规则；不读取原始 PDF/DOCX，不生成成品。
 
+网站组合工作流可传入 `--source-manifest /path/to/source-manifest.json`。其 schema 为 `body-scan-source-jobs-v1`，`assets` 以素材 ID 为键，值含 `job`、`job_sha256`；硬拼接子图另含 `split_report`、`split_report_sha256`。该参数解决 v4/v3 多层元数据不再直接携带单个 `job` 的情况，不修改图像或阶段判断算法。对复制到组合目录的子图，仍验证原始硬拼接边界、两张子图逐像素等于母图切片、两份子图的 SHA 相同、会员身份和素材 ID 一致。未提供该参数时保留原来源发现与覆盖行为。
+
 ```bash
 cd /root/apps/case-studio
 /root/apps/non-grid-calibration/.venv/bin/python -m scripts.body_scan_phase_classification run \

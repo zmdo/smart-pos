@@ -9,7 +9,7 @@ RED='#e60012';INK='#242821';MUTED='#70736d';PAPER='#f5f2ed';LINE='#e4e0d9'
 HEADERS=['类型','初始数据（训练前）','阶段数据（训练后）','变化量（+/-）','单位']
 
 def render(case,images,width,font_path,out):
-    rows=select_display_rows(case['rows'])
+    rows=case['reviewed_rows'] if 'reviewed_rows' in case else select_display_rows(case['rows'])
     if not rows:raise ValueError('no_table_no_product')
     if width<400:raise ValueError('reference_width_too_small')
     margin=round(width*.025);inner=width-2*margin;table_height=round(width*.398)
@@ -44,11 +44,11 @@ def render(case,images,width,font_path,out):
     geometry=[]
     if images:
         draw.rectangle((0,0,width,round(width*.009)),fill=RED)
-        draw.text((margin,width*.025),'体测数据 · 前后对比',font=font(.029),fill=INK)
+        draw.text((margin,width*.025),case.get('report_title','体测数据 · 前后对比'),font=font(.029),fill=INK)
         half=inner//2; y=round(width*.111); ih=round(half*4/3)
         for i,side in enumerate(('before','after')):
             x=margin+i*half
-            label(('训练前' if i==0 else '训练后')+'  '+case['pair'][side+'_date'],(x,width*.074,half,width*.028),size=.017,fill=RED if i else INK)
+            label(case.get(side+'_label','训练前' if i==0 else '训练后')+'  '+case['pair'][side+'_date'],(x,width*.074,half,width*.028),size=.017,fill=RED if i else INK)
             with Image.open(images[side]) as raw: im=raw.convert('RGB')
             scale=min(half/im.width,ih/im.height);sz=(round(im.width*scale),round(im.height*scale))
             scaled=im.resize(sz,Image.Resampling.LANCZOS)
@@ -56,12 +56,12 @@ def render(case,images,width,font_path,out):
             geometry.append({'side':side,'source_size':list(im.size),'placement':[px,py,*sz],
                              'scale':scale,'uniform_scale':True,'content_clipped':False})
         table_y=round(width*.807)
-        label('阶段性训练成果',(margin,width*.761,inner,width*.039),size=.025,fill=RED)
+        label(case.get('table_title','阶段性训练成果'),(margin,width*.761,inner,width*.039),size=.025,fill=RED)
     else:
         # Missing pair does not justify duplicating a report or guessing order.
         # Keep only the table section, with a small title and edge padding.
         table_y=compact_table_y
-        label('阶段性训练成果',(margin,table_y-width*.046,inner,width*.039),size=.025,fill=RED)
+        label(case.get('table_title','阶段性训练成果'),(margin,table_y-width*.046,inner,width*.039),size=.025,fill=RED)
     table_bottom=table_y+table_height
     cols=[.17,.24,.24,.22,.13]; xs=[margin]
     for fraction in cols:xs.append(xs[-1]+round(inner*fraction))
@@ -69,7 +69,7 @@ def render(case,images,width,font_path,out):
     header_h=round(width*.043); row_h=(table_height-header_h)/len(rows)
     draw.rounded_rectangle((margin,table_y,width-margin,table_bottom),radius=round(width*.008),fill='white')
     draw.rectangle((margin,table_y,width-margin,table_y+header_h),fill=RED)
-    for i,title in enumerate(HEADERS):label(title,(xs[i],table_y,xs[i+1]-xs[i],header_h),size=.017,fill='white')
+    for i,title in enumerate(case.get('headers',HEADERS)):label(title,(xs[i],table_y,xs[i+1]-xs[i],header_h),size=.017,fill='white')
     for index,row in enumerate(rows):
         y=table_y+header_h+index*row_h
         if index%2==1:draw.rectangle((margin,round(y),width-margin,round(y+row_h)),fill='#faf8f5')

@@ -30,14 +30,14 @@ def bind(path, bindings, expected=None):
     return path
 
 
-def split_assignment(asset, job_path, row, bindings):
+def split_assignment(asset, job_path, row, bindings, report_override=None):
     """Use real parent rectangles, never a __p01 filename convention."""
     meta = asset['pair_source']
     parent_id = meta['parent_asset_id']
     if not re.fullmatch(r'[A-Za-z0-9_-]+', parent_id):
         raise ValueError('invalid_parent_asset_id')
-    report_path = job_path.parent.parent/'splits'/parent_id/'report.json'
-    parent = read_json(bind(report_path, bindings))
+    report_path = Path(report_override['split_report']) if report_override else job_path.parent.parent/'splits'/parent_id/'report.json'
+    parent = read_json(bind(report_path, bindings, report_override['split_report_sha256'] if report_override else None))
     if (parent.get('asset_id') != parent_id or parent.get('status') not in ('split_ready', 'split_with_child_review')
             or parent['layout']['seam']['kind'] != 'hard' or len(parent['children']) != 2):
         raise ValueError('unverified_pair_source')
@@ -71,7 +71,13 @@ def split_assignment(asset, job_path, row, bindings):
         if crop is None or not np.array_equal(crop, image[rect[1]:rect[3], rect[0]:rect[2]]):
             raise ValueError('child_is_not_lossless_parent_crop')
         if child['asset_id'] == row['asset_id']:
-            if (child['status'] != 'ready' or child_path != Path(row['source']).resolve()
+            same_source = child_path == Path(row['source']).resolve()
+            if report_override and not same_source:
+                # The workflow may copy a verified child into a combined job.
+                # Bind both files and demand identical source bytes; never trust a filename.
+                relocated = bind(row['source'], bindings, child['source_sha256'])
+                same_source = digest(relocated) == child['source_sha256']
+            if (child['status'] != 'ready' or not same_source
                     or child['source_sha256'] != row['source_sha256']
                     or meta['crop_parent_xyxy'] != rect or meta['panel_index'] != index):
                 raise ValueError('split_child_provenance_mismatch')
@@ -85,10 +91,13 @@ def split_assignment(asset, job_path, row, bindings):
     return matched
 
 
-def load(directory):
+def load(directory, source_manifest=None):
     directory = Path(directory).resolve()
     bindings = {}; items = []; excluded = []; seen = set(); jobs = {}
     config = read_json(bind(directory/'config.json', bindings))
+    explicit_sources = read_json(bind(source_manifest, bindings)) if source_manifest else None
+    if explicit_sources is not None and (explicit_sources.get('schema') != 'body-scan-source-jobs-v1' or not isinstance(explicit_sources.get('assets'), dict)):
+        raise ValueError('invalid_source_job_manifest')
     if config.get('version') != 'body-scan-group-display-v2':
         raise ValueError('requires_approved_group_display_v2')
     for row in read_json(bind(directory/'summary.json', bindings)):
@@ -112,23 +121,31 @@ def load(directory):
                 'phase': 'unknown', 'phase_source': 'unresolved', 'status': 'needs_review',
                 'confidence': None, 'reason': 'no_same_view_counterpart', 'evidence': {},
                 'verified_chronology': False}
+        source_entry = explicit_sources['assets'].get(aid) if explicit_sources is not None else None
+        if explicit_sources is not None and not source_entry:
+            raise ValueError('source_job_manifest_missing_asset')
         standard_config = Path(row['input_directory'])/'config.json'
-        if str(standard_config) not in jobs:
+        job_key = source_entry['job'] if source_entry else str(standard_config)
+        if job_key not in jobs:
             cfg = read_json(bind(standard_config, bindings))
-            job_path = bind(cfg['job'], bindings)
+            job_path = bind(source_entry['job'], bindings, source_entry['job_sha256']) if source_entry else bind(cfg['job'], bindings)
             job = read_json(job_path)
             ids = [a['id'] for a in job['assets']]
             if len(ids) != len(set(ids)):
                 raise ValueError('duplicate_job_asset_ids')
-            jobs[str(standard_config)] = job_path, {a['id']: a for a in job['assets']}
-        job_path, assets = jobs[str(standard_config)]
+            jobs[job_key] = job_path, {a['id']: a for a in job['assets']}
+        job_path, assets = jobs[job_key]
+        if source_entry and digest(job_path) != source_entry['job_sha256']:
+            raise ValueError('source_job_manifest_hash_mismatch')
         asset = assets[aid]
         if (member_key(asset) != (store, member)
                 or (job_path.parent/'input'/asset['path']).resolve() != source):
             raise ValueError('job_source_or_member_mismatch')
         phase = 'unknown'; evidence = {}
         if asset.get('pair_source'):
-            phase, evidence = split_assignment(asset, job_path, row, bindings)
+            if source_entry and not all(source_entry.get(k) for k in ('split_report','split_report_sha256')):
+                raise ValueError('source_job_manifest_missing_split_report')
+            phase, evidence = split_assignment(asset, job_path, row, bindings, source_entry)
         if phase == 'unknown':
             # Only literal markers or explicit evidence qualify; legacy class.phase alone is not proof.
             literal = text_phase(source.stem)
