@@ -1,0 +1,18 @@
+{
+  "width": 1080,
+  "height": 1440,
+  "border": 6,
+  "accent": "#e60012",
+  "max_per_member": 3,
+  "action_margin": 0.025,
+  "max_upscale": 1.8,
+  "min_crop_short_side": 380,
+  "min_photo_area": 0.45,
+  "enhance": true,
+  "background_strength": 0.06,
+  "shadow_lift": 0.06,
+  "highlight_compression": 0.08,
+  "sharpen_percent": 28,
+  "inset_background": "soft",
+  "logo_path": null
+}
