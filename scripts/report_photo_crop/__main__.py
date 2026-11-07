@@ -1,0 +1,176 @@
+"""Crop useful report content and place it in a fixed frame; no paper dewarping."""
+import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import hashlib
+import html
+import json
+from pathlib import Path
+import re
+
+import cv2
+import numpy as np
+from PIL import Image, ImageOps
+
+from scripts.body_scan_full_eval.client import MeasuredClient
+from .geometry import make_frame, parse_ratio
+
+VERSION = 'report-photo-crop-v2'
+LOCALIZATION_VERSION = 'report-photo-crop-v1'
+PROMPT = '''你是报告图片取景助手。只判断原图中的有效报告区域，不修改图片、不展平、不推断训练前后。
+坐标全部为相对于整张输入图片的0到1000归一化坐标，左上为(0,0)、右下为(1000,1000)。
+先分成 screenshot（电子文档/电子表格/手机电脑截图或平整电子导出图）、paper_photo（实拍纸张）、other。
+电子截图：content_box紧贴所有有用的报告正文，包含正文标题、身份/日期、指标表格、报告结论、教练备注等；
+排除手机状态栏、文档查看器标题栏/工具栏、推荐功能按钮、翻页提示，以及正文上下左右大块空白。
+正文标题（如UP健身会员阶段性训练成果报告）要保留，应用程序标题栏不保留。表格最下方文字和末行不能截断。
+实拍纸张：定位主要报告纸张的全部可见部分，包含标题、日期、全部表格和报告页脚；
+paper_box为主纸张的轴对齐外接框，paper_polygon为顺时针4-16个边界点，排除桌面、手、墙和旁边其他纸张。
+不要把正文内部的图表/小人当成纸张边界。边缘在画面外时用画面边界。不要为了矩形而裁掉斜纸张四角。
+content_box覆盖主纸张可见的所有有用文字图表（可以比paper_box小），用来保护文字不被纸张背景蒙版删掉。
+卷曲、倾斜和折痕保持原样。不应把相邻报告或卷起的另一张纸上的字算作主报告正文。
+若上方有翻起的纸页背面、倒置文字或右侧有另一份报告，这些是外围杂物；
+paper_box与paper_polygon应从正常阅读方向的主要报告纸面边缘开始，不要把整张照片直接当成纸张。
+纸张铺满画面、确实没有外围杂物时才可以选择整幅。content_box同样不能把这些额外纸页的文字包含进来。
+若纸张正文有遮挡、裁断、边界不确定，请在issues说明，不能补造缺失信息。
+不要输出报告数值的转录。confidence表示你对区域定位的主观把握，不是核验正确率。
+仅返回JSON：{"is_report":true,"medium":"screenshot|paper_photo|other",
+"content_box":[x1,y1,x2,y2],"paper_box":[x1,y1,x2,y2],
+"paper_polygon":[[x,y],[x,y],[x,y],[x,y]],"confidence":0.0,
+"reason":"中文说明为什么这样取景","issues":["需关注的问题"]}。
+电子截图的paper_box和paper_polygon为null。无法可靠定位则medium=other并给原因。'''
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def sources(audit_path, root, ids):
+    rows, seen = [], set()
+    for row in json.loads(audit_path.read_text()):
+        if row.get('qwen', {}).get('kind') not in ('body_report', 'training_report'):
+            continue
+        aid = row['asset_id']
+        if ids and aid not in ids:
+            continue
+        relative = row['source'].split('/私教会员案例项目/', 1)[-1]
+        parts = Path(relative).parts
+        if not parts or not parts[0].endswith('店') or parts[0] != row['store']:
+            raise ValueError('not_store_material')
+        path = (root/relative).resolve()
+        if not path.is_relative_to(root.resolve()):
+            raise ValueError('source_path_escape')
+        if not re.fullmatch(r'a[0-9]+', aid) or aid in seen:
+            raise ValueError('invalid_or_duplicate_asset_id')
+        if sha(path) != row['source_sha256']:
+            raise ValueError('source_hash_mismatch: ' + aid)
+        seen.add(aid)
+        rows.append((row, path))
+    if not rows or (ids and ids != seen):
+        raise ValueError('missing_requested_report')
+    return rows
+
+
+def gallery(out, rows, ratio):
+    cards = []
+    for row in rows:
+        aid = row['asset_id']
+        label = html.escape(f"{row['store']} / {row['member']} · {aid}")
+        if row['status'] != 'cropped':
+            cards.append(f'<section id="{aid}"><h2>{label}</h2><p>未生成：{html.escape(row["error"])}</p></section>')
+            continue
+        e = row['geometry']
+        kind = '电子截图：截取报告正文' if e['medium'] == 'screenshot' else '纸张照片：保留形状，去除外围背景'
+        notes = html.escape('；'.join(e['review_reasons']) or '暂无明确缺失；请检查正文边缘。')
+        cards.append(f'<section id="{aid}" data-kind="{e["medium"]}"><h2>{label}</h2>'
+                     f'<p>{kind} · 有效区域占框 {e["occupied_fraction"]:.0%}</p>'
+                     f'<div class="pair"><figure><figcaption>原图</figcaption><a href="{aid}/original.png" target="_blank">'
+                     f'<img loading="lazy" src="{aid}/original-preview.jpg"></a></figure>'
+                     f'<figure><figcaption>固定比例 {ratio[0]}:{ratio[1]} · {e["frame_size"][0]} × {e["frame_size"][1]}</figcaption>'
+                     f'<a href="{aid}/frame.png" target="_blank"><img loading="lazy" src="{aid}/frame-preview.jpg"></a></figure></div>'
+                     f'<p>{notes}</p><a href="{aid}/frame.png" download>下载高清取景图</a> · '
+                     f'<a href="{aid}/crop.png" target="_blank">查看未缩放裁剪图</a></section>')
+    page = '''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>报告取景 · 保持纸张原形</title><style>
+body{margin:0;background:#f3f1ed;color:#293b34;font:16px/1.65 system-ui,sans-serif}main{max-width:1350px;margin:auto;padding:30px}
+h1{font-size:30px}h2{font-size:21px}.intro,p{color:#64736b}section{background:white;border:1px solid #dce3dc;border-radius:16px;padding:24px;margin:24px 0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:24px}figure{margin:0;min-width:0}figcaption{font-weight:600;margin-bottom:12px}
+figure img{display:block;max-width:100%;width:100%;height:660px;object-fit:contain;background:#e8ebe6;border:1px solid #d3dbd2}
+a{color:#386447}button{font:inherit;padding:8px 18px;margin:5px;border:1px solid #bbc9ba;border-radius:20px;background:white;cursor:pointer}
+button.active{background:#365b46;color:white}nav{position:sticky;top:0;background:#f3f1edf2;padding:10px 0;z-index:1}
+[hidden]{display:none!important}@media(max-width:700px){main{padding:12px}section{padding:12px}.pair{gap:10px}figure img{height:420px}}
+</style><main><h1>报告照片取景 · 保持原有形状</h1>
+<p class="intro">截图保留报告正文，纸张照片裁去外围杂乱背景；画框固定比例，像素尺寸随原图有效区域变化。
+默认保留裁剪图原始像素，页面等比缩小预览，点击可看高清图。不展平、不旋转、不拉伸。
+内容完整优先，剩余空间留白。原照片中已经遮住或拍漏的内容不补画。以下按素材归属展示，未重新判定训练前后。</p>
+<nav><button class="active" data-filter="all">全部</button><button data-filter="paper_photo">纸张照片</button><button data-filter="screenshot">电子截图</button></nav>
+'''
+    page += ''.join(cards) + '''</main><script>
+document.querySelectorAll('button').forEach(b=>b.onclick=()=>{document.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
+document.querySelectorAll('section').forEach(s=>s.hidden=b.dataset.filter!=='all'&&s.dataset.kind!==b.dataset.filter)});
+</script></html>'''
+    (out/'index.html').write_text(page)
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    for name in ('audit', 'input-root', 'settings', 'cache', 'out'):
+        p.add_argument('--'+name, type=Path, required=True)
+    p.add_argument('--ratio', type=parse_ratio, default=(3, 4))
+    p.add_argument('--max-side', type=int, help='Optional export pixel cap; default preserves source crop pixels')
+    p.add_argument('--workers', type=int, default=3)
+    p.add_argument('--ids', nargs='*')
+    args = p.parse_args()
+    if args.out.exists():
+        raise ValueError('output_must_be_new')
+    if not 1 <= args.workers <= 4 or (args.max_side is not None and args.max_side < 100):
+        raise ValueError('invalid_cap_or_workers')
+    selected = sources(args.audit, args.input_root, set(args.ids or []))
+    client = MeasuredClient(args.settings, args.cache, 'qwen')
+    args.out.mkdir(parents=True)
+    rows = []
+    def work(item):
+        row, source = item
+        aid = row['asset_id']
+        result = {k: row[k] for k in ('asset_id', 'store', 'member', 'source_sha256')}
+        result['kind'] = row['qwen']['kind']
+        dest = args.out/aid
+        dest.mkdir()
+        try:
+            with Image.open(source) as raw:
+                original = ImageOps.exif_transpose(raw).convert('RGB')
+            selection, trace = client.ask([cv2.cvtColor(np.asarray(original), cv2.COLOR_RGB2BGR)], PROMPT, LOCALIZATION_VERSION)
+            result['model_trace'] = {k: trace.get(k) for k in ('cached', 'request_count', 'key', 'requested_model')}
+            result['selection'] = selection
+            output, crop, geometry = make_frame(original, selection, args.ratio, args.max_side)
+            original.save(dest/'original.png')
+            thumb = original.copy()
+            thumb.thumbnail((900, 1600), Image.Resampling.LANCZOS)
+            thumb.save(dest/'original-preview.jpg', quality=91)
+            crop.save(dest/'crop.png')
+            output.save(dest/'frame.png')
+            preview = output.copy()
+            preview.thumbnail((1200, 1600), Image.Resampling.LANCZOS)
+            preview.save(dest/'frame-preview.jpg', quality=94)
+            result.update(status='cropped', geometry=geometry, source_size=list(original.size),
+                          frame_sha256=sha(dest/'frame.png'))
+            if sha(source) != row['source_sha256']:
+                raise ValueError('source_changed_during_run')
+        except (ValueError, OSError, TypeError, KeyError) as error:
+            result.update(status='needs_review', error=str(error))
+        (dest/'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
+        print(aid, result['status'], result.get('geometry', {}).get('medium'), result.get('error', ''), flush=True)
+        return result
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        for f in as_completed([pool.submit(work, item) for item in selected]):
+            rows.append(f.result())
+    rows.sort(key=lambda r: (r['store'], r['member'], r['asset_id']))
+    manifest = {'version': VERSION, 'ratio': list(args.ratio), 'max_side': args.max_side,
+                'localization_version': LOCALIZATION_VERSION,
+                'audit_sha256': sha(args.audit), 'prompt_sha256': hashlib.sha256(PROMPT.encode()).hexdigest(),
+                'dewarping_calls': 0, 'phase_classification_calls': 0, 'rows': rows}
+    (args.out/'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n')
+    gallery(args.out, rows, args.ratio)
+    print(json.dumps({'selected': len(rows), 'cropped': sum(r['status']=='cropped' for r in rows)}), flush=True)
+
+
+if __name__ == '__main__':
+    main()
