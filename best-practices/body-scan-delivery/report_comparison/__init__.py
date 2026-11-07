@@ -1,2 +1,2 @@
 """Model-free report pair and five-column product renderer."""
-VERSION='report-comparison-product-v4'
+VERSION='report-comparison-product-v5'

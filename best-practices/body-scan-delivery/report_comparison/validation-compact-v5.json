@@ -1,0 +1,38 @@
+{
+  "version": "report-comparison-product-v5",
+  "date": "2026-11-07",
+  "cases": 18,
+  "generated": 18,
+  "errors": 0,
+  "compact_cases": [
+    "c011",
+    "c013",
+    "c017"
+  ],
+  "compact_size": [
+    2160,
+    1068
+  ],
+  "paired_size": [
+    2160,
+    2700
+  ],
+  "unchanged_paired_products": 15,
+  "table_height_px": 860,
+  "compact_pixels_match_previous_table_crop": true,
+  "all_table_data_unchanged": true,
+  "all_input_hashes_unchanged": true,
+  "product_suite_tests": 64,
+  "model_calls": 0,
+  "remote_output": "/root/autodl-fs/case-studio/experiments/report-comparison-compact-v5-20261107/validated",
+  "products_bundle_sha256": "91b70af23d10990648c2cbe04ecdd900367369557e594e86800c2994a98fbd1f",
+  "local_links_checked": 72,
+  "local_product_hashes_verified": 18,
+  "local_filters": {
+    "all": 18,
+    "computed": 18,
+    "review": 16,
+    "none": 0
+  },
+  "visual_review": "c011 compact table title and all rows visible"
+}

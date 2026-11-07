@@ -8,7 +8,7 @@
     "view_comparison": "body-same-view-reference-v5",
     "single_view": "body-delivery-v1",
     "member_cover": "body-member-cover-v3",
-    "report_comparison": "report-comparison-product-v4"
+    "report_comparison": "report-comparison-product-v5"
   },
   "dependencies": "Frozen local scripts and four sibling renderer packages; data-only upstream frame contract, no development imports",
   "excluded_tests": "14 classification/ranking tests remain with the classification node; revision fixtures now use preclassified labels",
@@ -204,11 +204,11 @@
     },
     {
       "path": "report_comparison/README.md",
-      "sha256": "cb8e472818d57624da87a66060e660434ac7da8c93c4836af8e0317d603d8775"
+      "sha256": "db607be47f544d57cf4c103522ee12193236937ed25071f335cd8ebd4695ef84"
     },
     {
       "path": "report_comparison/__init__.py",
-      "sha256": "70d930d701c35958038f84092f23a4c5129000deaa61921009d17618d12632e8"
+      "sha256": "783e576ebd6b337c2bbeb3235991ac8865198e00b30748e216c8438b02ea54e8"
     },
     {
       "path": "report_comparison/__main__.py",
@@ -220,7 +220,7 @@
     },
     {
       "path": "report_comparison/render.py",
-      "sha256": "90381ad59a18efcfc759f33690da898764ea33cea3b1f0f310217d6202a02909"
+      "sha256": "0706515352851e68432981082565de4b0d2af6a9ed40964315f0a4b3aed2b922"
     },
     {
       "path": "report_comparison/run.sh",
@@ -228,11 +228,15 @@
     },
     {
       "path": "report_comparison/tests/test_report_product.py",
-      "sha256": "f58256d532853fc490af57cc88741325527d546a9731048af87b6e145e448f61"
+      "sha256": "4e8ffcc924c9c9966c8e9e113d3a202cb52957bf21471362420445b4f45676b9"
     },
     {
       "path": "report_comparison/validation-clean-v2.json",
       "sha256": "62dda840fa210e012a8c9579b97db6aadd5e1f556350834a34e5fae127faa347"
+    },
+    {
+      "path": "report_comparison/validation-compact-v5.json",
+      "sha256": "eb617c3a154251193767419ebccf35ca2d9fda90e1557ef57aff324efff2b09d"
     },
     {
       "path": "report_comparison/validation-core-nine-v4.json",

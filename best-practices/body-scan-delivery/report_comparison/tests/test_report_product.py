@@ -60,7 +60,12 @@ class ReportProductTests(unittest.TestCase):
                     self.assertEqual(r['row_count'],count)
                     self.assertAlmostEqual(r['header_height']+count*r['row_height'],r['table_frame'][3])
                     self.assertLessEqual(r['table_frame'][1]+r['table_frame'][3],r['height'])
-                    with Image.open(root/'out.png') as im:self.assertEqual(im.size,(800,1000))
+                    with Image.open(root/'out.png') as im:
+                        self.assertEqual(im.size,(800,1000 if paired else 396))
+                        if not paired:
+                            self.assertEqual(r['table_frame'][1],57)
+                            self.assertEqual(r['height']-r['table_frame'][1]-r['table_frame'][3],21)
+                            self.assertEqual(im.getpixel((0,0)),(245,242,237))
             self.assertEqual(set(frames),{round(800*.398)})
     def test_no_data_no_fabricated_product(self):
         with self.assertRaisesRegex(ValueError,'no_table'):render({'rows':[]},{},800,FONT,Path('/unused'))

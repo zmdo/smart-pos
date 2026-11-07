@@ -12,7 +12,10 @@ def render(case,images,width,font_path,out):
     rows=select_display_rows(case['rows'])
     if not rows:raise ValueError('no_table_no_product')
     if width<400:raise ValueError('reference_width_too_small')
-    height=round(width*1.25);canvas=Image.new('RGB',(width,height),PAPER);draw=ImageDraw.Draw(canvas)
+    margin=round(width*.025);inner=width-2*margin;table_height=round(width*.398)
+    compact_table_y=round(width*.071)
+    height=round(width*1.25) if images else compact_table_y+table_height+margin+1
+    canvas=Image.new('RGB',(width,height),PAPER);draw=ImageDraw.Draw(canvas)
     @lru_cache(maxsize=256)
     def load_font(size):
         f=ImageFont.truetype(str(font_path),size)
@@ -38,11 +41,10 @@ def render(case,images,width,font_path,out):
         bounds=draw.textbbox((0,0),text,font=f)
         if bounds[2]>w*.96 or bounds[3]-bounds[1]>h*.96:raise ValueError('text_exceeds_fixed_frame')
         draw.text((x+(w-bounds[2])/2,y+(h-(bounds[3]-bounds[1]))/2-bounds[1]),text,font=f,fill=fill)
-    margin=round(width*.025);inner=width-2*margin
-    draw.rectangle((0,0,width,round(width*.009)),fill=RED)
-    draw.text((margin,width*.025),'体测数据 · 前后对比',font=font(.029),fill=INK)
-    geometry=[];table_height=round(width*.398)
+    geometry=[]
     if images:
+        draw.rectangle((0,0,width,round(width*.009)),fill=RED)
+        draw.text((margin,width*.025),'体测数据 · 前后对比',font=font(.029),fill=INK)
         half=inner//2; y=round(width*.111); ih=round(half*4/3)
         for i,side in enumerate(('before','after')):
             x=margin+i*half
@@ -57,8 +59,8 @@ def render(case,images,width,font_path,out):
         label('阶段性训练成果',(margin,width*.761,inner,width*.039),size=.025,fill=RED)
     else:
         # Missing pair does not justify duplicating a report or guessing order.
-        # Center a standalone table, keeping the same height as report-pair tables.
-        table_y=round((height-table_height)/2)
+        # Keep only the table section, with a small title and edge padding.
+        table_y=compact_table_y
         label('阶段性训练成果',(margin,table_y-width*.046,inner,width*.039),size=.025,fill=RED)
     table_bottom=table_y+table_height
     cols=[.17,.24,.24,.22,.13]; xs=[margin]
@@ -83,4 +85,5 @@ def render(case,images,width,font_path,out):
             'table_frame':[margin,table_y,inner,table_height],'header_height':header_h,'row_height':row_h,
             'table_height_rule':'round(width * 0.398); independent of row count and report images',
             'images':geometry,'width_rule':'2 * max(original before width, original after width)',
-            'height_rule':'round(width * 1.25)','table_only':not bool(images)}
+            'height_rule':'round(width * 1.25)' if images else 'table title + fixed table height + edge padding',
+            'table_only':not bool(images)}
