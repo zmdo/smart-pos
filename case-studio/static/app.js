@@ -342,8 +342,11 @@ async function openJob(jid) {
 }
 async function refreshJob() {
   if (!state.job) return;
+  const jid = state.job.id;
   try {
-    const j = await api("/jobs/" + state.job.id);
+    const j = await api("/jobs/" + jid);
+    // Navigation may finish while an earlier progress request is still pending.
+    if (state.job?.id !== jid) return;
     const changed =
       j.status !== state.job.status ||
       j.review_version !== state.job.review_version;
