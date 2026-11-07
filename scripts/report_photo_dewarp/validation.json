@@ -1,0 +1,38 @@
+{
+  "version": "report-photo-dewarp-experiment-v1",
+  "date": "2026-11-07",
+  "remote_output": "/root/autodl-fs/case-studio/experiments/report-photo-dewarp-v1-20261107/all",
+  "counts": {
+    "body_report": 31,
+    "training_report": 15
+  },
+  "completed": 46,
+  "automatically_adopted": 0,
+  "unit_tests": 2,
+  "source_hashes_unchanged": true,
+  "output_hashes_and_dimensions_checked": true,
+  "preview_links_checked": 184,
+  "six_sample_rerun_pixel_identical": true,
+  "finite_unfolded_grids": true,
+  "ocr_completeness_checked": false,
+  "visual_reviewed_ids": [
+    "a0006",
+    "a0037",
+    "a0039",
+    "a0099",
+    "a0114",
+    "a0138"
+  ],
+  "visual_findings": [
+    "some_curved_lines_improved",
+    "additional_edge_content_cropping",
+    "flat_screenshot_regression",
+    "shadows_and_occlusion_remain"
+  ],
+  "ready_for_production": false,
+  "seconds": 111.758,
+  "gpu_peak_allocated_bytes": 1210871296,
+  "model_commit": "4c9b82b537057aff2526e6dd118a847cdd072e82",
+  "weights_sha256": "7e90861b8a516eb4bc51f84bd889cb77275743d2d1d3ca8091951ec9f2b7da23",
+  "manifest_sha256": "ce156abd2e749122a0dd3ace51dc85ecca8fcbe82e379ae77993a63f48436275"
+}
