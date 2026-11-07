@@ -2,7 +2,7 @@ import copy, io, json, tempfile, unittest
 import httpx
 from pathlib import Path
 from unittest.mock import patch
-from PIL import Image
+from PIL import Image, ImageDraw, ImageChops
 from test_studio import sample
 from studio import privacy, avatar_api, stickers, config, review, store
 from studio.common import DATA, WEB_DATA, save, sha, job_dir
@@ -58,6 +58,27 @@ class FacePrivacyTests(unittest.TestCase):
         out=self.folder/'edge.png'
         privacy.overlay(self.source,{'faces':[dict(self.face,box=[0,0,160,200])]},self.sticker,out)
         self.assertTrue(out.is_file())
+
+    def test_compact_backing_covers_face_oval_even_with_alpha_holes(self):
+        # Transparent artwork isolates the protection supplied by the backing.
+        avatar=Image.new('RGBA',(80,110),(190,130,80,0))
+        for width,height in [(1,1),(3,7),(7,3),(17,23),(23,17),(97,187),(215,287),(300,120)]:
+            with self.subTest(size=(width,height)):
+                layer=privacy.face_layer(avatar,width,height)
+                x,y=(layer.width-width)//2,(layer.height-height)//2
+                alpha=layer.getchannel('A').crop((x,y,x+width,y+height))
+                face=Image.new('L',(width,height))
+                ImageDraw.Draw(face).ellipse((0,0,width-1,height-1),fill=255)
+                self.assertIsNone(ImageChops.subtract(face,alpha).getbbox())
+
+    def test_compact_avatar_reduces_footprint_without_stretching(self):
+        avatar=Image.new('RGBA',(634,755),(190,130,80,255))
+        for width,height in [(215,287),(97,187)]:
+            layer=privacy.face_layer(avatar,width,height)
+            old_scale=max(width*1.55/avatar.width,height*1.55/avatar.height)
+            self.assertLess(layer.width,avatar.width*old_scale*.80)
+            self.assertLess(layer.height,avatar.height*old_scale*.80)
+            self.assertAlmostEqual(layer.width/layer.height,avatar.width/avatar.height,delta=.01)
 
     def test_sticker_and_hidden_never_overwritten(self):
         for state in ('sticker','hidden'):
@@ -123,6 +144,18 @@ class FacePrivacyTests(unittest.TestCase):
         self.assertNotEqual(before['vs'],review.preview_key(self.m,'vs'))
         self.assertNotEqual(before['cover'],review.preview_key(self.m,'cover'))
         self.assertEqual(before['table'],review.preview_key(self.m,'table'))
+
+    def test_overlay_version_invalidates_images_but_reuses_face_evidence(self):
+        before={s:review.preview_key(self.m,s) for s in ('vs','cover','table')}
+        with patch.object(stickers,'get',return_value={'path':str(self.sticker)}):
+            old=privacy.masked_source(self.m,str(self.source))
+            with patch.object(privacy,'RENDER_VERSION','next-overlay'):
+                new=privacy.masked_source(self.m,str(self.source))
+                self.assertNotEqual(old,new)
+                for section in ('vs','cover'):
+                    self.assertNotEqual(before[section],review.preview_key(self.m,section))
+                self.assertEqual(before['table'],review.preview_key(self.m,'table'))
+        self.assertEqual(self.evidence['version'],privacy.VERSION)
 
     def test_old_background_job_cannot_overwrite_new_review(self):
         jid=store.create('privacy-test',config.snapshot())['id']

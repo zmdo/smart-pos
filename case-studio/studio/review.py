@@ -255,6 +255,8 @@ def preview_key(member, section):
         "values": member[section],
     }
     if section in ("vs", "cover"):
+        from .privacy import RENDER_VERSION
+        data["privacy_renderer"] = RENDER_VERSION
         data["privacy"] = member.get("privacy", {"enabled": True})
         data["face_evidence"] = engine.get("privacy", {})
         data["photos"] = [

@@ -9,6 +9,8 @@ from . import model_client, avatar_api, stickers, store
 from .common import WEB_DATA, DATA, read, save, sha, signature, contained, job_dir, now
 
 VERSION = "face-privacy-v1"
+RENDER_VERSION = "face-overlay-compact-v2.2"
+STICKER_SCALE = 1.16
 POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="face-privacy")
 LOCK = threading.RLock()
 TASKS = {}
@@ -165,6 +167,32 @@ def validate_update(member, incoming):
     return old
 
 
+def face_layer(avatar, face_width, face_height, background=None):
+    """Cover the facial oval without enlarging the sticker to fill box corners."""
+    # Only the artwork scales by 16%; the backing has a small 5% safety margin.
+    # Box corners mostly contain hair/background; a facial oval avoids a square patch.
+    fw, fh = max(1, math.ceil(face_width)), max(1, math.ceil(face_height))
+    px, py = max(2, math.ceil(fw*.05)), max(2, math.ceil(fh*.05))
+    w, h = fw+2*px, fh+2*py
+    # Destroy facial detail underneath transparent corners. Source colors blend
+    # with the photo instead of leaving a conspicuous skin-colored rectangle.
+    if background is None:
+        backing = Image.new("RGBA", (w, h), (0, 0, 0, 255))
+    else:
+        backing = background.convert("RGB").resize((3, 3), Image.Resampling.BOX)
+        backing = backing.resize((w, h), Image.Resampling.BILINEAR).convert("RGBA")
+    alpha = Image.new("L", (w, h))
+    ImageDraw.Draw(alpha).ellipse((0, 0, w-1, h-1), fill=255)
+    backing.putalpha(alpha)
+    scale = max(fw*STICKER_SCALE/avatar.width, fh*STICKER_SCALE/avatar.height)
+    sw, sh = max(1, math.ceil(avatar.width*scale)), max(1, math.ceil(avatar.height*scale))
+    canvas = Image.new("RGBA", (max(w, sw), max(h, sh)))
+    canvas.alpha_composite(backing, ((canvas.width-w)//2, (canvas.height-h)//2))
+    canvas.alpha_composite(avatar.resize((sw, sh), Image.Resampling.LANCZOS),
+                           ((canvas.width-sw)//2, (canvas.height-sh)//2))
+    return canvas
+
+
 def overlay(source, evidence, sticker_path, dest):
     """Mask every uncovered face on a copy, including side faces and bystanders."""
     with Image.open(source) as im:
@@ -172,21 +200,13 @@ def overlay(source, evidence, sticker_path, dest):
     with Image.open(sticker_path) as avatar:
         avatar = avatar.convert("RGBA")
         avatar = avatar.crop(avatar.getchannel("A").getbbox())
-    fill = avatar.getpixel((avatar.width//2, avatar.height//2))[:3] + (255,)
     for face in evidence["faces"]:
         if face["state"] != "uncovered":
             continue
         l,t,r,b = [v*s/1000 for v,s in zip(face["box"], (im.width,im.height,im.width,im.height))]
-        # Opaque ellipse safely encloses the entire detected face rectangle.
         cx,cy = (l+r)/2,(t+b)/2
-        w,h = max(1,round((r-l)*1.55)), max(1,round((b-t)*1.55))
-        layer = Image.new("RGBA", (w,h))
-        ImageDraw.Draw(layer).ellipse((0,0,w-1,h-1), fill=fill)
-        scale = max(w/avatar.width, h/avatar.height)
-        sw,sh = max(1,round(avatar.width*scale)),max(1,round(avatar.height*scale))
-        canvas = Image.new("RGBA", (max(w,sw),max(h,sh)))
-        canvas.alpha_composite(layer, ((canvas.width-w)//2,(canvas.height-h)//2))
-        canvas.alpha_composite(avatar.resize((sw,sh), Image.Resampling.LANCZOS), ((canvas.width-sw)//2,(canvas.height-sh)//2))
+        region = im.crop((math.floor(l), math.floor(t), math.ceil(r), math.ceil(b)))
+        canvas = face_layer(avatar, r-l, b-t, region)
         im.alpha_composite(canvas, (round(cx-canvas.width/2), round(cy-canvas.height/2)))
     Path(dest).parent.mkdir(parents=True, exist_ok=True)
     im.convert("RGB").save(dest, "PNG")
@@ -205,7 +225,7 @@ def masked_source(member, source):
     if not p.get("sticker_id"):
         raise ValueError("请先准备或选择本会员的面部贴纸")
     sticker = stickers.get(p["sticker_id"])
-    key = signature({"source": evidence["source_sha256"], "faces": evidence["faces"], "sticker": sha(sticker["path"]), "version": VERSION})
+    key = signature({"source": evidence["source_sha256"], "faces": evidence["faces"], "sticker": sha(sticker["path"]), "version": VERSION, "render_version": RENDER_VERSION})
     dest = WEB_DATA / "masked-media" / (key + ".png")
     if not dest.exists():
         temp = dest.with_name(key + "-" + uuid.uuid4().hex + ".png")
