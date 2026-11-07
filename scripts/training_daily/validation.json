@@ -1,69 +1,86 @@
 {
   "validated_on": "2026-11-07",
   "status": "passed",
-  "unit_tests": 11,
+  "unit_tests": 15,
   "groups": 18,
   "candidates": 13,
-  "generated_groups": 8,
-  "products": 10,
-  "review_groups": 1,
+  "generated_groups": 9,
+  "products": 12,
+  "review_groups": 0,
   "missing_groups": 9,
-  "rejected_sources": 2,
+  "rejected_sources": 1,
   "model_calls": 0,
   "model_requests_analysis": 13,
   "layout_counts": {
     "fill": 8,
-    "inset": 2
+    "inset": 2,
+    "native_crop": 1,
+    "original_passthrough": 1
   },
-  "protected_regions_checked": 42,
+  "protected_regions_checked": 51,
   "source_sha_unchanged": 13,
-  "canvas": [
+  "standard_canvas": [
     1080,
     1440
   ],
-  "border_pixels": 6,
+  "border_pixels": 0,
+  "native_crop": {
+    "asset_id": "a0097",
+    "crop": [
+      0,
+      771,
+      928,
+      1295
+    ],
+    "output_size": [
+      928,
+      524
+    ],
+    "exact_source_crop_pixels": true
+  },
+  "original_passthrough": {
+    "asset_id": "a0164",
+    "output_size": [
+      1080,
+      1440
+    ],
+    "exact_source_file_sha": true
+  },
   "rejected": [
     {
       "asset_id": "a0013",
       "reason": "人物处于摆拍展示肌肉状态，未进行实际训练动作，且头部被裁切。"
-    },
-    {
-      "asset_id": "a0097",
-      "reason": "截图过窄，仅包含人物上半身背部，缺失下半身及完整动作支撑点，无法完整呈现训练动作全貌。"
     }
   ],
-  "needs_review": [
-    {
-      "asset_id": "a0164",
-      "reason": "训练主体不明确，需指定主要人物"
-    }
-  ],
+  "needs_review": [],
   "checks": [
     "All candidates from store daily_training labels; references and lifestyle excluded",
     "Every selected source used once; no more than three products per member",
     "Every annotated body/action/contact protection rectangle retained inside its crop",
-    "Every PNG/JPG fixed canvas; geometry uses uniform scale with less than half-pixel rounding error",
-    "All source hashes unchanged; rejected and ambiguous sources have no product image",
-    "All ten products visually inspected on contact sheet; screenshot black bars removed and horizontal action retained",
-    "Tone controls stay mild; no person/equipment geometry warp or generative detail",
-    "All local gallery links, filters and original/same-crop/output switches verified offline"
+    "Standard products fill a borderless frame with uniform scaling and mild tone treatment",
+    "a0097 retains the whole photo band pixel for pixel; no resize, enhancement or canvas",
+    "a0164 is an exact copy of the original JPEG; no recoding, cropping, resize or enhancement",
+    "All source hashes unchanged; original model statuses preserved alongside output policies",
+    "No model calls made during regeneration",
+    "All gallery links, filters, image switches, native ratios and format-specific downloads verified offline",
+    "All twelve outputs visually inspected on a contact sheet; a0097 native crop inspected at original resolution"
   ],
   "limitations": [
-    "Model boxes can miss details; original source and same-crop tone comparison remain visible",
+    "Model boxes can miss details; source previews remain available",
     "Background protection uses a conservative action rectangle, not fine person segmentation",
-    "Source-existing body cutoffs are not restored; severely insufficient screenshots are rejected",
-    "Multi-person subject confirmation is returned as JSON; review API not integrated",
+    "Source-existing body cutoffs remain; native screenshot output does not reconstruct missing parts",
+    "Padding-only crop requires clear long black bands near model boundaries",
     "Videos are not sampled; this branch has not yet been approved as a best practice"
   ],
   "gallery_checks": {
     "filters": {
       "all": 18,
-      "generated": 8,
-      "needs_review": 1,
+      "generated": 9,
+      "needs_review": 0,
       "skipped": 9
     },
-    "local_links": 61,
-    "image_switches": 30,
-    "downloads": 10
+    "local_links": 64,
+    "image_switches": 33,
+    "downloads": 12
   }
 }

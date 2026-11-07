@@ -1,10 +1,12 @@
-"""Mild documentary tone treatment and fixed-canvas training-photo products."""
+"""Frameless training photos, with native-pixel and original-file fallbacks."""
 from pathlib import Path
+import shutil
 import numpy as np
 from PIL import Image,ImageFilter,ImageOps
-from .geometry import plan,pixels
+from .geometry import pixels
+from .routing import choose_plan
 
-DEFAULTS={'width':1080,'height':1440,'border':6,'accent':'#e60012',
+DEFAULTS={'width':1080,'height':1440,'border':0,'accent':'#e60012',
           'action_margin':.025,'min_crop_short_side':380,'max_upscale':1.8,'min_photo_area':.45,
           'max_per_member':3,'enhance':True,'background_strength':.06,
           'shadow_lift':.06,'highlight_compression':.08,'sharpen_percent':28,
@@ -13,6 +15,8 @@ DEFAULTS={'width':1080,'height':1440,'border':6,'accent':'#e60012',
 
 def settings(config):
     result={**DEFAULTS,**config}
+    # Borderless is a product rule, including when replaying an older config.
+    result['border']=0
     bounds={'width':(720,2400),'height':(960,3200),'border':(0,24),'action_margin':(0,.08),
             'min_crop_short_side':(100,1200),'max_upscale':(1,2.5),'min_photo_area':(.35,.9),
             'max_per_member':(1,6),'background_strength':(0,.12),'shadow_lift':(0,.12),
@@ -30,7 +34,7 @@ def settings(config):
 
 
 def frame_for(config):
-    w,h,b=config['width'],config['height'],config['border']
+    w,h,b=config['width'],config['height'],0
     # Optional logo occupies its own footer, never overlays an action or a foot.
     footer=round(w*.09) if config.get('logo_path') else 0
     return [b,b,w-2*b,h-2*b-footer]
@@ -85,10 +89,20 @@ def enhance(im,record,crop,config):
 
 def render(path,record,out,config):
     with Image.open(path) as raw:original=ImageOps.exif_transpose(raw).convert('RGB')
-    geometry=plan(record,original.size,frame_for(config),config)
+    geometry=choose_plan(record,original,frame_for(config),config)
     if not geometry['passed']:return geometry
+    out=Path(out);out.parent.mkdir(parents=True,exist_ok=True)
+    if geometry['mode'] in ('native_crop','original_passthrough'):
+        if geometry['mode']=='original_passthrough':
+            output=out.with_suffix(Path(path).suffix.lower());shutil.copy2(path,output)
+            w,h=original.size
+        else:
+            output=out.with_suffix('.png');photo=original.crop(geometry['crop']);photo.save(output)
+            w,h=photo.size
+        return dict(geometry,tone={'enabled':False,'geometry_warp':False,'skin_reshape':False},width=w,height=h,
+                    files={'file':output.name,'preview':output.name,'before':None})
     crop=original.crop(geometry['crop']);treated,tone=enhance(crop,record,geometry['crop'],config)
-    canvas=Image.new('RGB',(config['width'],config['height']),config['accent'])
+    canvas=Image.new('RGB',(config['width'],config['height']),'#ebe8e3')
     x,y,w,h=geometry['frame'];px,py,pw,ph=geometry['placement']
     if geometry['mode']=='inset' and config['inset_background']=='soft':
         # Very blurred, low-contrast background is decoration only; the sharp action stays whole.
@@ -102,11 +116,11 @@ def render(path,record,out,config):
         with Image.open(config['logo_path']) as raw:logo=raw.convert('RGBA')
         logo.thumbnail((round(w*.30),round((config['height']-config['border']-top)*.65)))
         canvas.paste(logo,(x+(w-logo.width)//2,top+(config['height']-config['border']-top-logo.height)//2),logo)
-    out=Path(out);out.parent.mkdir(parents=True,exist_ok=True)
     canvas.save(out);canvas.save(out.with_suffix('.jpg'),quality=94,subsampling=0)
     # QA pair uses the same crop/scale so lighting changes can be assessed fairly.
     before=Image.new('RGB',canvas.size,'#ebe8e3')
     before.paste(crop.resize((pw,ph),Image.Resampling.LANCZOS),(px,py))
     before.save(out.with_name(out.stem+'-before.jpg'),quality=92)
     thumb=original.copy();thumb.thumbnail((720,960));thumb.save(out.with_name(out.stem+'-source.jpg'),quality=90)
-    return dict(geometry,tone=tone,width=canvas.width,height=canvas.height)
+    return dict(geometry,tone=tone,width=canvas.width,height=canvas.height,
+                files={'file':out.name,'preview':out.with_suffix('.jpg').name,'before':out.stem+'-before.jpg'})

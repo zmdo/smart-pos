@@ -10,6 +10,7 @@ from scripts.body_scan_contracts.bundles import seal
 from scripts.training_daily import EVIDENCE_SCHEMA
 from scripts.training_daily.analysis import normalize,inventory
 from scripts.training_daily.geometry import plan,pixels
+from scripts.training_daily.routing import screenshot_photo_box,choose_plan
 from scripts.training_daily.render import settings,frame_for,render,enhance,protection
 from scripts.training_daily.pipeline import run
 
@@ -84,8 +85,66 @@ class TrainingDailyTests(unittest.TestCase):
     def test_needs_review_never_writes_a_product(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);path=root/'source.png';Image.new('RGB',(800,1000),'white').save(path)
-            p=render(path,record(status='needs_review',reason='主体不明确'),root/'bad.png',settings({}))
+            p=render(path,record(status='needs_review',reason='动作范围置信不足'),root/'bad.png',settings({}))
             self.assertFalse(p['passed']);self.assertFalse((root/'bad.png').exists())
+
+    def test_narrow_screenshot_removes_only_verified_padding_at_native_resolution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);path=root/'screenshot.png';out=root/'out.png'
+            a=np.zeros((1600,800,3),dtype=np.uint8)
+            a[600:920]=np.random.default_rng(42).integers(30,240,(320,800,3),dtype=np.uint8)
+            a[1540:1546,300:500]=255  # The home indicator is not picture content.
+            im=Image.fromarray(a);im.save(path)
+            r=record(status='rejected',reason='截图过窄',source_size=[800,1600],subject_mode='single',
+                geometry_confidence=.95,quality={'clarity':4,'exposure':4},usable_bbox=[0,380,1000,570],
+                subject_bbox=[200,390,800,560],action_bbox=[100,390,900,560],protected_boxes=[])
+            cfg=settings({'border':6,'logo_path':'unused-for-native.png'})
+            meta=render(path,r,out,cfg)
+            self.assertEqual(meta['mode'],'native_crop');self.assertEqual(meta['crop'],[0,600,800,920])
+            with Image.open(out) as product:
+                self.assertEqual(product.size,(800,320));self.assertTrue(np.array_equal(np.asarray(product),a[600:920]))
+            self.assertEqual(meta['uniform_scale'],1)
+            self.assertFalse(meta['tone']['enabled']);self.assertIsNone(meta['files']['before'])
+            self.assertEqual(screenshot_photo_box(im,[0,0,1000,1000]),None)
+            # A dark scene without actual black padding is not trimmed by a model hint.
+            self.assertIsNone(screenshot_photo_box(Image.new('RGB',im.size,(20,20,20)),r['usable_bbox']))
+            self.assertFalse(choose_plan(record(**{**r,'kind':'posed_gym'}),im,frame_for(cfg),cfg)['passed'])
+
+    def test_ambiguous_subject_preserves_original_jpeg_bytes_and_orientation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);path=root/'original.jpg'
+            exif=Image.Exif();exif[274]=6
+            Image.new('RGB',(1000,800),(90,100,110)).save(path,exif=exif,quality=87)
+            cfg=settings({'logo_path':'unused-for-raw.png'})
+            p=render(path,record(status='needs_review',subject_mode='ambiguous'),root/'product.png',cfg)
+            self.assertEqual(p['mode'],'original_passthrough');self.assertFalse(p['tone']['enabled'])
+            self.assertEqual((p['width'],p['height']),(800,1000));self.assertEqual(p['uniform_scale'],1)
+            self.assertEqual(sha(path),sha(root/p['files']['file']));self.assertFalse((root/'product.png').exists())
+
+    def test_standard_product_has_no_border_even_with_legacy_config(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);path=root/'source.png';Image.new('RGB',(900,1200),(80,100,120)).save(path)
+            cfg=settings({'border':6,'enhance':False});self.assertEqual(frame_for(cfg),[0,0,1080,1440])
+            r=record(source_size=[900,1200],subject_bbox=[0,0,1000,1000],action_bbox=[0,0,1000,1000],protected_boxes=[])
+            p=render(path,r,root/'product.png',cfg)
+            a=np.asarray(Image.open(root/'product.png'))
+            self.assertEqual(p['mode'],'fill');self.assertTrue(np.all(a==[80,100,120]))
+
+    def test_pipeline_exports_ambiguous_original_without_fake_color_comparison(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base=Path(tmp);inputs=base/'input';evidence=base/'evidence'
+            path=inputs/'测试店/会员/source.jpg';path.parent.mkdir(parents=True)
+            Image.new('RGB',(800,1000),(90,100,110)).save(path)
+            row=record(status='needs_review',subject_mode='ambiguous',source=str(path.relative_to(inputs)),source_sha256=sha(path))
+            group=dict(store='测试店',member='会员',directory='测试店/会员')
+            for name,value in [('records.json',[row]),('groups.json',[group]),('sources.json',{})]:save(evidence/name,value)
+            seal(evidence,EVIDENCE_SCHEMA,('records.json','groups.json','sources.json'))
+            counts=run(inputs,evidence,base/'out');self.assertEqual(counts['products'],1);self.assertEqual(counts['review_groups'],0)
+            g=read(base/'out/results.json')[0];p=g['products'][0]
+            self.assertEqual(g['sources'][0]['status'],'needs_review')  # Keep the model's evidence intact.
+            self.assertEqual(g['sources'][0]['output_status'],'selected');self.assertEqual(p['sha256'],sha(path))
+            page=(base/'out/index.html').read_text();self.assertIn('下载 JPG',page)
+            self.assertNotIn('src="None"',page);self.assertNotIn('data-image="before"',page)
 
     def test_configuration_cannot_request_excessive_effects(self):
         for bad in ({'background_strength':1},{'max_upscale':10},{'width':float('nan')},{'max_per_member':2.5}):
@@ -114,7 +173,7 @@ class TrainingDailyTests(unittest.TestCase):
             self.assertFalse((base/'bad').exists())
 
     def test_render_modules_do_not_import_models_or_analysis(self):
-        for name in ('render.py','geometry.py','pipeline.py','__main__.py'):
+        for name in ('render.py','geometry.py','routing.py','pipeline.py','__main__.py'):
             nodes=ast.walk(ast.parse((Path(__file__).parents[1]/name).read_text()))
             modules=[n.module or '' for n in nodes if isinstance(n,ast.ImportFrom)]
             self.assertFalse(any('client' in m or m.endswith('analysis') for m in modules))
