@@ -1,0 +1,46 @@
+{
+  "version": "report-comparison-product-v3",
+  "date": "2026-11-07",
+  "source_policy": "original_measurements_first_summary_fills_gaps",
+  "sources": 51,
+  "cases": 18,
+  "checks": {
+    "valid_time_rows": 18,
+    "rows": 261,
+    "original": 163,
+    "original_cells_checked": 329,
+    "computed_deltas_checked": 242,
+    "summary_supplement": 80,
+    "unchanged_photo_regions": 30
+  },
+  "html_links_checked": 72,
+  "all_input_hashes_unchanged": true,
+  "report_node_tests": 35,
+  "product_suite_tests": 61,
+  "new_model_calls": 0,
+  "li_yuheng": {
+    "before": "2026-09-13",
+    "after": "2026-10-16",
+    "days": 33,
+    "weight_before": "56.9",
+    "weight_after": "63",
+    "delta": "+6.1"
+  },
+  "remote_output": "/root/autodl-fs/case-studio/experiments/report-comparison-original-first-v3-20261107/validated-final",
+  "tables_bundle_sha256": "844dee169b9b035daf5029977e69f7aafb4bbf4920f7c3b1d9a4be0f9ec17d50",
+  "products_bundle_sha256": "a420dd0cb3a6ddf22428fa281b74bbf9a80aac611b9dcc6071cd01611fede1ea",
+  "total_tests": 96,
+  "old_policy_bundle_rejected": true,
+  "local_filters": {
+    "all": 18,
+    "computed": 18,
+    "review": 16,
+    "none": 0
+  },
+  "local_product_hashes_verified": 18,
+  "visual_review": [
+    "c014: original dates, 33 days and complete table visible",
+    "c004: bilateral measurements and rows visible"
+  ],
+  "local_preview": "/Users/zhangming/Projects/FP16-Speed/artifacts/report-comparison-original-first-v3/validated/index.html"
+}

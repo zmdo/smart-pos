@@ -25,16 +25,18 @@ class FiveColumnTests(unittest.TestCase):
         c=build_cases([r])[0];self.assertEqual(c['store'],'测试店');self.assertEqual(c['display_store'],'别的店')
     def test_pair_uses_dates_even_when_weight_increased(self):
         a=measurement('a1','2026-02-01','70');b=measurement('a2','2026-01-01','60')
-        case=build_cases([a,b])[0];self.assertEqual(case['pair']['before'],'a2');self.assertEqual(case['rows'][0]['delta'],'+10')
+        case=build_cases([a,b])[0];self.assertEqual(case['pair']['before'],'a2');self.assertEqual(next(r for r in case['rows'] if r.get('key')=='weight')['delta'],'+10')
     def test_units_converted_before_calculation(self):
         a=measurement('a1','2026-01-01','120','斤');b=measurement('a2','2026-02-01','57')
         rows,_=derive(a,b);self.assertEqual(rows[0]['before'],'60');self.assertEqual(rows[0]['delta'],'-3');self.assertEqual(rows[0]['unit'],'kg')
     def test_missing_date_does_not_guess_order(self):
         a=measurement('a1',None,'60');b=measurement('a2','2026-02-01','57')
         case=build_cases([a,b])[0];self.assertIsNone(case['pair']);self.assertFalse(case['rows'])
-    def test_existing_table_has_priority_over_measurement(self):
+    def test_original_measurement_has_priority_and_summary_fills_gaps(self):
         r=normalize(table(),source('a3'));a=measurement('a1','2026-01-01','60');b=measurement('a2','2026-02-01','57')
-        c=build_cases([r,a,b])[0];self.assertEqual(c['table_origin'],'transcribed');self.assertEqual(c['rows'][1]['delta'],'+3')
+        c=build_cases([r,a,b])[0];self.assertEqual(c['table_origin'],'computed')
+        self.assertEqual(next(r for r in c['rows'] if r['type']=='体重')['delta'],'-3')
+        self.assertEqual(next(r for r in c['rows'] if r['type']=='未知指标')['delta'],'-3')
     def test_uncertain_or_missing_values_not_zero(self):
         a=measurement('a1','2026-01-01','60');b=measurement('a2','2026-02-01','')
         rows,skipped=derive(a,b);self.assertFalse(rows);self.assertTrue(skipped)
@@ -45,7 +47,7 @@ class FiveColumnTests(unittest.TestCase):
         a=measurement('a1','2026-01-01','60');a['metrics']*=2;b=measurement('a2','2026-02-01','57')
         rows,skipped=derive(a,b);self.assertFalse(rows);self.assertTrue(skipped)
     def test_explicit_table_dates_choose_matching_sessions(self):
-        raw=table();raw.update(before_date='2026-02-01',after_date='2026-03-01')
+        raw=table();raw.update(before_date='2026-02-01',after_date='2026-03-01');raw['rows'][0].update(before='2026.2.1',after='2026.3.1')
         r=normalize(raw,source('t1'))
         c=build_cases([r]+[measurement('a'+str(i),f'2026-0{i}-01',str(70-i)) for i in (1,2,3)])[0]
         self.assertEqual(c['pair']['before'],'a2');self.assertEqual(c['pair']['after'],'a3')

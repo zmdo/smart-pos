@@ -28,3 +28,16 @@ class ReportProductTests(unittest.TestCase):
             self.assertTrue(all(x['uniform_scale'] and not x['content_clipped'] for x in r['images']))
     def test_no_data_no_fabricated_product(self):
         with self.assertRaisesRegex(ValueError,'no_table'):render({'rows':[]},{},800,FONT,Path('/unused'))
+
+    def test_old_transcribed_bundle_is_rejected_before_rendering(self):
+        from scripts.body_scan_contracts.io import save
+        from scripts.body_scan_contracts.bundles import seal
+        from report_comparison.__main__ import run
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);tables=root/'tables';tables.mkdir()
+            save(tables/'records.json',[]);save(tables/'tables.json',[{'table_origin':'transcribed'}])
+            (tables/'index.html').write_text('old bundle')
+            seal(tables,'body-report-five-column-v1',('records.json','tables.json','index.html'))
+            with self.assertRaisesRegex(ValueError,'source_policy_upgrade_required'):
+                run(tables,root/'missing-crops',root/'out',FONT)
+            self.assertFalse((root/'out').exists())

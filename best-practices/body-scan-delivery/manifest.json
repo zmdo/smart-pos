@@ -8,7 +8,7 @@
     "view_comparison": "body-same-view-reference-v5",
     "single_view": "body-delivery-v1",
     "member_cover": "body-member-cover-v3",
-    "report_comparison": "report-comparison-product-v2"
+    "report_comparison": "report-comparison-product-v3"
   },
   "dependencies": "Frozen local scripts and four sibling renderer packages; data-only upstream frame contract, no development imports",
   "excluded_tests": "14 classification/ranking tests remain with the classification node; revision fixtures now use preclassified labels",
@@ -204,15 +204,15 @@
     },
     {
       "path": "report_comparison/README.md",
-      "sha256": "42ea72ea42d7eb11af8d5f490bf0e3b80b20b1aba54d3b3268ab0bcbfccfe24a"
+      "sha256": "b8c5977d96289bc39f1d614c290640d9acf7e83d37c34f131d516513b9c2c1e4"
     },
     {
       "path": "report_comparison/__init__.py",
-      "sha256": "d8f2a7a5ab602b0d0c7f8e265aab25beb72110db777eb81f41164e0dbb8887bb"
+      "sha256": "087a316e45f1d6e3e504579ec0036ee7a12f7003cb84333cd9cefedbea700d9e"
     },
     {
       "path": "report_comparison/__main__.py",
-      "sha256": "47eaf03185d2786528d6df1930a84bd048a7004045114d67685f1ab3f5b66544"
+      "sha256": "88bcb20bdf2a02567bdab31e456ab281ca24a80569bbb990c8f8bbb35e794bb3"
     },
     {
       "path": "report_comparison/render.py",
@@ -224,11 +224,15 @@
     },
     {
       "path": "report_comparison/tests/test_report_product.py",
-      "sha256": "a828552823b8b1a0570b94c41f16461bcdd0f5c6e9240cf3ff48eb52d48b66ae"
+      "sha256": "c6973e79b1ec820c6a923a56f657272030603e6640bf2f6a8d04aac529380fb6"
     },
     {
       "path": "report_comparison/validation-clean-v2.json",
       "sha256": "62dda840fa210e012a8c9579b97db6aadd5e1f556350834a34e5fae127faa347"
+    },
+    {
+      "path": "report_comparison/validation-original-first-v3.json",
+      "sha256": "12b71451d404960f2bbb98cc4e9d42fae299b3a34346c163910066aae0b77ad2"
     },
     {
       "path": "report_comparison/validation.json",
@@ -515,7 +519,7 @@
     "view_comparison": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "single_view": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "member_cover": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
-    "report_comparison": "style update on cec7b0a9b3d9abe3347788e62a32c1387faebefb"
+    "report_comparison": "original-report-first update on fc03972"
   },
   "cover_entrypoint": "member_cover/run.sh",
   "cover_input_contract": "existing verified delivery + body-scan-cover-frames-v2 + optional text overrides",

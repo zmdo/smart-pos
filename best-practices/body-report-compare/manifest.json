@@ -1,12 +1,12 @@
 {
-  "version": "body-report-compare-v2",
+  "version": "body-report-compare-v3",
   "authority": "user-approved independent processing node",
   "source_commit": "2b62aefc3656ed5ea54fc99325540269f6c0e7e4",
   "entrypoint": "run.sh",
   "files": [
     {
       "path": "README.md",
-      "sha256": "36551599ac6cc31ecc291ece1ca89f3a4a09b4cddb482c8c9c091a98e35a26cf"
+      "sha256": "b12cbe8dd520a1ad6e8389678675a94b270f7616750bc0d8ae8301a45243b8d0"
     },
     {
       "path": "launch.py",
@@ -43,6 +43,10 @@
       "source_sha256": "3f1b3c76c95c6cbf65003b87c5808d9ffdc10a2e67945acdf2d261fefd8d6531"
     },
     {
+      "path": "scripts/body_report_compare/comparison_rows.py",
+      "sha256": "0bda243586313b1cd84fd2a80208c3361691dde6d208dce942962fb42d8208fa"
+    },
+    {
       "path": "scripts/body_report_compare/extraction.py",
       "sha256": "d7382ce78cc8a2be68743c9de9a6d6dabd43d312105fc15538165d41ccfc5ab8",
       "source": "scripts/body_report_compare/extraction.py",
@@ -65,19 +69,23 @@
     },
     {
       "path": "scripts/body_report_compare/table_data.py",
-      "sha256": "140c1a2e9ad66afeb447cfe15991c3fd609040ae7dd697f33f9d503e33eb76da"
+      "sha256": "889a7c906ec056f78d4326b12f20f0fd7ce1845bd32f802d828677076c0abc09"
     },
     {
       "path": "scripts/body_report_compare/table_pipeline.py",
-      "sha256": "60a0f23cdc5f50b303002c7ae3dfde0b7703f740a527d6e889522c2ac0d8b416"
+      "sha256": "bea03794e98e62ae49570d81f57f0fafcb799ce01903dcab1e91a02511e46f1e"
     },
     {
       "path": "scripts/body_report_compare/tables.py",
-      "sha256": "ccff4df984aff1d632cc00649c48d2a9b4b9e6c8f16e3a21755c3ba114b05586"
+      "sha256": "bd77eea49cbdb624371b8f8206d2354e529dbc1a3815a32db18db4f5fecefbf8"
     },
     {
       "path": "scripts/body_report_compare/tests/test_five_columns.py",
-      "sha256": "46f7197f514374f4cb47324d2c362e78922501c5721443b4c92ecce0a92afec8"
+      "sha256": "ab95637ef08d517e21b430e5029cddafb865ea0feab5720777da30da862e2397"
+    },
+    {
+      "path": "scripts/body_report_compare/tests/test_original_first.py",
+      "sha256": "de90727ee848ad279e43de454d63d3ecf4f600a1d69d1943e6a72b4dd257c38b"
     },
     {
       "path": "scripts/body_report_compare/tests/test_report_node.py",
@@ -135,8 +143,12 @@
     {
       "path": "validation-five-column.json",
       "sha256": "02e24f7def4caa18f75bdeced5a6adfeefcd557ffc13f5635114da313ff31b7a"
+    },
+    {
+      "path": "validation-original-first-v3.json",
+      "sha256": "12b71451d404960f2bbb98cc4e9d42fae299b3a34346c163910066aae0b77ad2"
     }
   ],
   "dependencies": "self-contained verified Python import closure; no sibling best-practice or development fallback",
-  "extension_base_commit": "a6af050984febcfcef9513aa15b507d6dfe72489"
+  "extension_base_commit": "fc03972e92e829ea7d6d4279501ae2e4287a222d"
 }

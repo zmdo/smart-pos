@@ -1,7 +1,8 @@
 """Five-column report data; deterministic arithmetic, pairing and provenance."""
 import re
 from collections import defaultdict
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 from decimal import Decimal, InvalidOperation
 
 SCHEMA = 'body-report-five-column-v1'
@@ -58,19 +59,36 @@ def canonical(value, unit):
                    'm':(Decimal('100'),'cm'),'mm':(Decimal('.1'),'cm')}.get(u,(Decimal(1),u))
     return n*factor,target
 
-def valid_date(value):
-    try:return date.fromisoformat(value).isoformat()
+def today_cn():
+    return datetime.now(ZoneInfo('Asia/Shanghai')).date()
+
+def valid_date(value,as_of=None):
+    as_of=as_of or today_cn()
+    try:
+        if not isinstance(value,str) or not re.fullmatch(r'20\d{2}-\d{2}-\d{2}',value):return None
+        day=date.fromisoformat(value)
+        return day.isoformat() if day<=as_of else None
     except (ValueError,TypeError):return None
 
-def normalize(raw, source):
+def date_from_text(value,as_of=None):
+    # Parse the actual cell, never extract a valid-looking year from 20266.
+    compact=re.sub(r'\s+','',text(value))
+    found=re.findall(r'(?<!\d)(20\d{2})[年./-](\d{1,2})[月./-](\d{1,2})(?:日)?(?!\d)',compact)
+    if len(found)!=1:return None
+    y,m,d=map(int,found[0])
+    return valid_date(f'{y:04d}-{m:02d}-{d:02d}',as_of)
+
+def normalize(raw, source, as_of=None):
     if not isinstance(raw,dict): raise ValueError('invalid_transcription')
     kind=raw.get('kind')
     if kind not in ('comparison_table','measurement','other'):raise ValueError('unknown_report_kind')
     rec={**source,'kind':kind,'printed_member':text(raw.get('member')),'printed_store':text(raw.get('store')),
          'warnings':[text(x) for x in raw.get('issues',[]) if text(x)],'rows':[], 'metrics':[],
-         'measurement_date':valid_date(raw.get('measurement_date')),
-         'before_date':valid_date(raw.get('before_date')),'after_date':valid_date(raw.get('after_date')),
+         'measurement_date':valid_date(raw.get('measurement_date'),as_of),
+         'before_date':valid_date(raw.get('before_date'),as_of),'after_date':valid_date(raw.get('after_date'),as_of),
          'date_evidence':text(raw.get('date_evidence')),'identity_ok':True}
+    rec['raw_dates']={k:raw.get(k) for k in ('measurement_date','before_date','after_date')}
+    rec['date_rejections']=[{'field':k,'value':raw.get(k),'reason':'日期须为有效的20xx年日期，且不得晚于处理日期'} for k in rec['raw_dates'] if raw.get(k) and not rec.get(k)]
     # User rule: report identity is authoritative; directory remains the grouping key.
     name=rec['printed_member']; expected=source['member']
     if name and name not in expected and expected not in name:
@@ -97,6 +115,12 @@ def normalize(raw, source):
             if declared is not None and row['computed_delta'] is not None and abs(declared-(a-b))>Decimal('.011'):
                 row['warnings'].append('原填变化量与后减前不一致，保留原填值')
             rec['rows'].append(row)
+        date_rows=[r for r in rec['rows'] if r['type'] in ('时间','日期','测试日期')]
+        if len(date_rows)==1:
+            for side in ('before','after'):
+                cell=date_rows[0][side];field=side+'_date'
+                rec[field]=date_from_text(cell,as_of)
+                if cell and not rec[field]:rec['date_rejections'].append({'field':field,'value':cell,'reason':'原始日期单元格不合法或晚于处理日'})
         if not rec['rows']:rec['warnings'].append('未识别到可用表格行')
     elif kind=='measurement':
         for r in raw.get('metrics',[]):
@@ -184,7 +208,9 @@ def choose_pair(measurements,table=None):
     return {'before':selected[0]['source_id'],'after':selected[1]['source_id'],'before_date':dates[0],
             'after_date':dates[1],'basis':basis},warnings
 
-def build_cases(records):
+def build_cases(records,as_of=None):
+    from .comparison_rows import rebuild_rows
+    as_of=as_of or today_cn()
     groups=defaultdict(list)
     for r in records:groups[(r['store'],r['member'])].append(r)
     cases=[]
@@ -194,30 +220,26 @@ def build_cases(records):
         table=tables[0] if tables else None
         measurements=[r for r in recs if r.get('kind')=='measurement']
         pair,warnings=choose_pair(measurements,table)
-        rows=table['rows'] if table else [];origin='transcribed' if table else 'none';skipped=[]
-        if table and len(tables)>1:
-            signature=lambda t:[tuple(r[k] for k in ('type','before','after','delta','unit')) for r in t['rows']]
-            if any(signature(t)!=signature(table) for t in tables[1:]):warnings.append('存在多份内容不同的对比表，采用缺失最少、行数最完整版本，其他版本保留供审核')
-        if not table and pair:
-            byid={r['source_id']:r for r in measurements}
-            rows,skipped=derive(byid[pair['before']],byid[pair['after']]);origin='computed' if rows else 'none'
-        for r in recs:
-            warnings.extend(r.get('warnings',[]) if not r.get('identity_ok',True) else [])
-        if table:warnings.extend(table['warnings'])
-        if any(r['warnings'] for r in rows):warnings.append('表格包含待核对单元格，见逐行说明')
-        if not rows:warnings.append('没有可用现成表格或可配对体测数据，不输出对比表')
+        byid={r['source_id']:r for r in measurements}
+        before=byid[pair['before']] if pair else None;after=byid[pair['after']] if pair else None
+        rows,corrections,skipped,row_warnings=rebuild_rows(before,after,table,pair,as_of)
+        warnings.extend(row_warnings)
+        if any(r['value_source_kind']=='summary_supplement' for r in rows):
+            warnings.append('原始报告缺失的指标由阶段汇总表补充，来源记录在逐行数据中')
+        if not rows:warnings.append('没有可用于对比的前后实测值或补充数据，不输出表格')
+        if corrections:warnings.append('已按原始报告重建日期和实测值，并重新计算天数及变化量；原填值保留供追溯')
+        if any(r['warnings'] for r in rows):warnings.append('部分补充指标需要核对，详见逐行说明')
         names={r['printed_member'] for r in recs if r.get('identity_ok') and r.get('printed_member')}
-        if len(names)>1:warnings.append('同目录报告存在多个会员姓名，以选中报告为显示依据，请审核归属')
+        if len(names)>1:warnings.append('同目录报告存在多个会员姓名，请审核归属')
         chosen_name=(table.get('printed_member') if table else None) or (next(iter(names)) if len(names)==1 else member)
-        printed_store=(table.get('printed_store') if table else '') or ''
-        compact=re.sub(r'\s+','',printed_store)
+        compact=re.sub(r'\s+','',(table.get('printed_store') if table else '') or '')
         store_names=re.findall(r'[\u4e00-\u9fff]{2,6}店',compact)
         chosen_store=store if store in compact or not store_names else store_names[-1]
         cases.append({'case_id':f'c{i:03d}','store':store,'member':member,'headers':HEADERS,
-          'table_origin':origin,'table_source_id':table['source_id'] if table else None,'rows':rows,'pair':pair,
-          'warnings':list(dict.fromkeys(warnings)),'skipped_metrics':skipped,
+          'table_origin':'computed' if rows else 'none','table_source_id':table['source_id'] if table else None,
+          'source_policy':'original_measurements_first_summary_fills_gaps','as_of':as_of.isoformat(),
+          'rows':rows,'pair':pair,'corrections':corrections,'warnings':list(dict.fromkeys(warnings)),'skipped_metrics':skipped,
           'display_member':chosen_name,'display_store':chosen_store,'identity_authority':'report',
           'source_ids':[r['source_id'] for r in recs],'alternative_table_sources':[r['source_id'] for r in tables[1:]],
-          'requires_review':bool(warnings) or any(r['warnings'] for r in rows),
-          'transcription_method':'visual_model_or_document_text; not human verified'})
+          'requires_review':bool(warnings),'transcription_method':'visual_model_or_document_text; not human verified'})
     return cases
