@@ -1,7 +1,7 @@
 {
   "validated_on": "2026-11-07",
   "status": "passed",
-  "unit_tests": 13,
+  "unit_tests": 15,
   "groups": 18,
   "candidate_sources": 17,
   "accepted_sources": 16,
@@ -13,6 +13,12 @@
     1440
   ],
   "border": "#e60012",
+  "zoom_vs_previous": [
+    1.0203,
+    1.2299
+  ],
+  "mean_screenshot_frame_fill": 0.9806,
+  "frames_at_least_98_percent": 14,
   "layout_counts": {
     "long_story": 2,
     "short_reply": 9,
@@ -32,11 +38,13 @@
     "No screenshot is stretched, obscured, repeated or rewritten",
     "All bound source files remain unchanged",
     "Scores match deterministic weights and only member messages count",
-    "Gallery filters and all image/download links checked offline"
+    "Gallery filters and all image/download links checked offline",
+    "All images are larger than previous layout with identical crop bounds",
+    "Brand icon and text fit inside their panels without overlaps"
   ],
   "limitations": [
     "Real dataset has one accepted screenshot per member; multi-image layout uses synthetic regression tests",
-    "Wide source screenshots retain whitespace on the fixed portrait canvas",
+    "Very wide sources use a short full-width photo frame with a larger title area; portrait canvas cannot be filled with photo pixels without losing text",
     "Model role and crop boundaries remain reviewable in HTML; original redactions are preserved"
   ]
 }

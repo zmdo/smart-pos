@@ -141,4 +141,27 @@ class AlbumTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'brand_text_too_long'):
             draw_brand(Image.new('RGB',(720,960)),[500,0,160,960],FONT,{'brand':'长'*40})
 
+    @unittest.skipUnless(FONT.exists(),'font not installed')
+    def test_adaptive_brand_elements_do_not_overlap_or_leave_the_panel(self):
+        from scripts.testimonial_album.render import draw_brand
+        for w,h in ((1050,130),(1050,400),(1050,600),(1050,1200),(150,1410),(330,1410)):
+            elements=draw_brand(Image.new('RGB',(w,h)),[0,0,w,h],FONT,{})
+            for i,element in enumerate(elements):
+                l,t,r,b=element['bounds'];self.assertTrue(0<=l<r<=w and 0<=t<b<=h,(w,h,element))
+                for other in elements[:i]:
+                    ol,ot,orr,ob=other['bounds']
+                    self.assertFalse(max(l,ol)<min(r,orr) and max(t,ot)<min(b,ob),(element,other))
+
+    @unittest.skipUnless(FONT.exists(),'font not installed')
+    def test_short_and_tall_images_fill_their_frame_without_losing_pixels(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            for w,h in ((1200,220),(1000,1000),(600,1300)):
+                p=root/f'{w}-{h}.png';Image.new('RGB',(w,h),'#e9ecef').save(p)
+                r=record();r['context_bbox']=[0,0,1000,1000]
+                result=render_page([r],{'a0001':p},rank_messages([r])[0],FONT,root/'out.png',{})
+                layer=result['layers'][0]
+                self.assertEqual(layer['crop'],[0,0,w,h]);self.assertEqual(len(result['layers']),1)
+                self.assertGreaterEqual(layer['frame_fill'],.99)
+
 if __name__=='__main__':unittest.main()

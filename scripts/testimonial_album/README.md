@@ -37,6 +37,8 @@ python -m scripts.testimonial_album \
 
 先选角色和边界明确的完整回复，再按分数排序。长篇、重点、简短和横屏仅是排版分组：长篇至少 300 字且 70 分，重点至少 120 字，其余为简短；横屏图按实际比例适配。单图比较底部标题板与右侧标题板两种构图，在同一固定画布中优先保证文字可读；信息评分影响标题区预留空间。双图按分差分配主辅面积，并保留各自完整上下文，不复制素材。
 
+填框版压缩外边距、截图内边距和标题的最低占位，让截图等比放大。底部标题布局按截图实际高度收紧主图框；右侧标题布局按截图实际宽度收紧主图框，剩余空间由标题板接收。不能为铺满画布裁掉文字；极横的截图使用较矮的满宽图片框和较大的标题区。标题与信封图案分别布局，避免自适应面板中重叠或溢出。
+
 图上仅出现截图与标题装饰，评分和技术信息放在 HTML 详情及 JSON。不确定的角色、裁剪边界、原图截断或模型识别疑点写入 `review.json`，不凭空补全。
 
 ## 配置与输出
@@ -51,6 +53,6 @@ python -m unittest discover -s scripts/testimonial_album/tests -v
 
 目前核查 18 个会员组、17 张候选，16 张是有效感言；何彦霖的 `a0128` 为训练计划，剔除并保留原因。易丽云、黎国萍缺少感言截图。有效数据每位会员各一张，因此当前 16 张实际成品均使用单图构图；双图与四种布局通过独立测试覆盖。
 
-验证结果见 [validation.json](validation.json)：13 项测试通过。16 张 PNG/JPG 均为 1080×1440，逐一核对原图 SHA、会员气泡范围、截图唯一性以及成品像素与等比缩放结果一致；HTML 六个筛选项和下载链接已核验。横屏截图在竖向画布内会保留留白，模型识别和原图遮挡仍可在详情里人工核查。
+验证结果见 [validation.json](validation.json)：15 项测试通过。16 张 PNG/JPG 均为 1080×1440，逐一核对原图 SHA、会员气泡范围、截图唯一性以及成品像素与等比缩放结果一致；HTML 六个筛选项和下载链接已核验。填框版与上一版使用完全相同的源图裁剪范围，截图显示更大；新增标题元素边界与重叠检查。模型识别和原图遮挡仍可在详情里人工核查。
 
-红框预览产物：`artifacts/testimonial-album-v1/validated-red/index.html`（工作区根目录，Git 不存会员图片）。远程产物位于 `/root/autodl-fs/case-studio/experiments/testimonial-album-v1-20261107/validated-red`。
+当前填框预览：`artifacts/testimonial-album-v2/validated/index.html`（工作区根目录，Git 不存会员图片）。远程产物位于 `/root/autodl-fs/case-studio/experiments/testimonial-album-v1-20261107/validated-filled`。前一版保留在 `artifacts/testimonial-album-v1/validated-red`。

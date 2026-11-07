@@ -23,45 +23,67 @@ def open_crop(path,bounds):
     crop=pixel_box(bounds,im.size)
     return im.crop(tuple(crop)),crop,im.size
 
+def fit_font(draw,text,path,size,width,weight=700,error='display_text_too_long_for_canvas'):
+    font=load_font(path,size,weight)
+    while draw.textlength(text,font=font)>width:
+        if font.size<=8:raise ValueError(error)
+        font=load_font(path,font.size-1,weight)
+    return font
+
 def draw_brand(canvas,rect,font_path,config):
     x,y,w,h=rect;draw=ImageDraw.Draw(canvas);red=config.get('accent','#e60012')
     draw.rounded_rectangle((x,y,x+w,y+h),radius=12,fill='#fffdf9')
-    # Keep the title/icon together even when this is a tall side panel.
-    content_h=min(h,w*1.55)
-    if h>content_h:y+=(h-content_h)/2;h=content_h
-    draw.line((x+w*.18,y+h*.08,x+w*.82,y+h*.08),fill=red,width=max(2,round(w*.008)))
-    wide=w>h*2
-    # Small vector envelope/heart, independent of font emoji coverage.
-    ew=min(w*.52,h*.44) if not wide else h*.8
-    eh=ew*.64;ex=x+(w-ew)/2 if not wide else x+w*.055;ey=y+h*.18
-    draw.rounded_rectangle((ex,ey,ex+ew,ey+eh),radius=ew*.055,fill='#dce5eb')
-    draw.polygon([(ex,ey),(ex+ew/2,ey+eh*.66),(ex+ew,ey)],fill='#edf2f5')
-    draw.polygon([(ex,ey+eh),(ex+ew/2,ey+eh*.42),(ex+ew,ey+eh)],fill='#c6d4de')
-    cx=ex+ew/2;cy=ey+eh*.52;r=ew*.115
-    draw.ellipse((cx-2*r,cy-r,cx,cy+r),fill=red);draw.ellipse((cx,cy-r,cx+2*r,cy+r),fill=red)
-    draw.polygon([(cx-2*r,cy),(cx+2*r,cy),(cx,cy+2.6*r)],fill=red)
-    title=config.get('title','会员感言');lines=[title[:2],title[2:]] if len(title)==4 and not wide else [title]
-    size=round(min(w*.28,h*.16)) if not wide else round(h*.4);font=load_font(font_path,size)
-    for i,line in enumerate(lines):
-        while draw.textlength(line,font=font)>w*.86:
-            size-=1;font=load_font(font_path,size)
-        box=draw.textbbox((0,0),line,font=font);yy=y+h*.47+i*h*.21 if not wide else y+h*.22
-        draw.text((x+(w-(box[2]-box[0]))/2-box[0],yy-box[1]),line,font=font,fill=red)
-    brand=config.get('brand','UP 健身私教馆');font=load_font(font_path,max(10,round(w*.045 if not wide else h*.12)),450)
-    while draw.textlength(brand,font=font)>w*.85:
-        if font.size<=8:raise ValueError('brand_text_too_long_for_canvas')
-        font=load_font(font_path,font.size-1,450)
-    draw.text((x+(w-draw.textlength(brand,font=font))/2,y+h*(.92 if not wide else .76)),brand,font=font,fill='#8a7770')
+    title=config.get('title','会员感言');brand=config.get('brand','UP 健身私教馆');elements=[]
+    def text_center(text,font,cx,top,role):
+        b=draw.textbbox((0,0),text,font=font);tw,th=b[2]-b[0],b[3]-b[1]
+        left=cx-tw/2;draw.text((left-b[0],top-b[1]),text,font=font,fill=red if role=='title' else '#8a7770')
+        elements.append({'role':role,'bounds':[left,top,left+tw,top+th]})
+    def envelope(left,top,ew):
+        eh=ew*.64
+        draw.rounded_rectangle((left,top,left+ew,top+eh),radius=ew*.055,fill='#dce5eb')
+        draw.polygon([(left,top),(left+ew/2,top+eh*.66),(left+ew,top)],fill='#edf2f5')
+        draw.polygon([(left,top+eh),(left+ew/2,top+eh*.42),(left+ew,top+eh)],fill='#c6d4de')
+        cx=left+ew/2;cy=top+eh*.45;r=ew*.105
+        draw.ellipse((cx-2*r,cy-r,cx,cy+r),fill=red);draw.ellipse((cx,cy-r,cx+2*r,cy+r),fill=red)
+        draw.polygon([(cx-2*r,cy),(cx+2*r,cy),(cx,cy+2.6*r)],fill=red)
+        elements.append({'role':'icon','bounds':[left,top,left+ew,top+eh]})
+    if w>=h*1.6:
+        # Separate icon and text columns even for a large bottom title panel.
+        inset=min(w,h)*.10;ew=min(h*.68,w*.22);gap=w*.04
+        available=w-2*inset-ew-gap
+        title_font=fit_font(draw,title,font_path,min(h*.43,w*.12),available)
+        brand_font=fit_font(draw,brand,font_path,min(h*.13,w*.035),available,450,'brand_text_too_long_for_canvas')
+        tb=draw.textbbox((0,0),title,font=title_font);bb=draw.textbbox((0,0),brand,font=brand_font)
+        th=tb[3]-tb[1];bh=bb[3]-bb[1];textw=max(tb[2]-tb[0],bb[2]-bb[0])
+        totalw=ew+gap+textw;left=x+(w-totalw)/2;ty=y+(h-th-bh-h*.08)/2
+        envelope(left,y+(h-ew*.64)/2,ew)
+        text_center(title,title_font,left+ew+gap+textw/2,ty,'title')
+        text_center(brand,brand_font,left+ew+gap+textw/2,ty+th+h*.08,'brand')
+    else:
+        lines=[title[:2],title[2:]] if len(title)==4 else [title]
+        title_font=fit_font(draw,max(lines,key=len),font_path,min(w*.32,h*.17),w*.84)
+        brand_font=fit_font(draw,brand,font_path,min(w*.045,h*.06),w*.84,450,'brand_text_too_long_for_canvas')
+        heights=[draw.textbbox((0,0),line,font=title_font)[3]-draw.textbbox((0,0),line,font=title_font)[1] for line in lines]
+        bb=draw.textbbox((0,0),brand,font=brand_font);bh=bb[3]-bb[1]
+        ew=min(w*.60,h*.29);gap=min(w*.08,h*.045)
+        total=ew*.64+sum(heights)+bh+gap*(len(lines)+1)
+        top=y+(h-total)/2
+        envelope(x+(w-ew)/2,top,ew);top+=ew*.64+gap
+        for line,th in zip(lines,heights):text_center(line,title_font,x+w/2,top,'title');top+=th+gap
+        text_center(brand,brand_font,x+w/2,top,'brand')
+    return elements
 
 def paste_card(canvas,im,rect,asset_id,role,crop,original_size):
-    x,y,w,h=map(round,rect);pad=max(6,round(canvas.width*.007))
+    x,y,w,h=map(round,rect);pad=max(3,round(canvas.width*.003))
     ImageDraw.Draw(canvas).rounded_rectangle((x,y,x+w,y+h),radius=12,fill='#f7f5f1')
     scale=min((w-2*pad)/im.width,(h-2*pad)/im.height)
     size=(max(1,round(im.width*scale)),max(1,round(im.height*scale)))
     placed=im.resize(size,Image.Resampling.LANCZOS)
     px=x+(w-size[0])//2;py=y+(h-size[1])//2;canvas.paste(placed,(px,py))
     return {'asset_id':asset_id,'role':role,'original_size':list(original_size),'crop':crop,
-            'placement':[px,py,*size],'scale':scale,'uniform_scale':True,'content_clipped':False}
+            'placement':[px,py,*size],'frame':[x,y,w,h],
+            'frame_fill':round(size[0]*size[1]/((w-2*pad)*(h-2*pad)),4),
+            'scale':scale,'uniform_scale':True,'content_clipped':False}
 
 def render_page(records,paths,hero,font_path,out,config):
     width=int(config.get('width',1080))
@@ -76,23 +98,28 @@ def render_page(records,paths,hero,font_path,out,config):
     if layout not in ('long_story','focused_story','short_reply','wide_reply'):raise ValueError('unknown_layout')
     # Each original is placed exactly once, always retaining all relevant replies.
     main,main_crop,main_size=open_crop(paths[primary['asset_id']],primary['context_bbox'])
-    margin=round(width*.022);gap=round(width*.014);inner=width-2*margin;pad=round(width*.014)
+    margin=round(width*.014);gap=round(width*.010);inner=width-2*margin;pad=2*max(3,round(width*.003))
     content_h=height-2*margin
     if config.get('layout','auto')=='auto' and main.width/main.height>2.7:layout='wide_reply'
     if secondary is None:
-        # Compare two fixed-canvas arrangements; give richer feedback more room,
-        # then choose the one that keeps screenshot text largest without stretching.
+        # Give screenshot pixels priority over a large title panel. Compare two
+        # compact title positions, then fit the photo frame to its actual extent.
+        # Wide screenshots must remain readable, rather than being cover-cropped.
         richness=min(1,hero['score']/100)
-        band_h=round(width*(.31-.11*richness));side=round(width*(.31-.06*richness))
+        band_h=round(width*(.16-.04*richness));side=round(width*(.18-.035*richness))
         bottom_main=[margin,margin,inner,content_h-band_h-gap]
-        bottom_brand=[margin,height-margin-band_h,inner,band_h]
         side_main=[margin,margin,inner-side-gap,content_h]
-        side_brand=[width-margin-side,margin,side,content_h]
         fit=lambda rect:min((rect[2]-pad)/main.width,(rect[3]-pad)/main.height)
         if fit(side_main)>fit(bottom_main)*1.02:
-            main_rect,brand_rect=side_main,side_brand;composition='single_side_band'
+            main_w=min(side_main[2],math.ceil(main.width*fit(side_main))+pad)
+            main_rect=[margin,margin,main_w,content_h]
+            brand_rect=[margin+main_w+gap,margin,inner-main_w-gap,content_h]
+            composition='single_side_band'
         else:
-            main_rect,brand_rect=bottom_main,bottom_brand;composition='single_bottom_band'
+            main_h=min(bottom_main[3],math.ceil(main.height*fit(bottom_main))+pad)
+            main_rect=[margin,margin,inner,main_h]
+            brand_rect=[margin,margin+main_h+gap,inner,content_h-main_h-gap]
+            composition='single_bottom_band'
     else:
         context,context_crop,context_size=open_crop(paths[secondary['asset_id']],secondary['context_bbox'])
         secondary_score=max(m['score'] for m in secondary['messages'])
@@ -106,7 +133,7 @@ def render_page(records,paths,hero,font_path,out,config):
     layers=[paste_card(canvas,main,main_rect,primary['asset_id'],'context',main_crop,main_size)]
     if secondary is not None:
         layers.append(paste_card(canvas,context,context_rect,secondary['asset_id'],'context',context_crop,context_size))
-    draw_brand(canvas,brand_rect,font_path,config)
+    brand_elements=draw_brand(canvas,brand_rect,font_path,config)
     estimate=hero['text_line_height']/1000*main_size[1]*layers[0]['scale']
     issues=[]
     if hero['requires_review']:issues.append('主要回复角色、边界或原图完整性待核对，主图区已使用完整上下文')
@@ -114,4 +141,4 @@ def render_page(records,paths,hero,font_path,out,config):
     out=Path(out);canvas.save(out,format='PNG');canvas.save(out.with_suffix('.jpg'),quality=94,subsampling=0)
     return {'layout':layout,'composition':composition,'width':width,'height':height,'hero_message_id':hero['message_id'],
             'hero_score':hero['score'],'hero_char_count':hero['char_count'],'estimated_main_text_px':round(estimate,2),
-            'layers':layers,'brand_frame':brand_rect,'issues':issues}
+            'layers':layers,'brand_frame':brand_rect,'brand_elements':brand_elements,'issues':issues}
