@@ -19,7 +19,10 @@ class SnapshotTests(unittest.TestCase):
         import testimonial_album.render as testimonial
         import testimonial_album.pipeline as testimonial_pipeline
         import testimonial_album.privacy as privacy
-        for module in (renderer, contracts, grid, vs, single, testimonial, testimonial_pipeline, privacy):
+        import training_daily.pipeline as training
+        import training_daily.routing as training_routing
+        import life_photos.pipeline as lifestyle
+        for module in (renderer, contracts, grid, vs, single, testimonial, testimonial_pipeline, privacy, training, training_routing, lifestyle):
             self.assertTrue(Path(module.__file__).resolve().is_relative_to(ROOT))
         self.assertIs(renderer.seamless_grid, grid.seamless_grid)
         self.assertIs(renderer.draw_vs, vs.draw_vs)

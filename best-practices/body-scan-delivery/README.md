@@ -1,6 +1,6 @@
 # 体测成品生成最佳实践
 
-2026-11-06 归档三种体测成品，来源为开发版 `6d6e20f3767a24ff7d2f26e82abbdf3586183316`。2026-11-07 加入用户确认的会员案例封面，来源为 `eaf9964b24ed85e52b70dfaae348ef54c572996c`。2026-11-07 正式确认报告对比成品 v5，来源为 `f1320dd32b3a2d3bec451ab9e2520058b15b3506`。2026-11-07 加入已确认的会员感言 v5，来源为 `4ae1d98aef16ca6a2ccf65b6927c23522d90a152`。同一目录下分别维护六类成品，保留已确认的照片、配对、版式和审核规则。
+2026-11-06 归档三种体测成品，来源为开发版 `6d6e20f3767a24ff7d2f26e82abbdf3586183316`。2026-11-07 加入用户确认的会员案例封面，来源为 `eaf9964b24ed85e52b70dfaae348ef54c572996c`。2026-11-07 正式确认报告对比成品 v5，来源为 `f1320dd32b3a2d3bec451ab9e2520058b15b3506`。2026-11-07 加入已确认的会员感言 v5，来源为 `4ae1d98aef16ca6a2ccf65b6927c23522d90a152`。2026-11-07 归档训练日常 v2（来源 `ba42b69`），并按用户要求加入生活照原图成品。同一目录下分别维护八类成品，保留已确认的照片、配对、版式和审核规则。
 
 | 子目录 | 成品 | 绘图入口 |
 | --- | --- | --- |
@@ -10,6 +10,8 @@
 | [report_comparison](report_comparison/README.md) | 前后报告与九项五列表格；无报告图则紧凑表格 | `report_comparison/render.py:render` |
 | [member_cover](member_cover/README.md) | 会员案例封面，专用正面双图与报告故事 | `member_cover/render.py:draw_cover` |
 | [testimonial_album](testimonial_album/README.md) | 会员感言，固定红框、统一标题区、图片隐私遮盖 | `testimonial_album/render.py:render_page` |
+| [training_daily](training_daily/README.md) | 无框训练日常；过窄截图仅去黑边、主体不明原图直出 | `training_daily/run.sh` |
+| [life_photos](life_photos/README.md) | 已筛选生活照原文件直接输出 | `life_photos/run.sh` |
 
 `scripts/body_scan_delivery/` 是本目录冻结的公共配对、配置、渲染调度、版本、审核和预览代码；体测图调度直接调用三个原有体测图子目录。`scripts/body_scan_contracts/` 只包含离线数据契约，不含模型客户端。封面目录另外消费现有任务和封面专用双图包，复用本目录的公共工具。这些子目录不能将其中一个子目录单独搬走；部署时复制整个 `body-scan-delivery`。
 
@@ -17,7 +19,7 @@
 
 在远程服务器运行，默认 Python 为 `/root/apps/non-grid-calibration/.venv/bin/python`；可用 `CASE_PYTHON` 指定。渲染使用 Pillow，SVG Logo 需要 CairoSVG 和系统 Cairo；会员感言的独立识别与隐私标注入口使用 NumPy、OpenCV、httpx；可选 API 适配器及其测试使用 FastAPI/httpx，已验证版本见 [requirements.verified.txt](requirements.verified.txt)。字体、Logo、照片、报告包和配置均由外部数据路径提供，不归档用户素材或密钥。
 
-`run.sh` 清空外部 `PYTHONPATH`，固定到本快照目录，从 `manifest.json` 校验全部文件及 Python 模块集合。所有 `scripts.*` 导入均来自本目录，不依赖开发树或其他最佳实践。输入是已完成的阶段分类包，或既有成品任务；封面还需对应的专用双图包。成品排版不运行拆分、标准化、OCR 或大模型。感言的 `evidence.sh` / `annotate.sh` 是另行显式运行的模型准备节点，不由渲染隐式调用。
+`run.sh` 清空外部 `PYTHONPATH`，固定到本快照目录，从 `manifest.json` 校验全部文件及 Python 模块集合。所有 `scripts.*` 导入均来自本目录，不依赖开发树或其他最佳实践。体测成品输入是已完成的阶段分类包，或既有成品任务；封面还需对应的专用双图包。训练日常消费动作证据包，生活照直接消费已有图片分类与原文件。成品排版不运行拆分、标准化、OCR 或大模型。感言的 `evidence.sh` / `annotate.sh` 和训练照的 `evidence.sh` 是另行显式运行的模型准备节点，不由渲染隐式调用。
 
 ```bash
 ./run.sh check
@@ -79,7 +81,7 @@
 
 服务器部署：`/root/apps/case-studio/best-practices/body-scan-delivery`。独立验证目录：`/root/autodl-fs/case-studio/experiments/body-scan-delivery-best-practice-20261106`。
 
-更新时在开发目录实验，经用户确认后更新本快照、来源清单与验证记录。当前包括会员案例封面及体测报告对比成品；另含已确认的会员感言 v5；生活照和训练日常等其他模板尚未归档。
+更新时在开发目录实验，经用户确认后更新本快照、来源清单与验证记录。当前八类成品均有独立入口；根 `create` / `restyle` 仍负责原三类体测图，其余分支通过独立命令运行，尚未自动编排全部八类。
 
 ## 报告对比成品
 
@@ -108,3 +110,22 @@
 归档验证见 [testimonial_album/validation.json](testimonial_album/validation.json)，已确认版的历史效果验证保留在 [source-validation.json](testimonial_album/source-validation.json)。
 
 会员感言归档后，完整成品包 87 项测试通过；在无开发树的隔离目录重绘 15 张感言成品，图片及结果共 69 个文件与获准版逐字节一致，0 次模型调用。其他五类成品及共享模块的 71 个文件保持不变。
+
+## 训练日常与生活照
+
+```bash
+./training_daily/run.sh --input /path/to/私教会员案例项目 \
+  --evidence /path/to/training-evidence --config training_daily/presentation.example.json \
+  --out /path/to/new-training-products
+
+./life_photos/run.sh --input /path/to/私教会员案例项目 \
+  --audit /path/to/classification-comparison.json --out /path/to/new-lifestyle-products
+```
+
+训练照采用已确认的无框 v2：普通训练照保留动作、轻度美化；过窄截图仅去黑边，整块照片保持原像素；主体不明确则原文件直接输出。独立 `training_daily/evidence.sh` 可准备动作证据，本次归档复用已完成证据，不重新调用模型。归档同时修复模型失败记录缺少尺寸时中断批次的问题，失败素材正常返回待审。
+
+生活照直接复用 `life_photo` 分类，不做对比、不判断阶段、不添加图片处理。所有筛选出的生活照保持原文件字节、格式和尺寸，无数量限制。两个分支分别提供 HTML 下载、成品清单和未生成原因。
+
+两类独立验证分别见 [训练日常](training_daily/validation.json) 与 [生活照](life_photos/validation.json)；先前六类成品及共享契约保持不变。
+
+归档后完整成品包共 108 项测试通过。独立目录中禁止模型/网络模块导入，重绘的 12 张训练成品及配套结果共 69 个文件与批准版逐字节一致；19 张生活照全部与原文件 SHA 一致，覆盖 12 位会员。先前六类成品及共享模块的 88 个文件保持不变。训练日常的 `sources.json` 仅因独立部署时配置文件路径不同而重新绑定，不计入逐字节对照。

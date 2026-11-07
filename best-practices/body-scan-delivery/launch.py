@@ -1,4 +1,4 @@
-"""Isolated CLI shared by all six product directories."""
+"""Isolated CLI shared by all eight product directories."""
 import os
 import runpy
 import sys
@@ -15,10 +15,14 @@ if command == 'check':
     print(verify_integrity(root))
 elif command == 'test':
     suite = unittest.TestSuite()
-    for folder in ('scripts/body_scan_contracts/tests', 'scripts/body_scan_delivery/tests', 'member_cover/tests', 'report_comparison/tests', 'testimonial_album/tests', 'tests'):
+    for folder in ('scripts/body_scan_contracts/tests', 'scripts/body_scan_delivery/tests', 'member_cover/tests', 'report_comparison/tests', 'testimonial_album/tests', 'training_daily/tests', 'life_photos/tests', 'tests'):
         suite.addTests(unittest.TestLoader().discover(folder))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(not result.wasSuccessful())
+elif command in ('training-daily','training-evidence','life-photos'):
+    del sys.argv[1]
+    module={'training-daily':'training_daily','training-evidence':'training_daily.analysis','life-photos':'life_photos'}[command]
+    runpy.run_module(module,run_name='__main__')
 elif command in ('testimonial', 'testimonial-evidence', 'testimonial-annotate'):
     del sys.argv[1]
     module = {'testimonial':'testimonial_album', 'testimonial-evidence':'testimonial_album.evidence',

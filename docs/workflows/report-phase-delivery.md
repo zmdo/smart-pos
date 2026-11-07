@@ -83,3 +83,7 @@ flowchart LR
 ## 会员感言成品分支
 
 2026-11-07：会员感言 v5 归档为 [testimonial_album](../../best-practices/body-scan-delivery/testimonial_album/README.md)，与另外五类成品共处 `body-scan-delivery`。独立的识别评分、主要内容及隐私复核准备好证据后，由无模型渲染入口生成。此分支不使用训练前后标签或体测报告；根 `create` / `restyle` 尚不自动调用，当前工作流见[会员感言](testimonial-album.md)。
+
+## 训练日常与生活照成品分支
+
+2026-11-07：新增第七类[训练日常](training-daily.md)与第八类[生活照原图](life-photos.md)，分别通过成品包内 `training_daily/run.sh` 和 `life_photos/run.sh` 独立运行。训练照复用动作证据，保留已确认无框 v2；生活照直接复用首轮 `life_photo` 分类，逐字节输出全部已筛选原图。两个节点均不消费体测报告或训练阶段标签，不做生活照前后对比。八类成品入口已经齐备，根 `create` / `restyle` 尚未自动编排全部分支。

@@ -1,6 +1,6 @@
 # 日常训练照片成品 v2
 
-独立开发验证节点。复用第一步 `daily_training` 分类，不重跑全量图片分类，不判断训练前后。识别与图像处理在远程服务器执行；当前先用 HTML 确认效果，尚未归档最佳实践。
+独立开发节点。用户已确认 v2，权威快照位于 [训练日常成品最佳实践](../../best-practices/body-scan-delivery/training_daily/README.md)。复用第一步 `daily_training` 分类，不重跑全量图片分类，不判断训练前后；识别与图像处理在远程服务器执行。
 
 ## 已实现
 
@@ -50,6 +50,8 @@ python -m scripts.training_daily \
 18 组、13 张候选，生成 12 张、覆盖 9 组：10 张普通无框成品，吴显昉 `a0097` 仅去黑边（928×524），潘艺文 `a0164` 原图直出（1080×1440，文件 SHA 与原图一致）。仅关文博 `a0013` 肌肉摆拍跳过。9 组没有此分类的图片；视频没有抽帧。
 
 15 项测试覆盖目录范围、坐标映射、动作与器械完整性、横向嵌入、画质门槛、背景保护、原像素等比渲染、去重及限额、输入变更拒绝和渲染不导入模型；新增去黑边像素一致、原图字节与 EXIF 一致、旧配置也无边框、原图直出全流程验证。另逐张核对真实产物的尺寸、保护范围、来源哈希和 HTML 交互，记录见 [validation.json](validation.json)。
+
+归档时新增模型失败记录缺少尺寸的回归测试，现共 16 项；失败素材返回待审，正常成品保持已确认 v2 输出。归档重绘对照见 [归档验证](../../best-practices/body-scan-delivery/training_daily/validation.json)。
 
 ```bash
 python -m unittest discover -s scripts/training_daily/tests -v

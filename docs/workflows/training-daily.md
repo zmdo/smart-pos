@@ -1,6 +1,6 @@
 # 日常训练照片成品
 
-2026-11-07：独立脚本 v2 已实现，先确认 HTML 效果，尚未归档最佳实践。生活照前后对比分支已按用户要求取消，本节点仅处理训练日常图片。
+2026-11-07：用户已确认无框 v2 并要求归档，权威入口为成品目录第七类 [training_daily](../../best-practices/body-scan-delivery/training_daily/README.md)，来源 `ba42b69`。本节点仅处理训练日常；生活照不做前后对比，改由独立的[原图成品节点](life-photos.md)输出。
 
 ```mermaid
 flowchart LR
@@ -24,6 +24,8 @@ flowchart LR
 6. 所有成品无外框，旧 `border` 配置也按 0 处理。普通分支默认 1080×1440、无标题；可配置 Logo 独立小条。普通分支有效画面至少占框 45%，短边至少 380px，放大最多 1.8 倍。每组最多 3 张，按分数选图并按 SHA 去重。
 7. HTML 按每张成品的真实比例显示；普通分支支持处理后、同取景调色前、完整原图切换。原像素分支不提供虚假的调色前后对比，下载对应实际格式。输出策略与模型证据状态分开记录，主体不明确走原图直出后不再等待指定主体；其他待确认、拒绝、缺少候选均给出原因。返回 `review.json`，尚未接入既有网页审核 API。
 
-入口：[scripts/training_daily](../../scripts/training_daily/README.md)。识别证据与渲染分离，后者不调用模型；已确认的六类成品最佳实践保持原样。
+开发入口：[scripts/training_daily](../../scripts/training_daily/README.md)。权威快照的 `training_daily/evidence.sh` / `run.sh` 分别执行识别与渲染，后者不调用模型；部署复制整个成品包，不导入开发目录。已确认的六类成品代码保持原样。根 `create` / `restyle` 暂不自动编排本节点。
 
 本轮：13 张候选 → 12 张成品（10 张普通无框、1 张仅去黑边、1 张原图直出），覆盖 9 组；1 张摆拍拒绝，另 9 组没有候选。15 项测试通过，具体逐图验收见 [validation.json](../../scripts/training_daily/validation.json)。预览位于工作区 `artifacts/training-daily-v2/validated/index.html`。
+
+归档新增一项回归测试并修复异常分支：模型失败记录没有 `source_size` 时返回待审，不再导致整批中断；已有通过记录的输出不变。归档的 16 项训练照测试与独立重绘对照见 [归档验证](../../best-practices/body-scan-delivery/training_daily/validation.json)。

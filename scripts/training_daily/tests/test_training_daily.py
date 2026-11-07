@@ -146,6 +146,19 @@ class TrainingDailyTests(unittest.TestCase):
             page=(base/'out/index.html').read_text();self.assertIn('下载 JPG',page)
             self.assertNotIn('src="None"',page);self.assertNotIn('data-image="before"',page)
 
+    def test_model_error_without_dimensions_is_reported_without_stopping_other_groups(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base=Path(tmp);inputs=base/'input';evidence=base/'evidence'
+            path=inputs/'测试店/会员/source.jpg';path.parent.mkdir(parents=True)
+            Image.new('RGB',(800,1000),'white').save(path)
+            row=dict(asset_id='a0001',status='error',reason='模型调用失败',store='测试店',member='会员',directory='测试店/会员',
+                source=str(path.relative_to(inputs)),source_sha256=sha(path))
+            group=dict(store='测试店',member='会员',directory='测试店/会员')
+            for name,value in [('records.json',[row]),('groups.json',[group]),('sources.json',{})]:save(evidence/name,value)
+            seal(evidence,EVIDENCE_SCHEMA,('records.json','groups.json','sources.json'))
+            counts=run(inputs,evidence,base/'out')
+            self.assertEqual(counts['products'],0);self.assertEqual(counts['review_groups'],1)
+
     def test_configuration_cannot_request_excessive_effects(self):
         for bad in ({'background_strength':1},{'max_upscale':10},{'width':float('nan')},{'max_per_member':2.5}):
             with self.assertRaises(ValueError):settings(bad)

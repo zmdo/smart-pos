@@ -1,0 +1,60 @@
+{
+  "validated_on": "2026-11-07",
+  "status": "passed",
+  "suite_tests": 108,
+  "life_photo_tests": 5,
+  "groups": 18,
+  "candidates": 19,
+  "products": 19,
+  "generated_groups": 12,
+  "missing_groups": 6,
+  "rejected_sources": 0,
+  "model_calls": 0,
+  "original_files_byte_identical": 19,
+  "asset_ids": [
+    "a0170",
+    "a0172",
+    "a0179",
+    "a0002",
+    "a0007",
+    "a0087",
+    "a0041",
+    "a0046",
+    "a0052",
+    "a0053",
+    "a0026",
+    "a0029",
+    "a0071",
+    "a0129",
+    "a0131",
+    "a0150",
+    "a0115",
+    "a0143",
+    "a0144"
+  ],
+  "independent_package": "/root/autodl-fs/case-studio/experiments/training-life-best-practice-20261107/package",
+  "output": "/root/autodl-fs/case-studio/experiments/training-life-best-practice-20261107/life-products",
+  "checks": [
+    "Only store life_photo labels selected, using Qwen precedence over older labels",
+    "All nineteen selected photos exported, with no score threshold or per-member count cap",
+    "Each output is byte identical to its original, preserving format, dimensions, metadata and pre-existing masking",
+    "No processing, stage inference or comparison performed; zero model requests",
+    "Original files and classification inventory SHA bindings unchanged",
+    "Six groups without lifestyle photos retained with a missing-material reason",
+    "Local HTML links, filters, nineteen downloads and downloaded file hashes verified"
+  ],
+  "limitations": [
+    "Selection quality follows the existing upstream classification; no new classification run",
+    "Root create/restyle do not automatically orchestrate this branch"
+  ],
+  "gallery_checks": {
+    "filters": {
+      "all": 18,
+      "generated": 12,
+      "skipped": 6
+    },
+    "local_links": 56,
+    "downloads": 19,
+    "unchanged_local_copies": 19
+  }
+}

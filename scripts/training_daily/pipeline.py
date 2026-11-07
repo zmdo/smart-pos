@@ -31,7 +31,7 @@ def run(root,evidence,out,config=None):
             with Image.open(path) as raw:im=ImageOps.exif_transpose(raw).convert('RGB')
             thumb=im.copy();thumb.thumbnail((720,960));thumb.save(dest/(aid+'-source.jpg'),quality=90)
             source['original']=gid+'/'+aid+'-source.jpg'
-            if list(im.size)!=r['source_size']:raise ValueError('oriented_source_dimensions_changed')
+            if r['status']!='error' and list(im.size)!=r['source_size']:raise ValueError('oriented_source_dimensions_changed')
             assessment=choose_plan(r,im,frame_for(cfg),cfg)
             source['framing']=assessment
             if not assessment['passed']:

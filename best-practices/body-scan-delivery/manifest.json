@@ -1,6 +1,6 @@
 {
-  "version": "body-scan-delivery-best-practice-v4",
-  "authority": "user-authorized six-family product generation",
+  "version": "body-scan-delivery-best-practice-v5",
+  "authority": "user-authorized eight-family product generation",
   "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
   "entrypoint": "run.sh",
   "components": {
@@ -9,14 +9,16 @@
     "single_view": "body-delivery-v1",
     "member_cover": "body-member-cover-v3",
     "report_comparison": "report-comparison-product-v5",
-    "testimonial_album": "testimonial-album-approved-v5"
+    "testimonial_album": "testimonial-album-approved-v5",
+    "training_daily": "training-daily-product-v2",
+    "life_photos": "life-photo-originals-v1"
   },
-  "dependencies": "Frozen local contracts and six product categories; testimonial preparation is explicit and separate from model-free rendering",
+  "dependencies": "Frozen local contracts and eight product categories; model preparation is explicit and separate from rendering",
   "excluded_tests": "14 classification/ranking tests remain with the classification node; revision fixtures now use preclassified labels",
   "files": [
     {
       "path": "README.md",
-      "sha256": "05fcb8fadd3313e627b0b756c08be0473a24eb3953e973fc628bc6f1c5582f04"
+      "sha256": "a4914c9945dfe31d512888c2e43de51bcf4a562ce37474028889a8e0b8556721"
     },
     {
       "path": "category.py",
@@ -24,7 +26,42 @@
     },
     {
       "path": "launch.py",
-      "sha256": "e3e36a5fc42b903afebe4ccfcef0faef260fd19d81d815a00f67c71d8ae52bd4"
+      "sha256": "f2c66afc1a14c353c01bf6a78635b5161ad0745881ac4cae2059c4a5dfc7bb55"
+    },
+    {
+      "path": "life_photos/README.md",
+      "sha256": "11c03a996bafc069b32d9d94efd3940cac00a7c1d226d22dc509623be0d8e662",
+      "role": "new_original_file_product"
+    },
+    {
+      "path": "life_photos/__init__.py",
+      "sha256": "930917cb1ccc24d50494f0543d67d844776c4ee098c91509211e730b14bf2eaf",
+      "role": "new_original_file_product"
+    },
+    {
+      "path": "life_photos/__main__.py",
+      "sha256": "a1764d95c67bdf63a32982f52edf61c9af3eb67a87b8c8db4746bfd2fdd22095",
+      "role": "new_original_file_product"
+    },
+    {
+      "path": "life_photos/pipeline.py",
+      "sha256": "a434a80ba0cc8a6925e21611e48cd607bd3b6b001d4ee2b8813949984e6148a5",
+      "role": "new_original_file_product"
+    },
+    {
+      "path": "life_photos/run.sh",
+      "sha256": "e50c244ae8c3c96f83952e11efd985f8cd4b03ea08bdc2337749d408a1e1be4d",
+      "role": "new_original_file_product"
+    },
+    {
+      "path": "life_photos/tests/test_life_photos.py",
+      "sha256": "d7b4712d6da0683ecf009cbbbed56e673bfe84183c0198303bb0f9f50a506053",
+      "role": "new_original_file_product"
+    },
+    {
+      "path": "life_photos/validation.json",
+      "sha256": "6f7d2b2977f496a56f0d84898922c60ee4b96be3568487efe64c8f006d27d991",
+      "role": "new_original_file_product"
     },
     {
       "path": "member_cover/README.md",
@@ -281,7 +318,7 @@
     },
     {
       "path": "requirements.verified.txt",
-      "sha256": "23f1e1bf88c6591eaaeb9a8b5e9954b9018db340b67e6100067b5a6f19e0cc35"
+      "sha256": "1e113ab8bf9ba86f118f8feed0a4e60d01393ae262f5c5aa987338bf4239cbd2"
     },
     {
       "path": "run.sh",
@@ -631,7 +668,7 @@
     },
     {
       "path": "tests/test_snapshot.py",
-      "sha256": "f67a1c510c7dc69e258938a84fdf45b11dc966be2f7b9fcbbf688f629cb8063d"
+      "sha256": "fd452f303766a99df085be822e01026ab5d12fbe86a0a1c74132030510be1a08"
     },
     {
       "path": "three_views/README.md",
@@ -653,6 +690,120 @@
     {
       "path": "three_views/run.sh",
       "sha256": "25d64bccb5d080489a92ddcde40805a3a2dee4cb32e859c3f97b84f62c368491"
+    },
+    {
+      "path": "training_daily/README.md",
+      "sha256": "c65f2c2c6c99905732aea777e4b8c5b58318315dc093c024a6b4418e5466612a",
+      "source": "scripts/training_daily/README.md",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "ef2aaf75763c0341424bfe59abbbf95dc18b16cb4716de243a1122728c2d20a9",
+      "unchanged": false,
+      "adaptation": "Archive-local imports, documentation, tests and error-record handling; approved visual behavior retained"
+    },
+    {
+      "path": "training_daily/__init__.py",
+      "sha256": "5581fa91abc5bd5dcd182b9242ac499a3bec99cbf565d7af6e1b7e25d35f7d95",
+      "source": "scripts/training_daily/__init__.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "5581fa91abc5bd5dcd182b9242ac499a3bec99cbf565d7af6e1b7e25d35f7d95",
+      "unchanged": true
+    },
+    {
+      "path": "training_daily/__main__.py",
+      "sha256": "0893297ce2be5a187e277ed40efa9c2f2ca79a8aae95ad5bdea84ced62c46903",
+      "source": "scripts/training_daily/__main__.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "0893297ce2be5a187e277ed40efa9c2f2ca79a8aae95ad5bdea84ced62c46903",
+      "unchanged": true
+    },
+    {
+      "path": "training_daily/analysis.py",
+      "sha256": "fad22523184484a337ad96760f4d631a8718391bc95bd963e1b83935853aa2bc",
+      "source": "scripts/training_daily/analysis.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "3bc1413371e4d3f48985b7a810dc9bb09eb2f3b90c24b08169d1b771184dc8bf",
+      "unchanged": false,
+      "adaptation": "Archive-local imports, documentation, tests and error-record handling; approved visual behavior retained"
+    },
+    {
+      "path": "training_daily/client.py",
+      "sha256": "969a7876f073300aea4510e5954d7567ed928e353f51b3c9bbb43fd10808d975",
+      "source": "scripts/body_scan_contracts/client.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "969a7876f073300aea4510e5954d7567ed928e353f51b3c9bbb43fd10808d975",
+      "unchanged": true
+    },
+    {
+      "path": "training_daily/evidence.sh",
+      "sha256": "701b0ea66d79406f92557b0cc671ee6c4ed8862291ea4b4e27c2d3a53539e7e2",
+      "role": "archive_entrypoint"
+    },
+    {
+      "path": "training_daily/geometry.py",
+      "sha256": "4ac2314b2965618b978a026be3a3f16d0b0f9f768511d1862988e84f89ffd7cd",
+      "source": "scripts/training_daily/geometry.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "4ac2314b2965618b978a026be3a3f16d0b0f9f768511d1862988e84f89ffd7cd",
+      "unchanged": true
+    },
+    {
+      "path": "training_daily/pipeline.py",
+      "sha256": "e5532fcfd24d3de4d868d4fabb868a45770f8828ca29b4488fbcd30b4107578d",
+      "source": "scripts/training_daily/pipeline.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "8af660102507885040f8c4b403ba742c1759570610da78efd066b24710272bb1",
+      "unchanged": false,
+      "adaptation": "Archive-local imports, documentation, tests and error-record handling; approved visual behavior retained"
+    },
+    {
+      "path": "training_daily/presentation.example.json",
+      "sha256": "95733210e7ef4162bdcfc62edf35642dbeb4b8ce15747c4bfcd7a4bbedcded92",
+      "source": "scripts/training_daily/presentation.example.json",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "95733210e7ef4162bdcfc62edf35642dbeb4b8ce15747c4bfcd7a4bbedcded92",
+      "unchanged": true
+    },
+    {
+      "path": "training_daily/render.py",
+      "sha256": "9841ee0025d0dfdb681d8304e31179e006b628fab38c041e91d40953c167bcdc",
+      "source": "scripts/training_daily/render.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "9841ee0025d0dfdb681d8304e31179e006b628fab38c041e91d40953c167bcdc",
+      "unchanged": true
+    },
+    {
+      "path": "training_daily/routing.py",
+      "sha256": "7c4da2421cb3774240859566b1b715a9b81e03c756917244b8bf98fa2315e955",
+      "source": "scripts/training_daily/routing.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "7c4da2421cb3774240859566b1b715a9b81e03c756917244b8bf98fa2315e955",
+      "unchanged": true
+    },
+    {
+      "path": "training_daily/run.sh",
+      "sha256": "ca093175a48585563bf449b24ccb022cffdd0ed2468bdba742841ea182dfb7d6",
+      "role": "archive_entrypoint"
+    },
+    {
+      "path": "training_daily/source-validation.json",
+      "sha256": "cc47aa9ff8543b3058ad6695fe0c06dab27820f9bdd9168696b44c0e28d6a485",
+      "source": "scripts/training_daily/validation.json",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "cc47aa9ff8543b3058ad6695fe0c06dab27820f9bdd9168696b44c0e28d6a485",
+      "unchanged": true
+    },
+    {
+      "path": "training_daily/tests/test_training_daily.py",
+      "sha256": "39767bba3fb8b8d0204b16a0fa246d6b1b34ae3694b5be36ff33e5dbc56112ca",
+      "source": "scripts/training_daily/tests/test_training_daily.py",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "source_sha256": "76b6339427d75d6197cd15fb81245cb08ad829071915741c1b7e31a2dcd4079c",
+      "unchanged": false,
+      "adaptation": "Archive-local imports, documentation, tests and error-record handling; approved visual behavior retained"
+    },
+    {
+      "path": "training_daily/validation.json",
+      "sha256": "ec228f438359cba21b4d35a55b129cbef8da5aca372a48e28ea1f88f8a623ff6"
     },
     {
       "path": "validation.json",
@@ -694,12 +845,13 @@
     "single_view": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "member_cover": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
     "report_comparison": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
-    "testimonial_album": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152"
+    "testimonial_album": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+    "training_daily": "ba42b694d03f8806b4131defc7bda18dc224eba3"
   },
   "cover_entrypoint": "member_cover/run.sh",
   "cover_input_contract": "existing verified delivery + body-scan-cover-frames-v2 + optional text overrides",
   "report_entrypoint": "report_comparison/run.sh",
-  "extension_base_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+  "extension_base_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
   "component_approvals": {
     "report_comparison": {
       "version": "report-comparison-product-v5",
@@ -727,6 +879,30 @@
       "input_contract": "member-testimonial-layout-privacy-v1; member_images_keep_coach_and_text; verified privacy audit",
       "reference_validation": "testimonial_album/source-validation.json",
       "archive_validation": "testimonial_album/validation.json"
+    },
+    "training_daily": {
+      "version": "training-daily-product-v2",
+      "status": "user-approved",
+      "approved_on": "2026-11-07",
+      "source_commit": "ba42b694d03f8806b4131defc7bda18dc224eba3",
+      "entrypoint": "training_daily/run.sh",
+      "preparation_entrypoints": [
+        "training_daily/evidence.sh"
+      ],
+      "deployment_unit": "entire body-scan-delivery directory",
+      "input_contract": "training-daily-evidence-v1; original image SHA bindings",
+      "reference_validation": "training_daily/source-validation.json",
+      "archive_validation": "training_daily/validation.json",
+      "adaptation": "Archive-local imports/client and regression fix for failed model records lacking source dimensions; approved outputs unchanged"
+    },
+    "life_photos": {
+      "version": "life-photo-originals-v1",
+      "status": "user-requested-original-export",
+      "approved_on": "2026-11-07",
+      "entrypoint": "life_photos/run.sh",
+      "deployment_unit": "entire body-scan-delivery directory",
+      "input_contract": "existing classification-comparison inventory plus original image SHA bindings",
+      "archive_validation": "life_photos/validation.json"
     }
   }
 }
