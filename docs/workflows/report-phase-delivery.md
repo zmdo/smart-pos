@@ -75,3 +75,7 @@ flowchart LR
 ### 同朝向参考版 v3
 
 同朝向成品已加入用户目录 `logo/`、可配置姓氏称谓/门店地址，以及独立报告节点的围度变化。只读取结构化报告，不在成品节点重新抽取表格或推断阶段。宽度固定、两照片完整等比缩放、高度自适应。缺失数据与素材在 `output.presentation.warnings` 返回；明确来源的变化值保留前后单元格及报告 SHA。详见[配置与运行方法](../../scripts/body_scan_delivery/README.md#同朝向参考版-v3)。
+
+## 报告图片与五列表格扩展（2026-11-07）
+
+新增 `body-report-compare tables` 和 `body-scan-delivery report-comparison` 两个独立入口，流程见 [报告成品工作流](report-table-product.md)。旧报告 JSON、阶段分类与成品接口维持兼容；新的视觉转录包不自动替代旧报告证据，避免无意触发阶段重分类。

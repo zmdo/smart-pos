@@ -17,7 +17,8 @@ class ModelCallFailure(ValueError):
 
 
 class MeasuredClient:
-    def __init__(self, settings, cache, provider):
+    def __init__(self, settings, cache, provider, max_image_side=1280, max_tokens=3500):
+        self.max_image_side = max_image_side; self.max_tokens = max_tokens
         self.settings = Path(settings)
         self.cfg = json.loads(self.settings.read_text(encoding='utf-8'))
         if not all(self.cfg.get(k) for k in ('base_url','model','api_key')):
@@ -28,9 +29,10 @@ class MeasuredClient:
         self.cache.mkdir(parents=True, exist_ok=True)
 
     def ask(self, images, prompt, version):
-        options = {'temperature':0, 'max_tokens':3500, 'response_format':{'type':'json_object'}}
+        options = {'temperature':0, 'max_tokens':self.max_tokens, 'response_format':{'type':'json_object'}}
         options.update({'enable_thinking':False} if self.provider=='qwen' else {'thinking':{'type':'disabled'}})
         identity = {'base_url':self.cfg['base_url'], 'model':self.cfg['model'], 'version':version, 'options':options}
+        if self.max_image_side != 1280: identity['max_image_side'] = self.max_image_side
         digest = hashlib.sha256(json.dumps(identity,sort_keys=True).encode()+prompt.encode())
         image_hashes=[]
         for im in images:
@@ -40,7 +42,7 @@ class MeasuredClient:
             return json.loads(path.read_text(encoding='utf-8')), {'cached':True,'request_count':0,'version':version,'key':key,'trace_path':str(trace_path)}
         content=[{'type':'text','text':'按上述规则检查图片，返回JSON。'}]
         for im in images:
-            height,width=im.shape[:2];scale=min(1.,1280/max(height,width))
+            height,width=im.shape[:2];scale=min(1.,self.max_image_side/max(height,width))
             resized=cv2.resize(im,(round(width*scale),round(height*scale)),interpolation=cv2.INTER_AREA)
             ok,data=cv2.imencode('.jpg',resized,[cv2.IMWRITE_JPEG_QUALITY,92])
             if not ok:raise ValueError('image_encoding_failed')

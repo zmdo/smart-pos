@@ -1,20 +1,21 @@
 {
-  "version": "body-scan-delivery-best-practice-v2",
-  "authority": "user-approved four-family product generation",
+  "version": "body-scan-delivery-best-practice-v3",
+  "authority": "user-authorized five-family product generation",
   "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
   "entrypoint": "run.sh",
   "components": {
     "three_views": "body-three-views-seamless-v2",
     "view_comparison": "body-same-view-reference-v5",
     "single_view": "body-delivery-v1",
-    "member_cover": "body-member-cover-v3"
+    "member_cover": "body-member-cover-v3",
+    "report_comparison": "report-comparison-product-v1"
   },
   "dependencies": "Frozen local scripts and four sibling renderer packages; data-only upstream frame contract, no development imports",
   "excluded_tests": "14 classification/ranking tests remain with the classification node; revision fixtures now use preclassified labels",
   "files": [
     {
       "path": "README.md",
-      "sha256": "6f2e77f84db42efe6c5b6bd024ada174143db195773e3ff74dae63bf543fc6fc"
+      "sha256": "07b189fd821a5f59d2603726b03f09994f32a160ead4065563ff27cc7a86740b"
     },
     {
       "path": "category.py",
@@ -22,7 +23,7 @@
     },
     {
       "path": "launch.py",
-      "sha256": "33c91e577e07519db69507e71484d0ce5f7bc102863b547d99582592511486db"
+      "sha256": "4c910ec28c8869b4134b13d646b9c8d056e11edc0b0ae97b0bb450e5506e7051"
     },
     {
       "path": "member_cover/README.md",
@@ -200,6 +201,34 @@
       "unchanged": false,
       "adaptation": "Archive documentation",
       "sha256": "e60edeeec24465aec7787e9bee58fcd42f3cb0bb897be13b37fdbd2ebd75328f"
+    },
+    {
+      "path": "report_comparison/README.md",
+      "sha256": "b07b54fe4327b67f0cda6006e5e3d2034badf102b53e738779fdbbdbcf749c31"
+    },
+    {
+      "path": "report_comparison/__init__.py",
+      "sha256": "ec848506cadf9da7fceec909bf8ca1d764bb6c1395f9f774ea93b696d52a70e6"
+    },
+    {
+      "path": "report_comparison/__main__.py",
+      "sha256": "47eaf03185d2786528d6df1930a84bd048a7004045114d67685f1ab3f5b66544"
+    },
+    {
+      "path": "report_comparison/render.py",
+      "sha256": "2e23ac9fb4239e8572fbd5a95505c4ca92cd2b02f95e072f731026115fff6170"
+    },
+    {
+      "path": "report_comparison/run.sh",
+      "sha256": "f8c8f26e509d85f063f02d89be6df0e4b41faa90461f0007bf2885e063f343e1"
+    },
+    {
+      "path": "report_comparison/tests/test_report_product.py",
+      "sha256": "a828552823b8b1a0570b94c41f16461bcdd0f5c6e9240cf3ff48eb52d48b66ae"
+    },
+    {
+      "path": "report_comparison/validation.json",
+      "sha256": "02e24f7def4caa18f75bdeced5a6adfeefcd557ffc13f5635114da313ff31b7a"
     },
     {
       "path": "requirements.verified.txt",
@@ -481,8 +510,11 @@
     "three_views": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "view_comparison": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "single_view": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
-    "member_cover": "eaf9964b24ed85e52b70dfaae348ef54c572996c"
+    "member_cover": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
+    "report_comparison": "new implementation on a6af050"
   },
   "cover_entrypoint": "member_cover/run.sh",
-  "cover_input_contract": "existing verified delivery + body-scan-cover-frames-v2 + optional text overrides"
+  "cover_input_contract": "existing verified delivery + body-scan-cover-frames-v2 + optional text overrides",
+  "report_entrypoint": "report_comparison/run.sh",
+  "extension_base_commit": "a6af050984febcfcef9513aa15b507d6dfe72489"
 }

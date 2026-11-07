@@ -1,12 +1,12 @@
 {
-  "version": "body-report-compare-v1",
+  "version": "body-report-compare-v2",
   "authority": "user-approved independent processing node",
   "source_commit": "2b62aefc3656ed5ea54fc99325540269f6c0e7e4",
   "entrypoint": "run.sh",
   "files": [
     {
       "path": "README.md",
-      "sha256": "7d6dfed7f08877d0bc43109dc7d5465a37f60777e970b4027d7a8e46c8385927"
+      "sha256": "36551599ac6cc31ecc291ece1ca89f3a4a09b4cddb482c8c9c091a98e35a26cf"
     },
     {
       "path": "launch.py",
@@ -37,7 +37,7 @@
     },
     {
       "path": "scripts/body_report_compare/__main__.py",
-      "sha256": "3f1b3c76c95c6cbf65003b87c5808d9ffdc10a2e67945acdf2d261fefd8d6531",
+      "sha256": "32ffcfc603519e0373a9adfd8ce009fe6cca5f21aeb58938eaca6fa0517430f8",
       "source": "scripts/body_report_compare/__main__.py",
       "source_commit": "2b62aefc3656ed5ea54fc99325540269f6c0e7e4",
       "source_sha256": "3f1b3c76c95c6cbf65003b87c5808d9ffdc10a2e67945acdf2d261fefd8d6531"
@@ -64,6 +64,22 @@
       "source_sha256": "c7934dcb8c8880755f419b8b24de0f27667c2988fb18dd5251dccb0e8c48ed82"
     },
     {
+      "path": "scripts/body_report_compare/table_data.py",
+      "sha256": "140c1a2e9ad66afeb447cfe15991c3fd609040ae7dd697f33f9d503e33eb76da"
+    },
+    {
+      "path": "scripts/body_report_compare/table_pipeline.py",
+      "sha256": "60a0f23cdc5f50b303002c7ae3dfde0b7703f740a527d6e889522c2ac0d8b416"
+    },
+    {
+      "path": "scripts/body_report_compare/tables.py",
+      "sha256": "ccff4df984aff1d632cc00649c48d2a9b4b9e6c8f16e3a21755c3ba114b05586"
+    },
+    {
+      "path": "scripts/body_report_compare/tests/test_five_columns.py",
+      "sha256": "46f7197f514374f4cb47324d2c362e78922501c5721443b4c92ecce0a92afec8"
+    },
+    {
       "path": "scripts/body_report_compare/tests/test_report_node.py",
       "sha256": "47bc3dd2d06c204f71009b4953f9462f597167b3036db5296e934b65e4839750",
       "source": "scripts/body_report_compare/tests/test_report_node.py",
@@ -86,7 +102,7 @@
     },
     {
       "path": "scripts/body_scan_contracts/client.py",
-      "sha256": "471ca159c88477accfe6b317757bd25ad361c44ce1898b3428e7c8271f12dccd",
+      "sha256": "969a7876f073300aea4510e5954d7567ed928e353f51b3c9bbb43fd10808d975",
       "source": "scripts/body_scan_contracts/client.py",
       "source_commit": "2b62aefc3656ed5ea54fc99325540269f6c0e7e4",
       "source_sha256": "471ca159c88477accfe6b317757bd25ad361c44ce1898b3428e7c8271f12dccd"
@@ -115,7 +131,12 @@
     {
       "path": "snapshot.py",
       "sha256": "d8d664912c48eb3ad2222b82c7e8a72549619ac97dc01a78f4b0cab909223f70"
+    },
+    {
+      "path": "validation-five-column.json",
+      "sha256": "02e24f7def4caa18f75bdeced5a6adfeefcd557ffc13f5635114da313ff31b7a"
     }
   ],
-  "dependencies": "self-contained verified Python import closure; no sibling best-practice or development fallback"
+  "dependencies": "self-contained verified Python import closure; no sibling best-practice or development fallback",
+  "extension_base_commit": "a6af050984febcfcef9513aa15b507d6dfe72489"
 }

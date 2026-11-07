@@ -1,15 +1,16 @@
 # 体测成品生成最佳实践
 
-2026-11-06 归档三种体测成品，来源为开发版 `6d6e20f3767a24ff7d2f26e82abbdf3586183316`。2026-11-07 加入用户确认的会员案例封面，来源为 `eaf9964b24ed85e52b70dfaae348ef54c572996c`。同一目录下分别维护四类成品，保留已确认的照片、配对、版式和审核规则。
+2026-11-06 归档三种体测成品，来源为开发版 `6d6e20f3767a24ff7d2f26e82abbdf3586183316`。2026-11-07 加入用户确认的会员案例封面，来源为 `eaf9964b24ed85e52b70dfaae348ef54c572996c`。2026-11-07 新增报告对比成品。 同一目录下分别维护五类成品，保留已确认的照片、配对、版式和审核规则。
 
 | 子目录 | 成品 | 绘图入口 |
 | --- | --- | --- |
 | [three_views](three_views/README.md) | 完整三视图，前后各正／侧／背 | `three_views/render.py:seamless_grid` |
 | [view_comparison](view_comparison/README.md) | 各朝向训练前后 VS | `view_comparison/render.py:draw_vs` |
 | [single_view](single_view/README.md) | 训练前／训练后的各朝向单图 | `single_view/render.py:draw_single` |
+| [report_comparison](report_comparison/README.md) | 前后报告与五列表格 | `report_comparison/render.py:render` |
 | [member_cover](member_cover/README.md) | 会员案例封面，专用正面双图与报告故事 | `member_cover/render.py:draw_cover` |
 
-`scripts/body_scan_delivery/` 是本目录冻结的公共配对、配置、渲染调度、版本、审核和预览代码；体测图调度直接调用三个原有体测图子目录。`scripts/body_scan_contracts/` 只包含离线数据契约，不含模型客户端。封面目录另外消费现有任务和封面专用双图包，复用本目录的公共工具。四类不能将其中一个子目录单独搬走；部署时复制整个 `body-scan-delivery`。
+`scripts/body_scan_delivery/` 是本目录冻结的公共配对、配置、渲染调度、版本、审核和预览代码；体测图调度直接调用三个原有体测图子目录。`scripts/body_scan_contracts/` 只包含离线数据契约，不含模型客户端。封面目录另外消费现有任务和封面专用双图包，复用本目录的公共工具。这些子目录不能将其中一个子目录单独搬走；部署时复制整个 `body-scan-delivery`。
 
 ## 环境与独立性
 
@@ -78,3 +79,7 @@
 服务器部署：`/root/apps/case-studio/best-practices/body-scan-delivery`。独立验证目录：`/root/autodl-fs/case-studio/experiments/body-scan-delivery-best-practice-20261106`。
 
 更新时在开发目录实验，经用户确认后更新本快照、来源清单与验证记录。当前包括会员案例封面；生活照、感言、报告图片和训练日常等其他模板尚未归档。
+
+## 报告对比成品
+
+`./report_comparison/run.sh --tables TABLES --crops CROPS --font FONT --out NEW_OUTPUT` 消费独立五列表格数据和原图矩形取景。只绘制，不调用模型。新入口、固定尺寸规则、缺失及审核约定见 [报告成品说明](report_comparison/README.md)。

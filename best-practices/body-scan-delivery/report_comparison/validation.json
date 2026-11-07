@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-07",
+  "version": "report-comparison-product-v1",
+  "sources": 51,
+  "cases": 18,
+  "paired_products": 15,
+  "table_only_products": 3,
+  "transcribed_tables": 16,
+  "computed_tables": 2,
+  "table_rows_preserved": 165,
+  "report_image_regions_pixel_verified": 30,
+  "html_links_checked": 72,
+  "all_input_hashes_unchanged": true,
+  "all_widths_twice_original_reference": true,
+  "all_heights_fixed_ratio_1_25": true,
+  "legacy_reports_inventory_html_byte_identical": true,
+  "frozen_report_tests": 25,
+  "frozen_product_tests": 60,
+  "model_extraction_requests": 51,
+  "final_cached_extraction_requests": 0,
+  "render_model_calls": 0,
+  "tables_bundle_sha256": "cd8e01ad2b66245530e1274922e3d2b180aad87189a6081382791aae61abfbbf",
+  "products_bundle_sha256": "ff254846affa0c3b133db9f2f833c313b6c80b5a17eb85aa914b0270949b2065",
+  "remote_output": "/root/autodl-fs/case-studio/experiments/report-comparison-product-v1-20261107/validated-v2",
+  "limitations": [
+    "visual transcription is not human verified",
+    "report/date/identity conflicts returned for review",
+    "three cases have no report-photo pair"
+  ],
+  "local_links_checked": 72,
+  "offline_filters": {
+    "all": 18,
+    "transcribed": 16,
+    "computed": 2,
+    "review": 17,
+    "none": 0
+  },
+  "visual_review": "Reviewed all 18 contact-sheet products and full previews for transcribed / computed / table-only layouts; larger CJK type and wrapped bilateral rows checked.",
+  "local_preview": "/Users/zhangming/Projects/FP16-Speed/artifacts/report-comparison-product-v1/validated-v2/index.html"
+}

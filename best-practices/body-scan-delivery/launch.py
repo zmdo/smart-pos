@@ -15,10 +15,13 @@ if command == 'check':
     print(verify_integrity(root))
 elif command == 'test':
     suite = unittest.TestSuite()
-    for folder in ('scripts/body_scan_contracts/tests', 'scripts/body_scan_delivery/tests', 'member_cover/tests', 'tests'):
+    for folder in ('scripts/body_scan_contracts/tests', 'scripts/body_scan_delivery/tests', 'member_cover/tests', 'report_comparison/tests', 'tests'):
         suite.addTests(unittest.TestLoader().discover(folder))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(not result.wasSuccessful())
+elif command == 'report-comparison':
+    del sys.argv[1]
+    runpy.run_module('report_comparison', run_name='__main__')
 elif command in ('cover', 'cover-prepare', 'cover-compare'):
     del sys.argv[1]
     module = {'cover':'member_cover', 'cover-prepare':'member_cover.prepare',

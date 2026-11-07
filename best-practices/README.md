@@ -7,7 +7,7 @@
 | 硬拼接拆分 | [body-scan-pairs](body-scan-pairs/README.md) | 仅处理两张照片硬拼接，独立分类子图；工作流使用 `--split-only` |
 | 单图标准化 v4 | [body-scan-wall-v4](body-scan-wall-v4/README.md) | 海报过滤、网格/非网格校正、可靠几何检查及回退、最大有效矩形 |
 | 同组展示 v3 | [body-scan-group-display-v3](body-scan-group-display-v3/README.md) | 共同人物尺度、完整头脚保护、肩部共同取景、一人一画幅；附封面正面双图独立取景入口 |
-| 体检表单对比 | [body-report-compare](body-report-compare/README.md) | 独立提取门店报告、按明确前后列核验、标准 JSON / HTML |
+| 体检表单对比 | [body-report-compare](body-report-compare/README.md) | 独立提取门店报告、按明确前后列核验；新增图片五列表格 / 数据计算包 |
 | 训练阶段自动分类 | [body-scan-phase-classification](body-scan-phase-classification/README.md) | 盲评视觉与可选报告辅助，补齐全部阶段标签及推断/待审标记 |
 | 体测成品生成 | [body-scan-delivery](body-scan-delivery/README.md) | 同目录下分为完整三视图、各朝向 VS、训练前后朝向单图、会员案例封面；封面独立消费专用双图和报告 |
 

@@ -1,3 +1,10 @@
+import sys
+if len(sys.argv)>1 and sys.argv[1]=='tables':
+    del sys.argv[1]
+    from .tables import main
+    main()
+    raise SystemExit
+
 import argparse
 from pathlib import Path
 from scripts.body_scan_contracts.client import MeasuredClient
