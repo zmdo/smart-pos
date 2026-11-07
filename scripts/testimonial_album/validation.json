@@ -1,55 +1,96 @@
 {
   "validated_on": "2026-11-07",
   "status": "passed",
-  "unit_tests": 17,
+  "unit_tests": 23,
   "groups": 18,
+  "generated_groups": 15,
+  "pages": 15,
+  "skipped_groups": 3,
+  "rejected_sources": 1,
+  "layout_rejected_sources": 1,
+  "quality_skipped_groups": 1,
+  "model_calls": 0,
   "candidate_sources": 17,
   "accepted_sources": 16,
-  "rejected_sources": 1,
-  "generated_products": 14,
-  "layout_rejected_sources": 2,
-  "quality_skipped_groups": 2,
-  "missing_groups": 2,
+  "privacy_verified_sources": 16,
+  "privacy_policy": "member_images_keep_coach_and_text",
   "canvas": [
     1080,
     1440
   ],
   "border": "#e60012",
-  "zoom_vs_v1": [
-    1.0203,
-    1.069
+  "photo_frame": [
+    15,
+    15,
+    1050,
+    1159
   ],
-  "mean_screenshot_frame_fill": 0.934,
-  "frames_at_least_98_percent": 8,
+  "brand_frame": [
+    15,
+    1185,
+    1050,
+    240
+  ],
+  "title_font_px": 97,
+  "icon_width": 193.6,
   "layout_counts": {
     "long_story": 2,
-    "short_reply": 8,
+    "short_reply": 9,
     "focused_story": 4
   },
-  "model_requests_analysis": 17,
-  "model_requests_render": 0,
+  "pixel_checks": {
+    "unchanged_sources": 17,
+    "protected_regions": 28,
+    "text_regions": 87,
+    "privacy_verified_sources": 16,
+    "exact_product_pixels": 15,
+    "coach_avatar_regions": 68
+  },
+  "mean_screenshot_frame_fill": 0.9368,
+  "skips": [
+    {
+      "member": "易丽云",
+      "reason": "门店目录中没有会员感言截图"
+    },
+    {
+      "member": "李禹衡",
+      "reason": "截图不合格，未生成：a0152 主要聊天内容不足取景区域的 40%，扩展背景无法形成合格成品；聊天截图仅占成品面积的 42.1%，低于 50%，无法成为画面主体"
+    },
+    {
+      "member": "黎国萍",
+      "reason": "门店目录中没有会员感言截图"
+    }
+  ],
+  "model_requests_layout_privacy": 33,
   "checks": [
-    "Every actual product has one screenshot, placed exactly once",
-    "One unique source yields one single-image product",
-    "Synthetic multi-page tests check hash deduplication and global dimensions",
-    "All PNG and JPG dimensions are identical",
-    "Every source passing content and layout checks is used once; all rejected sources are excluded",
-    "All member message boxes are inside the crop",
-    "Every placed screenshot pixel matches uniform resampling of its original crop",
-    "No screenshot is stretched, obscured, repeated or rewritten",
-    "All bound source files remain unchanged",
-    "Scores match deterministic weights and only member messages count",
-    "Gallery filters and all image/download links checked offline",
-    "Source crop bounds are unchanged, and screenshots are at least as large as red-border v1",
-    "Brand icon and text fit inside their panels without overlaps",
-    "Horizontal title stays 97 px and icon 193.6 px; vertical title stays 69 px and icon 145.6 px",
-    "Every product has chat screenshot area at least 50 percent and brand area at most 40 percent",
-    "Layout-rejected members have no product files and retain machine-readable reasons",
-    "Mixed good and bad sources keep good screenshots; weak two-image compositions fall back to two single-image products"
+    "All source SHA hashes unchanged",
+    "Each qualified screenshot used exactly once",
+    "All PNG/JPG canvas and entire title module identical",
+    "Every important text bubble remains inside crop",
+    "All annotated text regions and right coach avatar regions pixel-identical to source",
+    "Rendered screenshot pixels equal uniformly scaled masked original crop",
+    "Only member-avatar and person-photo masks accepted",
+    "All source privacy reviews passed",
+    "Rejected groups have no product files",
+    "No unmasked original or OCR transcripts exported",
+    "Gallery filters, local images, result JSON and download links checked offline",
+    "Contact sheet and background-photo cases inspected visually"
   ],
   "limitations": [
-    "Real dataset has one accepted screenshot per member; multi-image layout uses synthetic regression tests",
-    "Very wide or short screenshots are skipped when they cannot dominate the fixed canvas without cropping text",
-    "Model role and crop boundaries remain reviewable in HTML; original redactions are preserved"
-  ]
+    "Model region detection is fallible; retain source bindings and review metadata",
+    "Real data has one qualified screenshot per member; multiple sources covered by synthetic tests",
+    "Old previews retained separately and do not reflect the current privacy policy"
+  ],
+  "gallery_checks": {
+    "filters": {
+      "all": 18,
+      "long_story": 2,
+      "focused_story": 4,
+      "short_reply": 9,
+      "wide_reply": 0,
+      "skipped": 3
+    },
+    "local_links": 79,
+    "download_links": 15
+  }
 }

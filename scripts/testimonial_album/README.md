@@ -1,62 +1,76 @@
-# 会员感言相册模板 v1
+# 会员感言相册模板
 
-开发与效果验证入口；当前先供用户在 HTML 中查看，尚未升级为正式最佳实践。所有识别、图像裁剪与渲染在远程服务器执行。
+独立开发与效果验证入口，目前先供用户查看 HTML，尚未归档到正式最佳实践。识别、隐私复核、图像处理与渲染均在远程服务器执行。
 
-## 确认约束
+## 固定版式与内容约束
 
-- 每批统一画布，默认 **1080×1440**。可在全局配置调整宽高，会员配置不能改变尺寸。
-- 外边框和卡片分隔使用品牌红色（默认 `#e60012`），与“会员感言”标题保持一致。
-- 图标和文字采用首版红框的固定尺寸档，不再随着剩余标题区域变大：1080 宽画布中，横排标题 97 px、图标宽 193.6 px；竖排标题 69 px、图标宽 145.6 px。只有批次全局画布宽度变化时才同比缩放。
-- 聊天截图必须成为成品主体：实际截图像素占成品面积至少 50%，标题区域不超过成品面积 40%。不合格截图跳过生成，并在 HTML、结果 JSON 与审核清单返回原因和实际占比。
-- 每张原始截图在同一会员的全部成品页中只出现一次。不将同一截图同时做气泡放大图与上下文图；相同 SHA 的重复文件也只使用一次。
-- 只有一张有效截图就生成单图版。两张时主辅排版，多于两张分页，每页至多两张，不混用其他会员的素材。
-- 仅裁掉聊天 UI 和无关边缘，保留完整相关会员反馈与教练回复，所有可读会员气泡都位于上下文框内。等比缩放，不拉伸、不重写聊天文字、不生成虚构评价。
-- 只处理 `xxx店` 目录，排除参考模板与说明文件。训练计划、约课和教练自述不是会员感言；没有素材保留缺失原因。
+- 整批固定 **1080×1440**，红色边框 `#e60012`。仅全局配置可改变尺寸，会员不能单独改尺寸。
+- **整个“会员感言”模块固定**：默认截图框 `[15,15,1050,1159]`，底部标题区 `[15,1185,1050,240]`（x、y、宽、高）。图标、文字及周围留白都使用相同位置和大小，不随截图长短变化。
+- 延用首版横排规格：标题 97 px、图标宽 193.6 px、品牌文字 29 px。全局画布宽度改变时统一等比调整。
+- 每张截图仅用一次，相同 SHA 去重。单张素材只做一页单图；多张按评分排主辅、分页，每页至多两张，不借用其他会员素材。
+- AI 标出主要反馈、完整气泡及允许取景范围。程序在原图范围内寻找包含主要内容的矩形，尽量适应固定截图框，等比缩放；不切掉有用反馈，不改写聊天文字。
+- 实际截图至少占画布 50%；主要内容包围框至少占裁剪区域 40%，防止靠大量背景凑满。单图与合成页均检查，组合不合格时拆成单图页。仍不合格则跳过，并返回原因。
 
-## 两个独立阶段
+## 隐私范围
+
+只新增会员头像、聊天内人物照片、背景人物照片的马赛克。会员头像即使是动物或图案也遮盖。**对话中的姓名、昵称和全部文字均保留；右侧教练头像保持原样**，即使头像本身是健身人物照片，也不能当成聊天内照片遮挡。普通表情包、非人物图片保留。原图已有的遮挡不恢复。
+
+模型分别圈出需遮图片、完整文字气泡与右侧教练头像。程序从图片遮罩中扣除文字与教练头像保护区，再对源图副本做马赛克；背景人物照片的遮罩也不得覆盖气泡或教练头像。第二次模型检查原图与遮盖图，发现遗漏可补框重试；误遮、坐标异常、低置信或复核未通过则不导出该截图。
+
+当前 HTML 的原截图入口只提供**已遮盖的预览**，不附未遮盖原图或 OCR 转录。模型原始回答留在服务器证据目录。店名、会员目录名仍保留在内部导航中，供用户查找；这不是整站匿名化。旧实验预览不会被覆盖，应使用最新 v4 预览。
+
+## 三个独立阶段
 
 ```bash
+# 1. 识别感言、区分会员与教练、评分。已有证据可以直接复用。
 python -m scripts.testimonial_album.evidence \
   --input /path/to/私教会员案例项目 \
   --audit /path/to/classification-comparison.json \
   --settings /path/to/private-qwen-settings.json \
   --cache /path/to/testimonial-cache --workers 3 \
-  --out /path/to/new-testimonial-evidence
+  --out /path/to/testimonial-evidence
 
+# 2. 标注主要内容、文字/教练头像保护区与隐私图片，进行遮盖复核。
+python -m scripts.testimonial_album.annotate \
+  --input /path/to/私教会员案例项目 \
+  --evidence /path/to/testimonial-evidence \
+  --settings /path/to/private-qwen-settings.json \
+  --cache /path/to/testimonial-layout-cache --workers 3 \
+  --out /path/to/testimonial-layout-evidence
+
+# 3. 仅消费证据，生成成品和 HTML，无模型调用。
 python -m scripts.testimonial_album \
   --input /path/to/私教会员案例项目 \
-  --evidence /path/to/new-testimonial-evidence \
+  --evidence /path/to/testimonial-layout-evidence \
   --font /path/to/NotoSansSC.ttf \
   --config scripts/testimonial_album/presentation.example.json \
   --out /path/to/new-testimonial-products
 ```
 
-从项目根目录运行，使用远程 `/root/apps/non-grid-calibration/.venv/bin/python`。第一阶段复用已授权 Qwen 配置，不在代码或产物中写密钥；模型只分析原截图。第二阶段不导入模型客户端，只消费带 SHA 的 `member-testimonial-evidence-v1` 数据包。修改版式无须再次识别。
+从项目根目录运行，当前远程解释器为 `/root/apps/non-grid-calibration/.venv/bin/python`。私密模型配置只传路径，不写入代码或公开产物。只处理 `xxx店`，排除参考模板与说明文件。
 
-## 评分与布局
+第一阶段输出 `member-testimonial-evidence-v1`，第二阶段输出带 SHA 绑定的 `member-testimonial-layout-privacy-v1`。渲染要求 `privacy_policy=member_images_keep_coach_and_text`、`status=verified` 和 `privacy_audit_passed=true`，不能误用旧遮盖规则的证据。
 
-只给会员回复计分，教练文字不计。总分 100：有效文字长度 30 分（350 字封顶）、具体经历与细节 35 分、明确情感表达 20 分、清晰度 15 分。模型对后三项给 0–5 分，程序按权重计算；分项、原文、语气和原因全部可查。情感表达衡量丰富程度，不把负面情感自动算低分，不按情绪正负淘汰素材；分数不代表评价真实性或训练效果。
+第二阶段可加 `--reuse-content /path/to/previous-layout-evidence` 复用同 SHA 源图的主要内容框，只重做隐私标注及复核。缓存按图像、提示词与版本区分。改变排版可直接重跑第三阶段。
 
-先选角色和边界明确的完整回复，再按分数排序。长篇、重点、简短和横屏仅是排版分组：长篇至少 300 字且 70 分，重点至少 120 字，其余为简短。单图比较底部标题板与右侧标题板两种构图，在同一固定画布中优先保证文字可读；标题和图标使用固定规格。双图按分差分配主辅面积，并保留各自完整上下文，不复制素材。
+## 评分与结果
 
-保留较小的外边距和截图内边距，让截图等比放大。底部标题布局按截图实际高度收紧主图框；右侧标题布局按截图实际宽度收紧主图框。先按单图版式检查每张截图，防止差的素材借另一张大图通过；再检查最终合成版式。若两张合格截图拼在一页后占比不合格，就拆为两张单图成品，每张来源仍只用一次。标题与信封图案分别布局，不能通过放大标题、裁字或拉伸截图凑满画布。
+只给会员回复评分，教练文字不计。总分 100：有效文字长度 30（350 字封顶）、具体经历 35、情感表达 20、清晰度 15。模型后三项各给 0–5 分，程序计算权重；情感衡量表达丰富度，不因负面感言而淘汰。分数只用于选主图，不代表评价真实性或训练效果。
 
-内容识别结果 `status=accepted` 与版式适用性分别保存。`presentation` 记录每张截图是否适合成品、聊天面积占比、标题区占比与拒绝原因；`quality_rejections` 汇总不合格素材。无合格截图的组返回 `status=skipped` 和 `skip_kind=unsuitable_screenshot`，不写成品 PNG/JPG，保留原图供核查。同组其余合格截图继续生成。没有素材则返回 `skip_kind=missing_material`，不与版式不合格混淆。
+长篇（至少 300 字且 70 分）、重点（至少 120 字）、简短与横屏是 HTML 分类，不改变固定标题区。先单独验证来源，再按评分排版；主辅双图使用 60%/40% 宽度。
 
-图上仅出现截图与标题装饰，评分和技术信息放在 HTML 详情及 JSON。不确定的角色、裁剪边界、原图截断或模型识别疑点写入 `review.json`，不凭空补全。
+配置支持全局 `width`、`height`、`title`、`brand`、`accent`、`layout`；`members` 按 `店/会员目录` 指定 `hero_message_id` 或分类。默认“会员感言”与“UP 健身私教馆”。
 
-## 配置与输出
+输出 `index.html`、`results.json`、`review.json`、来源 SHA 绑定、各组 `page-NN.png/jpg`、已遮盖的原尺寸预览和排版元数据。`layers` 记录来源、裁剪、等比缩放、实际马赛克区域与落位。公共 JSON 只保留数字评分，不导出聊天转录。
 
-参考 `presentation.example.json`。支持全局 `width`、`height`、`title`、`brand`、`accent`、`layout`；`members` 按 `店/原始会员目录` 覆盖 `hero_message_id` 或布局。默认标题为“会员感言”、品牌文字为“UP 健身私教馆”。
+无素材使用 `skip_kind=missing_material`；有素材但取景或隐私未通过使用 `unsuitable_screenshot`，具体原因在 `quality_rejections` 中（如 `privacy_or_content_unverified`、`main_content_too_sparse`、`chat_area_too_small`）。跳过的组没有成品图片。输出目录必须全新，旧预览保留。
 
-输出 `index.html`、`results.json`、`review.json`、来源绑定及各组 `page-NN.png/jpg`、原截图和排版元数据。`layers` 逐项记录来源 ID、原始尺寸、裁剪矩形、等比缩放系数及落位，可核验一图一次与完整像素。输出目录必须全新，不覆盖旧预览。
+## 验证与预览
 
 ```bash
 python -m unittest discover -s scripts/testimonial_album/tests -v
 ```
 
-目前核查 18 个会员组、17 张候选，16 张内容属于感言；何彦霖的 `a0128` 为训练计划，剔除并保留原因。新版中 14 张通过版式检查，生成 14 张成品。李禹衡的 `a0152` 聊天面积仅 12.5%、标题区 81.4%；蒲小东的 `a0030` 聊天面积 40.1%、标题区 53.7%，均不生成。易丽云、黎国萍缺少感言截图。
+23 项测试覆盖一图一次、去重分页、统一画布/标题区、完整内容取景、等比像素保真、文字与右侧教练头像保护、背景照片遮盖、未复核不导出、公共结果不泄露未遮原图或转录。真实数据每个会员只有一张合格感言来源，多图由合成测试验证。
 
-验证结果见 [validation.json](validation.json)：17 项测试通过。14 张 PNG/JPG 均为 1080×1440，逐一核对原图 SHA、会员气泡范围、截图唯一性、等比缩放像素、固定字号和图标尺寸、标题不重叠。源图裁剪范围不变。另验证不合格截图无成品文件、同组保留合格素材、双图不合格时分开输出。HTML 六个筛选项和下载链接已核验。真实数据每组只有一张内容合格素材，多图行为由合成样例回归测试覆盖。
-
-当前预览：`artifacts/testimonial-album-v3/validated/index.html`（工作区根目录，Git 不存会员图片）。远程产物位于 `/root/autodl-fs/case-studio/experiments/testimonial-album-v1-20261107/validated-chat-first`。旧版预览保留供比较。
+全量结果与逐像素核验见 [validation.json](validation.json)。当前预览位于工作区 `artifacts/testimonial-album-v4/validated/index.html`；远程产物 `/root/autodl-fs/case-studio/experiments/testimonial-album-v4-20261107/delivery`。Git 不存会员图片。

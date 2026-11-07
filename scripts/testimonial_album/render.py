@@ -3,6 +3,8 @@ import math
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont,ImageOps
 from .policy import choose_layout
+from . import PRIVACY_POLICY
+from .privacy import crop_for_frame,mask_regions,mosaic
 
 def load_font(path,size,weight=700):
     font=ImageFont.truetype(str(path),max(8,round(size)))
@@ -96,12 +98,12 @@ def card_geometry(im,rect,width):
     return {'placement':[px,py,*size],'frame':[x,y,w,h],
             'frame_fill':round(size[0]*size[1]/((w-2*pad)*(h-2*pad)),4),'scale':scale}
 
-def paste_card(canvas,im,rect,asset_id,role,crop,original_size):
+def paste_card(canvas,im,rect,asset_id,role,crop,original_size,details=None):
     geometry=card_geometry(im,rect,canvas.width);x,y,w,h=geometry['frame']
     ImageDraw.Draw(canvas).rounded_rectangle((x,y,x+w,y+h),radius=12,fill='#f7f5f1')
     px,py,pw,ph=geometry['placement'];canvas.paste(im.resize((pw,ph),Image.Resampling.LANCZOS),(px,py))
     return dict(geometry,asset_id=asset_id,role=role,original_size=list(original_size),crop=crop,
-                uniform_scale=True,content_clipped=False)
+                uniform_scale=True,content_clipped=False,content_crop=details)
 
 def prepare_page(records,paths,hero,config):
     width=int(config.get('width',1080))
@@ -110,46 +112,32 @@ def prepare_page(records,paths,hero,config):
     if not 1<=len(records)<=2:raise ValueError('one_or_two_sources_per_page')
     if len({r['asset_id'] for r in records})!=len(records):raise ValueError('duplicate_source_on_page')
     byid={r['asset_id']:r for r in records};primary=byid[hero['asset_id']]
-    secondary=next((r for r in records if r['asset_id']!=primary['asset_id']),None)
+    ordered=[primary]+[r for r in records if r is not primary]
     layout=config.get('layout','auto')
     if layout=='auto':layout=choose_layout(hero)
     if layout not in ('long_story','focused_story','short_reply','wide_reply'):raise ValueError('unknown_layout')
-    # Each original is placed exactly once, always retaining all relevant replies.
-    main,main_crop,main_size=open_crop(paths[primary['asset_id']],primary['context_bbox'])
-    margin=round(width*.014);gap=round(width*.010);inner=width-2*margin;pad=2*max(3,round(width*.003))
-    content_h=height-2*margin
-    if config.get('layout','auto')=='auto' and main.width/main.height>2.7:layout='wide_reply'
-    if secondary is None:
-        # Give screenshot pixels priority over a large title panel. Compare two
-        # compact title positions, then fit the photo frame to its actual extent.
-        # Wide screenshots must remain readable, rather than being cover-cropped.
-        band_h=round(width/1080*200);side=round(width/1080*270)
-        bottom_main=[margin,margin,inner,content_h-band_h-gap]
-        side_main=[margin,margin,inner-side-gap,content_h]
-        fit=lambda rect:min((rect[2]-pad)/main.width,(rect[3]-pad)/main.height)
-        if fit(side_main)>fit(bottom_main)*1.02:
-            main_w=min(side_main[2],math.ceil(main.width*fit(side_main))+pad)
-            main_rect=[margin,margin,main_w,content_h]
-            brand_rect=[margin+main_w+gap,margin,inner-main_w-gap,content_h]
-            composition='single_side_band'
-        else:
-            main_h=min(bottom_main[3],math.ceil(main.height*fit(bottom_main))+pad)
-            main_rect=[margin,margin,inner,main_h]
-            brand_rect=[margin,margin+main_h+gap,inner,content_h-main_h-gap]
-            composition='single_bottom_band'
+    # One template for every member: identical photo region and bottom title panel.
+    unit=width/1080;margin=round(15*unit);gap=round(11*unit);inner=width-2*margin
+    brand_h=round(240*unit);photo_h=height-2*margin-gap-brand_h
+    photo_frame=[margin,margin,inner,photo_h];brand_rect=[margin,height-margin-brand_h,inner,brand_h]
+    if len(records)==1:frames=[photo_frame]
     else:
-        context,context_crop,context_size=open_crop(paths[secondary['asset_id']],secondary['context_bbox'])
-        secondary_score=max(m['score'] for m in secondary['messages'])
-        ratio=max(.52,min(.70,.58+(hero['score']-secondary_score)*.002))
-        col=round((inner-gap)*ratio);side=inner-gap-col;brand_h=min(round(side*1.28),round(content_h*.40))
-        main_rect=[margin,margin,col,content_h]
-        context_rect=[margin+col+gap,margin,side,content_h-brand_h-gap]
-        brand_rect=[margin+col+gap,margin+content_h-brand_h,side,brand_h]
-        composition='pair_feature'
-    prepared=[(main,main_rect,primary['asset_id'],'context',main_crop,main_size)]
-    if secondary is not None:prepared.append((context,context_rect,secondary['asset_id'],'context',context_crop,context_size))
-    plan={'layout':layout,'composition':composition,'width':width,'height':height,'brand_frame':brand_rect,
-          'brand_orientation':'horizontal' if composition=='single_bottom_band' else 'vertical'}
+        primary_w=round((inner-gap)*.60)
+        frames=[[margin,margin,primary_w,photo_h],[margin+primary_w+gap,margin,inner-gap-primary_w,photo_h]]
+    prepared=[]
+    for record,rect in zip(ordered,frames):
+        annotation=record.get('layout_evidence',{})
+        if annotation.get('status')!='verified' or annotation.get('privacy_audit_passed') is not True or annotation.get('privacy_policy')!=PRIVACY_POLICY:
+            raise UnsuitableScreenshot({'passed':False,'reason':'AI 主要内容或隐私遮盖复核未通过，待人工审核后生成',
+                'codes':['privacy_or_content_unverified'],'chat_area_ratio':None,'brand_area_ratio':None})
+        with Image.open(paths[record['asset_id']]) as raw:im=ImageOps.exif_transpose(raw).convert('RGB')
+        pad=max(3,round(width*.003));aspect=(rect[2]-2*pad)/(rect[3]-2*pad)
+        crop,details=crop_for_frame(annotation,im.size,aspect)
+        masks=mask_regions(annotation,im.size);masked=mosaic(im,masks)
+        details.update(privacy_masks=masks,privacy_audit_passed=True,protected_regions=annotation['protected_regions'])
+        prepared.append((masked.crop(tuple(crop)),rect,record['asset_id'],'main_content',crop,list(im.size),details))
+    plan={'layout':layout,'composition':'fixed_single' if len(records)==1 else 'fixed_pair',
+          'width':width,'height':height,'photo_frame':photo_frame,'brand_frame':brand_rect,'brand_orientation':'horizontal'}
     return plan,prepared
 
 def assess_plan(plan,prepared):
@@ -158,6 +146,8 @@ def assess_plan(plan,prepared):
     chat_ratio=sum(w*h for _,_,w,h in placements)/area
     brand_ratio=plan['brand_frame'][2]*plan['brand_frame'][3]/area
     codes=[];reasons=[]
+    if any(p[-1]['main_content_fraction']<.40 for p in prepared):
+        codes.append('main_content_too_sparse');reasons.append('主要聊天内容不足取景区域的 40%，扩展背景无法形成合格成品')
     if chat_ratio<.50:
         codes.append('chat_area_too_small');reasons.append(f'聊天截图仅占成品面积的 {chat_ratio:.1%}，低于 50%，无法成为画面主体')
     if brand_ratio>.40:
@@ -167,7 +157,8 @@ def assess_plan(plan,prepared):
             'min_chat_area_ratio':.50,'max_brand_area_ratio':.40}
 
 def assess_page(records,paths,hero,config):
-    return assess_plan(*prepare_page(records,paths,hero,config))
+    try:return assess_plan(*prepare_page(records,paths,hero,config))
+    except UnsuitableScreenshot as e:return e.assessment
 
 def render_page(records,paths,hero,font_path,out,config):
     plan,prepared=prepare_page(records,paths,hero,config);quality=assess_plan(plan,prepared)
@@ -177,7 +168,7 @@ def render_page(records,paths,hero,font_path,out,config):
     canvas=Image.new('RGB',(width,height),config.get('accent','#e60012'))
     layers=[paste_card(canvas,*args) for args in prepared]
     brand_elements=draw_brand(canvas,brand_rect,font_path,config,plan['brand_orientation'])
-    main_size=prepared[0][-1]
+    main_size=prepared[0][-2]
     estimate=hero['text_line_height']/1000*main_size[1]*layers[0]['scale']
     issues=[]
     if hero['requires_review']:issues.append('主要回复角色、边界或原图完整性待核对，主图区已使用完整上下文')

@@ -10,9 +10,10 @@ from scripts.testimonial_album.policy import normalize,score,rank_messages,choos
 from scripts.testimonial_album.render import render_page,pixel_box,assess_page,UnsuitableScreenshot
 from scripts.testimonial_album.evidence import inventory
 from scripts.testimonial_album.pipeline import run
-from scripts.testimonial_album import EVIDENCE_SCHEMA
+from scripts.testimonial_album import LAYOUT_SCHEMA,PRIVACY_POLICY
 from scripts.body_scan_contracts.io import save,sha,read
 from scripts.body_scan_contracts.bundles import seal
+from scripts.testimonial_album.privacy import mask_regions,mosaic,crop_for_frame
 
 FONT=Path(os.environ.get('CASE_TEST_FONT','/root/autodl-fs/case-studio/fonts/NotoSansSC.ttf'))
 
@@ -22,8 +23,12 @@ def message(**extra):
         'sentiment':'positive','text_line_height':20,'cut_off':False,'score_reason':'有具体经历'},**extra)
 
 def record(**extra):
-    return normalize(dict(is_testimonial=True,reason='反馈',context_bbox=[0,50,1000,950],
+    r=normalize(dict(is_testimonial=True,reason='反馈',context_bbox=[0,50,1000,950],
                           messages=[message(**extra)],issues=[]),dict(asset_id='a0001',source_size=[600,1000]))
+    r['layout_evidence']={'status':'verified','privacy_checked':True,'privacy_audit_passed':True,'privacy_policy':PRIVACY_POLICY,
+        'main_bbox':[0,50,1000,950],'usable_bbox':[0,0,1000,1000],
+        'protected_regions':[[100,100,900,500]],'privacy_regions':[]}
+    return r
 
 class AlbumTests(unittest.TestCase):
     def test_coach_messages_never_rank_as_member(self):
@@ -120,7 +125,7 @@ class AlbumTests(unittest.TestCase):
                 r=record();r.update(group,asset_id=f'a{i:04}',source=str(p.relative_to(root)),source_sha256=sha(p))
                 r['messages'][0]['message_id']=r['asset_id']+'-m01';records.append(r)
             for name,value in [('records.json',records),('groups.json',groups),('sources.json',{})]:save(evidence/name,value)
-            seal(evidence,EVIDENCE_SCHEMA,('records.json','groups.json','sources.json'))
+            seal(evidence,LAYOUT_SCHEMA,('records.json','groups.json','sources.json'))
             config=base/'config.json';save(config,{'width':720,'height':960,'members':{groups[1]['directory']:{'width':1080,'height':1440}}})
             out=base/'products';counts=run(root,evidence,out,FONT,config)
             self.assertEqual(counts['pages'],4);self.assertEqual(counts['model_calls'],0)
@@ -134,6 +139,10 @@ class AlbumTests(unittest.TestCase):
                 for page in r['pages']:
                     with Image.open(out/page['file']) as im:self.assertEqual(im.size,(720,960))
             self.assertIn('统一720×960',(out/'index.html').read_text())
+            self.assertNotIn('训练三个月',(out/'results.json').read_text())
+            self.assertNotIn('训练三个月',(out/'index.html').read_text())
+            self.assertEqual(list(out.rglob('*original*')),[])
+            self.assertTrue(list(out.rglob('*redacted.png')))
 
     @unittest.skipUnless(FONT.exists(),'font not installed')
     def test_too_long_brand_fails_without_an_unbounded_font_loop(self):
@@ -158,13 +167,15 @@ class AlbumTests(unittest.TestCase):
     def test_qualified_square_and_tall_images_fill_their_frame_without_losing_pixels(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
-            for w,h in ((1000,1000),(600,1300)):
+            for w,h in ((1000,1000),(600,900)):
                 p=root/f'{w}-{h}.png';Image.new('RGB',(w,h),'#e9ecef').save(p)
-                r=record();r['context_bbox']=[0,0,1000,1000]
+                r=record();r['layout_evidence']['main_bbox']=[0,0,1000,1000]
                 result=render_page([r],{'a0001':p},rank_messages([r])[0],FONT,root/'out.png',{})
                 layer=result['layers'][0]
                 self.assertEqual(layer['crop'],[0,0,w,h]);self.assertEqual(len(result['layers']),1)
-                self.assertGreaterEqual(layer['frame_fill'],.99)
+                self.assertGreaterEqual(layer['frame_fill'],.65)
+                self.assertEqual(result['brand_frame'],[15,1185,1050,240])
+                self.assertEqual(result['photo_frame'],[15,15,1050,1159])
 
     @unittest.skipUnless(FONT.exists(),'font not installed')
     def test_wide_sources_are_rejected_before_any_product_file_is_written(self):
@@ -172,13 +183,80 @@ class AlbumTests(unittest.TestCase):
             root=Path(tmp)
             for w,h in ((1200,220),(1200,650)):
                 p=root/f'{w}-{h}.png';Image.new('RGB',(w,h),'#e9ecef').save(p)
-                r=record();r['context_bbox']=[0,0,1000,1000];hero=rank_messages([r])[0]
+                r=record();r['layout_evidence']['main_bbox']=[0,0,1000,1000];hero=rank_messages([r])[0]
                 quality=assess_page([r],{'a0001':p},hero,{})
                 self.assertFalse(quality['passed']);self.assertIn('chat_area_too_small',quality['codes'])
-                self.assertIn('brand_area_too_large',quality['codes'])
+                self.assertLess(quality['brand_area_ratio'],.40)
                 out=root/'rejected.png'
                 with self.assertRaises(UnsuitableScreenshot):render_page([r],{'a0001':p},hero,FONT,out,{})
                 self.assertFalse(out.exists());self.assertFalse(out.with_suffix('.jpg').exists())
+
+    def test_crop_contains_every_protected_region(self):
+        e={'main_bbox':[140,450,820,780],'usable_bbox':[0,100,1000,950],
+           'protected_regions':[[150,460,800,610],[180,700,810,800]]}
+        crop,detail=crop_for_frame(e,(1000,2000),1044/1153)
+        l,t,r,b=crop
+        for pl,pt,pr,pb in e['protected_regions']:
+            self.assertTrue(l<=pl and t<=pt*2 and r>=pr and b>=pb*2)
+        self.assertEqual(detail['mode'],'cover_protected')
+        self.assertLess(r-l,1000);self.assertLess(b-t,2000)
+
+    def test_mosaic_preserves_feedback_over_a_personal_background(self):
+        im=Image.new('RGB',(200,300));im.putdata([(x%256,y%256,(x+y)%256) for y in range(300) for x in range(200)])
+        original=im.copy();e={'protected_regions':[[200,200,800,600]],'coach_avatar_regions':[[850,200,1000,300]],
+            'privacy_regions':[{'kind':'person_photo','bbox':[0,0,1000,1000]}]}
+        masked=mosaic(im,mask_regions(e,im.size))
+        self.assertIsNone(ImageChops.difference(im,original).getbbox())
+        self.assertIsNone(ImageChops.difference(im.crop((40,60,160,180)),masked.crop((40,60,160,180))).getbbox())
+        self.assertIsNone(ImageChops.difference(im.crop((170,60,200,90)),masked.crop((170,60,200,90))).getbbox())
+        self.assertIsNotNone(ImageChops.difference(im,masked).getbbox())
+        with self.assertRaisesRegex(ValueError,'unsupported_privacy_scope'):
+            mosaic(im,[{'kind':'nickname','box':[40,60,160,100]}])
+
+    def test_coach_photo_avatar_mask_is_discarded_including_its_rim(self):
+        evidence={'protected_regions':[], 'coach_avatar_regions':[[860,200,970,250]],
+                  'privacy_regions':[{'kind':'person_photo','bbox':[855,198,975,253]}]}
+        self.assertEqual(mask_regions(evidence,(1000,2000)),[])
+
+    @unittest.skipUnless(FONT.exists(),'font not installed')
+    def test_unverified_privacy_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p=Path(tmp)/'input.png';Image.new('RGB',(600,1000),'white').save(p)
+            r=record();r['layout_evidence']['privacy_audit_passed']=False;hero=rank_messages([r])[0]
+            self.assertFalse(assess_page([r],{'a0001':p},hero,{})['passed'])
+            out=Path(tmp)/'result.png'
+            with self.assertRaises(UnsuitableScreenshot):render_page([r],{'a0001':p},hero,FONT,out,{})
+            self.assertFalse(out.exists())
+
+    def test_region_evidence_requires_explicit_complete_privacy_review(self):
+        from scripts.testimonial_album.annotate import normalize_regions,map_square_regions
+        raw={'main_bbox':[300,200,700,800],'usable_bbox':[250,0,750,1000],
+             'protected_regions':[{'bbox':[310,210,690,790]}],'text_regions':[{'bbox':[310,210,690,790]}],
+             'privacy_regions':[{'kind':'member_avatar','bbox_2d':[260,200,300,250],'confidence':.98}],
+             'coach_avatar_regions':[{'bbox_2d':[700,200,740,250]}],
+             'privacy_checked':True,'content_complete':True,'privacy_confidence':.98,'crop_confidence':.98}
+        mapped=map_square_regions(raw,(1000,2000),(2000,500,0))
+        self.assertEqual(mapped['main_bbox'],[100,200,900,800])
+        self.assertEqual(mapped['coach_avatar_regions'][0]['bbox'],[900,200,980,250])
+        self.assertEqual(normalize_regions(mapped)['status'],'verified')
+        raw['privacy_checked']=False;self.assertEqual(normalize_regions(raw)['status'],'needs_review')
+        del raw['privacy_regions']
+        with self.assertRaises(KeyError):normalize_regions(raw)
+
+    @unittest.skipUnless(FONT.exists(),'font not installed')
+    def test_redaction_pixels_and_fixed_footer_are_preserved_in_product(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p=Path(tmp)/'input.png';im=Image.new('RGB',(600,1000),'#ededed')
+            from PIL import ImageDraw
+            d=ImageDraw.Draw(im)
+            for y in range(100,220,10):d.rectangle((20,y,90,y+4),fill=(y,0,0))
+            im.save(p);r=record();r['layout_evidence']['privacy_regions']=[{'kind':'member_avatar','bbox':[30,95,160,225]}]
+            out=Path(tmp)/'result.png';result=render_page([r],{'a0001':p},rank_messages([r])[0],FONT,out,{})
+            layer=result['layers'][0];masked=mosaic(im,mask_regions(r['layout_evidence'],im.size))
+            x,y,w,h=layer['placement'];expected=masked.crop(tuple(layer['crop'])).resize((w,h),Image.Resampling.LANCZOS)
+            with Image.open(out) as product:self.assertIsNone(ImageChops.difference(product.crop((x,y,x+w,y+h)),expected).getbbox())
+            self.assertEqual(result['photo_frame'],[15,15,1050,1159]);self.assertEqual(result['brand_frame'],[15,1185,1050,240])
+            self.assertTrue(layer['content_crop']['privacy_masks'])
 
     @unittest.skipUnless(FONT.exists(),'font not installed')
     def test_pipeline_keeps_valid_sources_and_splits_weak_pairs(self):
@@ -192,7 +270,7 @@ class AlbumTests(unittest.TestCase):
                 r=record();r.update(group,asset_id=f'a{i:04}',source=str(p.relative_to(root)),source_sha256=sha(p))
                 r['messages'][0]['message_id']=r['asset_id']+'-m01';records.append(r)
             for name,value in [('records.json',records),('groups.json',groups),('sources.json',{})]:save(evidence/name,value)
-            seal(evidence,EVIDENCE_SCHEMA,('records.json','groups.json','sources.json'))
+            seal(evidence,LAYOUT_SCHEMA,('records.json','groups.json','sources.json'))
             out=base/'products';counts=run(root,evidence,out,FONT)
             self.assertEqual(counts['generated_groups'],2);self.assertEqual(counts['quality_skipped_groups'],1)
             self.assertEqual(counts['layout_rejected_sources'],2);self.assertEqual(counts['pages'],3)
