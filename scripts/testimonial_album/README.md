@@ -17,7 +17,7 @@
 
 模型分别圈出需遮图片、完整文字气泡与右侧教练头像。程序从图片遮罩中扣除文字与教练头像保护区，再对源图副本做马赛克；背景人物照片的遮罩也不得覆盖气泡或教练头像。第二次模型检查原图与遮盖图，发现遗漏可补框重试；误遮、坐标异常、低置信或复核未通过则不导出该截图。
 
-当前 HTML 的原截图入口只提供**已遮盖的预览**，不附未遮盖原图或 OCR 转录。模型原始回答留在服务器证据目录。店名、会员目录名仍保留在内部导航中，供用户查找；这不是整站匿名化。旧实验预览不会被覆盖，应使用最新 v4 预览。
+当前 HTML 的原截图入口只提供**已遮盖的预览**，不附未遮盖原图或 OCR 转录。模型原始回答留在服务器证据目录。店名、会员目录名仍保留在内部导航中，供用户查找；这不是整站匿名化。旧实验预览不会被覆盖，应使用最新 v5 预览。
 
 ## 三个独立阶段
 
@@ -73,4 +73,6 @@ python -m unittest discover -s scripts/testimonial_album/tests -v
 
 23 项测试覆盖一图一次、去重分页、统一画布/标题区、完整内容取景、等比像素保真、文字与右侧教练头像保护、背景照片遮盖、未复核不导出、公共结果不泄露未遮原图或转录。真实数据每个会员只有一张合格感言来源，多图由合成测试验证。
 
-全量结果与逐像素核验见 [validation.json](validation.json)。当前预览位于工作区 `artifacts/testimonial-album-v4/validated/index.html`；远程产物 `/root/autodl-fs/case-studio/experiments/testimonial-album-v4-20261107/delivery`。Git 不存会员图片。
+全量结果与逐像素核验见 [validation.json](validation.json)。当前预览位于工作区 `artifacts/testimonial-album-v5/validated/index.html`；远程产物 `/root/autodl-fs/case-studio/experiments/testimonial-album-v4-20261107/delivery-heart-v5`。Git 不存会员图片。
+
+2026-11-07 图标修订：信封爱心改为连续对称曲线，四倍采样后平滑边缘；维持原图标大小与位置。复用内容和隐私证据重渲染 15 张成品，无模型调用；逐像素核验变更仅发生在信封图标内。

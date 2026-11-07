@@ -41,6 +41,24 @@ def brand_metrics(canvas_width,orientation):
                 title_font_px=round(BRAND_PRESETS[orientation]['title_font_px']*unit),
                 brand_font_px=round(BRAND_PRESETS[orientation]['brand_font_px']*unit))
 
+def draw_heart(canvas,bounds,color):
+    """Draw a symmetric, continuous heart with smooth lobes and a tapered tip."""
+    left,top,width,height=bounds
+    width,height=max(1,round(width)),max(1,round(height));supersample=4
+    points=[]
+    for i in range(512):
+        t=2*math.pi*i/512
+        points.append((16*math.sin(t)**3,
+                       13*math.cos(t)-5*math.cos(2*t)-2*math.cos(3*t)-math.cos(4*t)))
+    xmin=min(x for x,y in points);xmax=max(x for x,y in points)
+    ymin=min(y for x,y in points);ymax=max(y for x,y in points)
+    mask=Image.new('L',(width*supersample,height*supersample),0)
+    path=[((x-xmin)/(xmax-xmin)*(mask.width-1),
+           (ymax-y)/(ymax-ymin)*(mask.height-1)) for x,y in points]
+    ImageDraw.Draw(mask).polygon(path,fill=255)
+    mask=mask.resize((width,height),Image.Resampling.LANCZOS)
+    canvas.paste(color,(round(left),round(top),round(left)+width,round(top)+height),mask)
+
 def draw_brand(canvas,rect,font_path,config,orientation=None):
     x,y,w,h=rect;draw=ImageDraw.Draw(canvas);red=config.get('accent','#e60012')
     draw.rounded_rectangle((x,y,x+w,y+h),radius=12,fill='#fffdf9')
@@ -62,8 +80,7 @@ def draw_brand(canvas,rect,font_path,config,orientation=None):
         draw.polygon([(left,top),(left+ew/2,top+eh*.66),(left+ew,top)],fill='#edf2f5')
         draw.polygon([(left,top+eh),(left+ew/2,top+eh*.42),(left+ew,top+eh)],fill='#c6d4de')
         cx=left+ew/2;cy=top+eh*.52;r=ew*.115
-        draw.ellipse((cx-2*r,cy-r,cx,cy+r),fill=red);draw.ellipse((cx,cy-r,cx+2*r,cy+r),fill=red)
-        draw.polygon([(cx-2*r,cy),(cx+2*r,cy),(cx,cy+2.6*r)],fill=red)
+        draw_heart(canvas,(cx-2*r,cy-r,4*r,3.6*r),red)
         elements.append({'role':'icon','bounds':[left,top,left+ew,top+eh]})
     ew=metrics['icon_width']
     if orientation=='horizontal':

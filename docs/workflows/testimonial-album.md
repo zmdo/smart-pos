@@ -27,4 +27,4 @@ flowchart LR
 
 入口：[scripts/testimonial_album](../../scripts/testimonial_album/README.md)。三个节点独立：感言识别评分 → 内容与隐私标注/复核 → 无模型渲染。第二节点可复用已绑定的内容框，第三节点可复用完整证据；上游体测、报告和封面流程不变。
 
-验证：23 项测试覆盖固定尺寸、一图一次、保护区内文字/教练头像原像素不变、人物背景遮盖、坐标映射、等比渲染、未通过复核不导出与公共数据限制。全量实测和跳过统计见 [validation.json](../../scripts/testimonial_album/validation.json)。预览在工作区 `artifacts/testimonial-album-v4/validated/index.html`，旧预览保留，不再作为当前遮盖规则的结果。
+验证：23 项测试覆盖固定尺寸、一图一次、保护区内文字/教练头像原像素不变、人物背景遮盖、坐标映射、等比渲染、未通过复核不导出与公共数据限制。全量实测和跳过统计见 [validation.json](../../scripts/testimonial_album/validation.json)。预览在工作区 `artifacts/testimonial-album-v5/validated/index.html`，旧预览保留，不再作为当前遮盖规则的结果。

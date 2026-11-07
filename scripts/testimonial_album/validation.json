@@ -74,12 +74,13 @@
     "Rejected groups have no product files",
     "No unmasked original or OCR transcripts exported",
     "Gallery filters, local images, result JSON and download links checked offline",
-    "Contact sheet and background-photo cases inspected visually"
+    "Contact sheet and background-photo cases inspected visually",
+    "All 15 v5 PNG products differ from v4 only inside the envelope icon bounds"
   ],
   "limitations": [
     "Model region detection is fallible; retain source bindings and review metadata",
     "Real data has one qualified screenshot per member; multiple sources covered by synthetic tests",
-    "Old previews retained separately and do not reflect the current privacy policy"
+    "Pre-v4 previews are retained separately and do not reflect the current privacy policy"
   ],
   "gallery_checks": {
     "filters": {
@@ -92,5 +93,7 @@
     },
     "local_links": 79,
     "download_links": 15
-  }
+  },
+  "presentation_revision": "v5-symmetric-envelope-heart",
+  "render_model_requests_this_revision": 0
 }
