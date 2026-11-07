@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS versions(job TEXT,id TEXT,data TEXT NOT NULL,PRIMARY 
         )
 
 
-def create(name, settings, legacy=None):
+def create(name, settings, legacy=None, parent=None, member=None):
     jid = secrets.token_hex(12)
     base = job_dir(jid)
     base.mkdir(parents=True)
@@ -60,6 +60,8 @@ def create(name, settings, legacy=None):
         error=None,
         legacy_source=legacy,
     )
+    if parent:
+        data.update(parent_id=parent, member_group=member)
     from .common import save
 
     save(base / "settings.json", settings, True)
@@ -93,10 +95,58 @@ def patch(jid, **values):
     return data
 
 
-def listing():
+def listing(include_internal=False):
     with db() as c:
         rows = [json.loads(r["data"]) for r in c.execute("SELECT data FROM jobs")]
-    return sorted(rows, key=lambda r: r["created_at"], reverse=True)
+    return sorted(
+        [r for r in rows if include_internal or not r.get("parent_id")],
+        key=lambda r: r["created_at"],
+        reverse=True,
+    )
+
+
+def children(jid):
+    return sorted(
+        (r for r in listing(True) if r.get("parent_id") == jid),
+        key=lambda r: r["member_group"]["id"],
+    )
+
+
+def set_node(jid, entry):
+    """Branches update different nodes in one transaction, without lost writes."""
+    with db(True) as c:
+        row = c.execute("SELECT data FROM jobs WHERE id=?", (jid,)).fetchone()
+        if not row:
+            raise KeyError("任务不存在")
+        data = json.loads(row["data"])
+        nodes = [n for n in data["nodes"] if n["key"] != entry["key"]] + [entry]
+        running = [n for n in nodes if n["status"] in ("running", "waiting")]
+        data.update(
+            nodes=nodes,
+            stage=(running[-1] if running else entry)["key"],
+            progress=min(
+                95,
+                round(
+                    100
+                    * sum(n["status"] in ("complete", "skipped") for n in nodes)
+                    / 17
+                ),
+            ),
+            updated_at=now(),
+        )
+        c.execute(
+            "UPDATE jobs SET data=? WHERE id=?",
+            (json.dumps(data, ensure_ascii=False), jid),
+        )
+    return data
+
+
+def copy_media(source, target):
+    with db(True) as c:
+        c.execute(
+            "INSERT OR IGNORE INTO media(job,id,path,sha) SELECT ?,id,path,sha FROM media WHERE job=?",
+            (target, source),
+        )
 
 
 def review(jid, version=None):

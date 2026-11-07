@@ -1,6 +1,7 @@
 """Small JSON client for explicit identity transcription and user-triggered copy."""
 
-import json, threading, time
+import json, os, threading, time
+from pathlib import Path
 import httpx
 from . import config
 from .common import WEB_DATA, read, save, signature
@@ -9,7 +10,12 @@ CAPACITY = threading.BoundedSemaphore(2)
 
 
 def ask(system, prompt, images=(), cache=False, temperature=0):
-    cfg = config.load()["model"]
+    relay = os.environ.get("STUDIO_MODEL_SETTINGS")
+    cfg = (
+        read(Path(relay).with_name("settings.json"))["model"]
+        if relay
+        else config.load()["model"]
+    )
     if not all(cfg.get(k) for k in ("base_url", "model", "api_key")):
         raise RuntimeError("请先在设置中配置模型接口、模型名与 API Key")
     content = [{"type": "text", "text": prompt}]
@@ -31,6 +37,14 @@ def ask(system, prompt, images=(), cache=False, temperature=0):
     if cache and path.exists():
         result = read(path)
         return result["value"], {"cached": True, "request_count": 0, "key": key}
+    # Node subprocesses share the parent's relay; interactive copy uses the same relay.
+    if relay:
+        cfg = read(relay)
+    else:
+        from . import model_gateway
+
+        if model_gateway.ENABLED:
+            cfg = model_gateway.settings(cfg)
     with CAPACITY:
         for attempt in range(2):
             try:

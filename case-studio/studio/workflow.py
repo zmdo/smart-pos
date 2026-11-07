@@ -1,7 +1,8 @@
-"""Durable serial GPU workflow. Each frozen node runs in an isolated process."""
+"""Durable member-parallel workflow with bounded GPU, CPU and model resources."""
 
 import os, signal, subprocess, threading, queue, traceback, shutil, uuid, time
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 from .common import (
     DATA,
     WEB_DATA,
@@ -15,7 +16,7 @@ from .common import (
     job_dir,
     sha,
 )
-from . import store, config, intake
+from . import store, config, intake, model_gateway
 
 QUEUE = queue.Queue()
 LOCK = threading.RLock()
@@ -23,6 +24,9 @@ ACTIVE = set()
 PROCESSES = {}
 STOPPING = threading.Event()
 WORKER = None
+RESOURCES = {"gpu": threading.BoundedSemaphore(1), "cpu": threading.BoundedSemaphore(2)}
+GPU_NODES = {"split", "standardize", "display"}
+CPU_NODES = {"review", "training", "testimonial", "life", "reports"}
 BP = REPO / "best-practices"
 DELIVERY = BP / "body-scan-delivery"
 NAMES = {
@@ -60,8 +64,9 @@ def enqueue(jid, action="preprocess", version=None):
 def start():
     global WORKER
     STOPPING.clear()
+    model_gateway.ENABLED = True
     store.initialize()
-    for job in store.listing():
+    for job in store.listing(include_internal=True):
         if job["status"] in ("processing", "generating", "queued", "uploading"):
             store.patch(
                 job["id"],
@@ -95,6 +100,7 @@ def stop():
     QUEUE.put(None)
     if WORKER:
         WORKER.join(timeout=5)
+    model_gateway.stop()
 
 
 def worker():
@@ -133,7 +139,11 @@ def command(jid, args, log):
         MKL_NUM_THREADS="1",
         PYTHONUNBUFFERED="1",
         CASE_PYTHON=PYTHON,
+        STUDIO_NODE_WORKERS="1",
     )
+    model = job_dir(jid) / "model.json"
+    if model.exists():
+        env["STUDIO_MODEL_SETTINGS"] = str(model)
     log.parent.mkdir(parents=True, exist_ok=True)
     with log.open("w") as output:
         with LOCK:
@@ -172,8 +182,7 @@ def node(jid, key, fn, skip=False):
     if STOPPING.is_set():
         raise RuntimeError("服务重启中断了任务，可重试；已完成节点保留")
     job = store.get(jid)
-    nodes = job["nodes"]
-    old = next((n for n in nodes if n["key"] == key), None)
+    old = next((n for n in job["nodes"] if n["key"] == key), None)
     if old and old["status"] == "complete":
         return Path(old["path"])
     dest = job_dir(jid) / "nodes" / (key + "-" + uuid.uuid4().hex[:8])
@@ -184,41 +193,79 @@ def node(jid, key, fn, skip=False):
         path=str(dest),
         started_at=now(),
     )
-    nodes = [n for n in nodes if n["key"] != key] + [entry]
-    store.patch(
-        jid,
-        nodes=nodes,
-        stage=key,
-        progress=min(
-            95,
-            round(
-                len([n for n in nodes if n["status"] in ("complete", "skipped")])
-                / len(NAMES)
-                * 100
-            ),
-        ),
-    )
+    store.set_node(jid, entry)
     if skip:
         return None
+    resource = "gpu" if key in GPU_NODES else "cpu" if key in CPU_NODES else None
+    acquired = False
     try:
+        if resource:
+            entry.update(status="waiting", resource=resource)
+            store.set_node(jid, entry)
+            while not RESOURCES[resource].acquire(timeout=0.2):
+                if STOPPING.is_set():
+                    raise RuntimeError("处理已停止，已完成节点保留")
+            acquired = True
+            if STOPPING.is_set():
+                raise RuntimeError("处理已停止，已完成节点保留")
+            entry.update(status="running", resource_acquired_at=now())
+            store.set_node(jid, entry)
         fn(dest)
     except Exception:
         entry.update(status="failed", finished_at=now())
-        store.patch(jid, nodes=nodes)
+        store.set_node(jid, entry)
         raise
+    finally:
+        if acquired:
+            RESOURCES[resource].release()
     entry.update(status="complete", finished_at=now())
-    store.patch(jid, nodes=nodes)
+    store.set_node(jid, entry)
     return dest
 
 
 def preprocess(jid):
+    from .parallel import run
+
+    run(jid)
+
+
+def combine_sources(jobfile, pairs, pair_ids, combined):
+    original = read(jobfile)
+    combined.mkdir(exist_ok=True)
+    assets = [a for a in original["assets"] if a["id"] not in pair_ids]
+    for source_job, selected in [(jobfile, assets)] + (
+        [
+            (
+                pairs / "dataset/job.json",
+                [
+                    a
+                    for a in read(pairs / "dataset/job.json")["assets"]
+                    if a.get("pair_source", {}).get("parent_asset_id") in pair_ids
+                ],
+            )
+        ]
+        if pairs
+        else []
+    ):
+        for asset in selected:
+            target = combined / "input" / asset["path"]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if not target.exists():
+                shutil.copy2(source_job.parent / "input" / asset["path"], target)
+        if source_job != jobfile:
+            assets.extend(selected)
+    save(combined / "job.json", {**original, "assets": assets})
+    return assets
+
+
+def preprocess_member(jid):
     base = job_dir(jid)
-    store.patch(jid, status="processing", error=None)
+    store.patch(jid, status="processing", error=None, processing_started_at=now())
     cfg = read(base / "settings.json")
     cfg["model"] = config.load()["model"]
     save(base / "settings.json", cfg, True)
     model = base / "model.json"
-    save(model, cfg["model"], True)
+    save(model, model_gateway.settings(cfg["model"]), True)
     cache = DATA / "cache/website"
     cache.mkdir(parents=True, exist_ok=True)
 
@@ -261,213 +308,98 @@ def preprocess(jid):
         for a in original["assets"]
         if a["class"].get("kind") == "body_scan" and a["class"].get("phase") == "both"
     ]
-    pairs = node(
-        jid,
-        "split",
-        lambda out: shell(
-            out,
-            [
-                "bash",
-                BP / "body-scan-pairs/scripts/body_scan_pairs/run.sh",
-                "--job",
-                jobfile,
-                "--out",
-                out,
-                "--settings",
-                model,
-                "--cache",
-                cache / "pairs",
-                "--split-only",
-                "--asset-id",
-                *pair_ids,
-            ],
-        ),
-        not pair_ids,
-    )
-    # Physical links keep source containment checks valid and avoid duplicating large originals.
-    combined = base / "combined"
-    combined.mkdir(exist_ok=True)
-    assets = [a for a in original["assets"] if a["id"] not in pair_ids]
-    for source_job, selected in [(jobfile, assets)] + (
-        [(pairs / "dataset/job.json", read(pairs / "dataset/job.json")["assets"])]
-        if pairs
-        else []
-    ):
-        for asset in selected:
-            target = combined / "input" / asset["path"]
-            target.parent.mkdir(parents=True, exist_ok=True)
-            if not target.exists():
-                shutil.copy2(source_job.parent / "input" / asset["path"], target)
-        if source_job != jobfile:
-            assets.extend(selected)
-    save(combined / "job.json", {**original, "assets": assets})
-    body = [a for a in assets if a.get("class", {}).get("kind") == "body_scan"]
-    standard = node(
-        jid,
-        "standardize",
-        lambda out: shell(
-            out,
-            [
-                "bash",
-                BP / "body-scan-wall-v4/scripts/run_body_scan_refined.sh",
-                "--job",
-                combined / "job.json",
-                "--out",
-                out,
-                "--settings",
-                model,
-                "--font",
-                FONT,
-                "--width",
-                cfg["display_width"],
-                "--height",
-                1792,
-            ],
-        ),
-        not body,
-    )
-    displayed = node(
-        jid,
-        "display",
-        lambda out: shell(
-            out,
-            [
-                "bash",
-                BP / "body-scan-group-display-v3/run.sh",
-                "--input",
-                standard,
-                "--out",
-                out,
-                "--settings",
-                model,
-                "--visibility-settings",
-                model,
-                "--width",
-                cfg["display_width"],
-                "--workers",
-                min(3, cfg["model_workers"]),
-            ],
-        ),
-        not standard
-        or not any(
-            r.get("status") == "rectangular"
-            for r in read(standard / "summary.json", [])
-        ),
-    )
-    tables = node(
-        jid,
-        "tables",
-        lambda out: shell(
-            out,
-            [
-                "bash",
-                BP / "body-report-compare/run.sh",
-                "tables",
-                "--input",
-                root,
-                "--audit",
-                audit,
-                "--out",
-                out,
-                "--settings",
-                model,
-                "--cache",
-                cache / "tables",
-                "--workers",
-                cfg["model_workers"],
-            ],
-        ),
-    )
-    from .report_bridge import build as report_bundle
 
-    reports = node(jid, "reports", lambda out: report_bundle(tables, out))
-    sources = {}
-    for asset in assets:
-        sources[asset["id"]] = {
-            "job": str(combined / "job.json"),
-            "job_sha256": sha(combined / "job.json"),
-        }
-        if asset.get("pair_source"):
-            report = (
-                pairs
-                / "splits"
-                / asset["pair_source"]["parent_asset_id"]
-                / "report.json"
-            )
-            sources[asset["id"]].update(
-                split_report=str(report), split_report_sha256=sha(report)
-            )
-    save(
-        base / "source-manifest.json",
-        {"schema": "body-scan-source-jobs-v1", "assets": sources},
-    )
-    phase = node(
-        jid,
-        "phase",
-        lambda out: shell(
-            out,
-            [
-                "bash",
-                BP / "body-scan-phase-classification/run.sh",
-                "run",
-                "--input",
-                displayed / "display",
-                "--source-manifest",
-                base / "source-manifest.json",
-                "--reports",
-                reports,
-                "--out",
-                out,
-                "--settings",
-                model,
-                "--cache",
-                cache / "phase",
-                "--provider",
-                "qwen",
-            ],
-        ),
-        not displayed,
-    )
-    crops = node(
-        jid,
-        "report_crop",
-        lambda out: shell(
-            out,
-            [
-                PYTHON,
-                "-m",
-                "scripts.report_photo_crop",
-                "--audit",
-                audit,
-                "--input-root",
-                root,
-                "--out",
-                out,
-                "--settings",
-                model,
-                "--cache",
-                cache / "report-crop",
-                "--ratio",
-                "3:4",
-                "--workers",
-                cfg["model_workers"],
-            ],
-        ),
-        not kinds.intersection({"body_report", "training_report"}),
-    )
-    products = {}
-    for key, package, kind in [
-        ("training", "training_daily", "daily_training"),
-        ("testimonial", "testimonial_album", "testimonial"),
-    ]:
-        evidence = node(
+    def body_branch():
+        pairs = node(
             jid,
-            key + "_evidence",
-            lambda out, p=package: shell(
+            "split",
+            lambda out: shell(
                 out,
                 [
                     "bash",
-                    DELIVERY / p / "evidence.sh",
+                    BP / "body-scan-pairs/scripts/body_scan_pairs/run.sh",
+                    "--job",
+                    jobfile,
+                    "--out",
+                    out,
+                    "--settings",
+                    model,
+                    "--cache",
+                    cache / "pairs",
+                    "--split-only",
+                    "--asset-id",
+                    *pair_ids,
+                ],
+            ),
+            not pair_ids,
+        )
+        combined = base / "combined"
+        assets = combine_sources(jobfile, pairs, pair_ids, combined)
+        body = [a for a in assets if a.get("class", {}).get("kind") == "body_scan"]
+        standard = node(
+            jid,
+            "standardize",
+            lambda out: shell(
+                out,
+                [
+                    "bash",
+                    BP / "body-scan-wall-v4/scripts/run_body_scan_refined.sh",
+                    "--job",
+                    combined / "job.json",
+                    "--out",
+                    out,
+                    "--settings",
+                    model,
+                    "--font",
+                    FONT,
+                    "--width",
+                    cfg["display_width"],
+                    "--height",
+                    1792,
+                ],
+            ),
+            not body,
+        )
+        displayed = node(
+            jid,
+            "display",
+            lambda out: shell(
+                out,
+                [
+                    "bash",
+                    BP / "body-scan-group-display-v3/run.sh",
+                    "--input",
+                    standard,
+                    "--out",
+                    out,
+                    "--settings",
+                    model,
+                    "--visibility-settings",
+                    model,
+                    "--width",
+                    cfg["display_width"],
+                    "--workers",
+                    min(3, cfg["model_workers"]),
+                ],
+            ),
+            not standard
+            or not any(
+                r.get("status") == "rectangular"
+                for r in read(standard / "summary.json", [])
+            ),
+        )
+        return assets, pairs, displayed
+
+    def report_branch():
+        tables = node(
+            jid,
+            "tables",
+            lambda out: shell(
+                out,
+                [
+                    "bash",
+                    BP / "body-report-compare/run.sh",
+                    "tables",
                     "--input",
                     root,
                     "--audit",
@@ -477,74 +409,193 @@ def preprocess(jid):
                     "--settings",
                     model,
                     "--cache",
-                    cache / p,
+                    cache / "tables",
                     "--workers",
                     cfg["model_workers"],
                 ],
             ),
-            kind not in kinds,
         )
-        if key == "testimonial":
+        from .report_bridge import build as report_bundle
+
+        reports = node(jid, "reports", lambda out: report_bundle(tables, out))
+        crops = node(
+            jid,
+            "report_crop",
+            lambda out: shell(
+                out,
+                [
+                    PYTHON,
+                    "-m",
+                    "scripts.report_photo_crop",
+                    "--audit",
+                    audit,
+                    "--input-root",
+                    root,
+                    "--out",
+                    out,
+                    "--settings",
+                    model,
+                    "--cache",
+                    cache / "report-crop",
+                    "--ratio",
+                    "3:4",
+                    "--workers",
+                    cfg["model_workers"],
+                ],
+            ),
+            not kinds.intersection({"body_report", "training_report"}),
+        )
+        return tables, reports, crops
+
+    def extras_branch():
+        products = {}
+        for key, package, kind in [
+            ("training", "training_daily", "daily_training"),
+            ("testimonial", "testimonial_album", "testimonial"),
+        ]:
             evidence = node(
                 jid,
-                "testimonial_layout",
-                lambda out: shell(
+                key + "_evidence",
+                lambda out, p=package: shell(
                     out,
                     [
                         "bash",
-                        DELIVERY / package / "annotate.sh",
+                        DELIVERY / p / "evidence.sh",
                         "--input",
                         root,
-                        "--evidence",
-                        evidence,
+                        "--audit",
+                        audit,
                         "--out",
                         out,
                         "--settings",
                         model,
                         "--cache",
-                        cache / "testimonial-layout",
+                        cache / p,
                         "--workers",
                         cfg["model_workers"],
                     ],
                 ),
+                kind not in kinds,
+            )
+            if key == "testimonial":
+                evidence = node(
+                    jid,
+                    "testimonial_layout",
+                    lambda out: shell(
+                        out,
+                        [
+                            "bash",
+                            DELIVERY / package / "annotate.sh",
+                            "--input",
+                            root,
+                            "--evidence",
+                            evidence,
+                            "--out",
+                            out,
+                            "--settings",
+                            model,
+                            "--cache",
+                            cache / "testimonial-layout",
+                            "--workers",
+                            cfg["model_workers"],
+                        ],
+                    ),
+                    not evidence,
+                )
+            products[key] = node(
+                jid,
+                key,
+                lambda out, p=package, e=evidence: shell(
+                    out,
+                    [
+                        "bash",
+                        DELIVERY / p / "run.sh",
+                        "--input",
+                        root,
+                        "--evidence",
+                        e,
+                        "--out",
+                        out,
+                        *(["--font", FONT] if p == "testimonial_album" else []),
+                    ],
+                ),
                 not evidence,
             )
-        products[key] = node(
+        products["life"] = node(
             jid,
-            key,
-            lambda out, p=package, e=evidence: shell(
+            "life",
+            lambda out: shell(
                 out,
                 [
                     "bash",
-                    DELIVERY / p / "run.sh",
+                    DELIVERY / "life_photos/run.sh",
                     "--input",
                     root,
-                    "--evidence",
-                    e,
+                    "--audit",
+                    audit,
                     "--out",
                     out,
-                    *(["--font", FONT] if p == "testimonial_album" else []),
                 ],
             ),
-            not evidence,
         )
-    products["life"] = node(
-        jid,
-        "life",
-        lambda out: shell(
-            out,
-            [
-                "bash",
-                DELIVERY / "life_photos/run.sh",
-                "--input",
-                root,
-                "--audit",
-                audit,
-                "--out",
+        return products
+
+    with ThreadPoolExecutor(max_workers=3, thread_name_prefix="member-branch") as pool:
+        body_task = pool.submit(body_branch)
+        report_task = pool.submit(report_branch)
+        extras_task = pool.submit(extras_branch)
+        assets, pairs, displayed = body_task.result()
+        tables, reports, crops = report_task.result()
+        combined = base / "combined"
+        sources = {}
+        for asset in assets:
+            sources[asset["id"]] = {
+                "job": str(combined / "job.json"),
+                "job_sha256": sha(combined / "job.json"),
+            }
+            if asset.get("pair_source"):
+                report = (
+                    pairs
+                    / "splits"
+                    / asset["pair_source"]["parent_asset_id"]
+                    / "report.json"
+                )
+                sources[asset["id"]].update(
+                    split_report=str(report), split_report_sha256=sha(report)
+                )
+        save(
+            base / "source-manifest.json",
+            {"schema": "body-scan-source-jobs-v1", "assets": sources},
+        )
+        phase = node(
+            jid,
+            "phase",
+            lambda out: shell(
                 out,
-            ],
-        ),
-    )
+                [
+                    "bash",
+                    BP / "body-scan-phase-classification/run.sh",
+                    "run",
+                    "--input",
+                    displayed / "display",
+                    "--source-manifest",
+                    base / "source-manifest.json",
+                    "--reports",
+                    reports,
+                    "--out",
+                    out,
+                    "--settings",
+                    model,
+                    "--cache",
+                    cache / "phase",
+                    "--provider",
+                    "qwen",
+                ],
+            ),
+            not displayed,
+        )
+        products = extras_task.result()
+
     paths = dict(
         job=str(jobfile),
         audit=str(audit),
@@ -581,7 +632,15 @@ def preprocess(jid):
         store.save_review(jid, data, store.get(jid)["review_version"])
 
     node(jid, "review", prepare)
-    store.patch(jid, status="review", stage="review", progress=100, error=None)
+    members = store.review(jid)["members"]
+    store.patch(
+        jid,
+        status="review",
+        stage="review",
+        progress=100,
+        error=None,
+        resolved_profile=members[0]["profile"] if len(members) == 1 else None,
+    )
 
 
 def generate(jid, review_version):

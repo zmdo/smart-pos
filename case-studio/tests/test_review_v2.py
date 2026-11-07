@@ -8,6 +8,8 @@ from studio.common import job_dir, save
 
 class ProcessIsolationTests(unittest.TestCase):
     def test_current_app_wins_over_old_snapshot_package(self):
+        store.initialize()
+        jid = store.create("process-isolation", config.snapshot())["id"]
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             for name in ("current", "snapshot"):
@@ -19,7 +21,7 @@ class ProcessIsolationTests(unittest.TestCase):
             with patch.object(workflow, "APP_ROOT", root / "current"), patch.object(
                 workflow, "REPO", root / "snapshot"
             ):
-                workflow.command("qa", [sys.executable, "-m", "studio.probe"], log)
+                workflow.command(jid, [sys.executable, "-m", "studio.probe"], log)
             self.assertEqual(log.read_text().strip(), "current")
 
 

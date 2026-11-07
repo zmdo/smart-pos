@@ -1431,6 +1431,111 @@ progress {
   gap: 12px;
   margin-top: 20px;
 }
+
+.member-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  margin: 32px 0 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 26px;
+}
+.member-progress-head h3 {
+  margin: 8px 0 0;
+}
+.member-progress-lists {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.member-progress-list {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+.member-progress-list h4 {
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  background: #f6f4f0;
+  font-size: 14px;
+}
+.member-progress-list.running h4 {
+  background: #fff0ed;
+  color: var(--red);
+}
+.member-progress-list.complete h4 {
+  background: #edf3ed;
+  color: #4b6651;
+}
+.member-progress-list.failed {
+  grid-column: 1 / -1;
+}
+.member-progress-list.failed h4 {
+  color: #ae352a;
+}
+.member-progress-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.member-progress-list li {
+  padding: 16px;
+  border-top: 1px solid var(--line);
+}
+.member-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+.member-progress-label strong {
+  display: block;
+  font-size: 14px;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.member-progress-label small,
+.member-progress-list p,
+.member-progress-empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+.member-progress-list progress {
+  width: 100%;
+  height: 5px;
+  margin-top: 12px;
+  accent-color: var(--red);
+}
+.member-step {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+.member-step small {
+  margin-left: auto;
+  color: var(--muted);
+}
+.node-dot.waiting {
+  color: #a0763b;
+  background: #f7f0e6;
+}
+@media (max-width: 900px) {
+  .member-progress-lists {
+    grid-template-columns: 1fr;
+  }
+  .member-progress-head {
+    align-items: start;
+    flex-direction: column;
+  }
+}
 .crop-dialog > .muted {
   text-align: center;
   font-size: 11px;

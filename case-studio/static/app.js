@@ -322,7 +322,11 @@ function input(label, name, value, type = "text") {
   return `<label>${E(label)}<input type="${type}" name="${E(name)}" value="${E(value)}" autocomplete="${type === "password" ? "new-password" : "off"}"></label>`;
 }
 async function openJob(jid) {
+  clearInterval(poll);
   state.job = await api("/jobs/" + jid);
+  state.review = null;
+  state.versions = [];
+  state.output = false;
   state.selectedVersion = null;
   state.page = "home";
   if (state.job.review_version) {
@@ -364,6 +368,8 @@ async function refreshJob() {
       $(".progress-large progress") &&
         ($(".progress-large progress").value = j.progress);
       $("#nodes") && ($("#nodes").innerHTML = nodes(j));
+      $("#member-progress") &&
+        ($("#member-progress").innerHTML = memberProgress(j));
     }
   } catch (e) {
     console.warn(e.message);
@@ -418,7 +424,25 @@ function nodes(j) {
     .join("");
 }
 function progress(j) {
-  return `<section class="card progress-card"><span class="eyebrow">PREPARING YOUR MATERIALS</span><h2>${j.status === "failed" ? "处理暂时中断" : "正在整理这一批改变"}</h2><p class="muted">可以离开页面，处理会在服务器继续。完成后进入人工审核。</p><div class="progress-large"><b id="progress-number">${j.progress}%</b><progress max="100" value="${j.progress}"></progress></div><div id="nodes">${nodes(j)}</div>${j.error ? `<div class="error-panel">${E(j.error)}<button id="retry">重试未完成节点</button></div>` : ""}</section>`;
+  return `<section class="card progress-card"><span class="eyebrow">PREPARING YOUR MATERIALS</span><h2>${j.status === "failed" ? "部分处理需要重试" : "正在整理这一批改变"}</h2><p class="muted">可以离开页面，处理会在服务器继续。完成后进入人工审核。</p><div class="progress-large"><b id="progress-number">${j.progress}%</b><progress max="100" value="${j.progress}"></progress></div><div id="nodes">${nodes(j)}</div>${j.error ? `<div class="error-panel">${E(j.error)}<button id="retry">重试未完成会员与节点</button></div>` : ""}<div id="member-progress">${memberProgress(j)}</div></section>`;
+}
+function memberProgress(j) {
+  const info = j.preprocessing;
+  if (!info) return "";
+  const groups = info.groups || [];
+  const lists = [
+    ["running", "正在并行预处理", "没有正在处理的会员"],
+    ["complete", "已完成预处理", "会员处理完成后会显示在这里"],
+    ["queued", "排队中", "没有排队中的会员"],
+  ];
+  if (groups.some((g) => g.status === "failed"))
+    lists.push(["failed", "需要重试", ""]);
+  return `<div class="member-progress-head"><div><span class="eyebrow">MEMBER WORKFLOWS</span><h3>按会员并行处理</h3></div><span class="muted">${groups.filter((g) => g.status === "complete").length} / ${groups.length} 已完成 · 最多 ${info.limit} 位同时推进</span></div><div class="member-progress-lists">${lists
+    .map(([status, title, empty]) => {
+      const items = groups.filter((g) => g.status === status);
+      return `<section class="member-progress-list ${status}" aria-label="${title}"><h4>${title}<span>${items.length}</span></h4><ul>${items.length ? items.map((g) => `<li data-member-progress="${E(g.id)}"><div class="member-progress-label"><div><small>${E(g.store)}</small><strong>${E(g.coach || "未填写教练")}-${E(g.member)}</strong></div><span>${g.progress}%</span></div><progress max="100" value="${g.progress}" aria-label="${E(g.member)}预处理进度"></progress><p>${g.image_count} 张图片${status === "complete" ? " · 已准备好审核资料" : status === "queued" ? " · 等待处理名额" : ""}</p>${g.steps.map((n) => `<div class="member-step"><span class="node-dot ${n.status}">${n.status === "waiting" ? "◷" : "↻"}</span>${E(n.name)}${n.status === "waiting" ? `<small>等待 ${n.resource === "gpu" ? "GPU" : "图片处理"} 通道</small>` : ""}</div>`).join("")}${g.error ? `<p class="error-text">${E(g.error)}</p>` : ""}</li>`).join("") : `<li class="member-progress-empty">${empty}</li>`}</ul></section>`;
+    })
+    .join("")}</div>`;
 }
 function sidebar() {
   const groups = Object.groupBy

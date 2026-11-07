@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 TEMP = tempfile.TemporaryDirectory()
 os.environ["CASE_DATA"] = TEMP.name
+os.environ["STUDIO_GATEWAY_PORT"] = "0"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from studio import intake, store, config, review
 from studio.common import WEB_DATA, DATA, save, read, job_dir
@@ -349,13 +350,15 @@ class ShutdownTests(unittest.TestCase):
         import queue, threading, time
         from studio import workflow
 
+        store.initialize()
+        jid = store.create("shutdown-test", config.snapshot())["id"]
         errors = []
         root = Path(tempfile.mkdtemp(dir=TEMP.name))
 
         def run(i):
             try:
                 workflow.command(
-                    "same-job",
+                    jid,
                     [sys.executable, "-c", "import time; time.sleep(60)"],
                     root / f"{i}.log",
                 )
@@ -381,7 +384,7 @@ class ShutdownTests(unittest.TestCase):
                 self.assertFalse(workflow.PROCESSES)
                 with self.assertRaises(RuntimeError):
                     workflow.command(
-                        "new-job", [sys.executable, "-c", "pass"], root / "new.log"
+                        jid, [sys.executable, "-c", "pass"], root / "new.log"
                     )
             finally:
                 workflow.STOPPING.clear()

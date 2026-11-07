@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from studio import store, config, review, workflow, copywriter
+from studio import store, config, review, workflow, copywriter, parallel
 from studio.common import APP_ROOT, DATA, WEB_DATA, PUBLIC_URL, job_dir, read, save
 
 
@@ -155,6 +155,17 @@ def public_job(job):
     value = dict(job)
     value["nodes"] = [{k: v for k, v in n.items() if k != "path"} for n in job["nodes"]]
     value.pop("legacy_source", None)
+    if job.get("parallel_members"):
+        value["preprocessing"] = parallel.summary(job["id"])
+        groups = value["preprocessing"]["groups"]
+        value["nodes"] = [n for n in value["nodes"] if n["key"] == "intake"]
+        if groups and not job["review_version"]:
+            value["progress"] = min(
+                99,
+                round(
+                    5 + 90 * sum(g["progress"] for g in groups) / (100 * len(groups))
+                ),
+            )
     return value
 
 

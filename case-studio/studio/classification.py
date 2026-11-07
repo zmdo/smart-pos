@@ -1,6 +1,6 @@
 """Source-bound classification; the approved prompt is independent of the UI."""
 
-import sys
+import os, sys
 from concurrent.futures import ThreadPoolExecutor
 from .common import REPO, read, save, sha
 from .prompts import CLASSIFY_PROMPT, CLASSIFY_VERSION
@@ -93,7 +93,9 @@ def run(job_path, settings, cache, out):
             trace=trace,
         )
 
-    with ThreadPoolExecutor(max_workers=3) as pool:
+    with ThreadPoolExecutor(
+        max_workers=int(os.environ.get("STUDIO_NODE_WORKERS", "3"))
+    ) as pool:
         rows = list(pool.map(work, job["assets"]))
     save(job_path, job)
     save(out / "classification-comparison.json", rows)
