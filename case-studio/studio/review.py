@@ -6,6 +6,18 @@ from .common import read, save, job_dir, clean_name, now, PYTHON, signature
 from . import store
 
 PREVIEW_LOCK = threading.Lock()
+PRODUCT_KINDS = frozenset(
+    {
+        "three_views",
+        "vs",
+        "single",
+        "cover",
+        "report",
+        "training",
+        "testimonial",
+        "life",
+    }
+)
 PROFILE_LIMITS = {"name": 40, "gender": 1, "coach": 40}
 VS_LIMITS = {
     "brand_name": 35,
@@ -391,12 +403,29 @@ def render_version(jid, review_version):
     return result
 
 
-def archive(jid, vid, mid=None):
+def archive(jid, vid, mid=None, kinds=None):
+    if kinds is not None:
+        if (
+            not isinstance(kinds, (list, tuple))
+            or not kinds
+            or not all(isinstance(k, str) and k in PRODUCT_KINDS for k in kinds)
+        ):
+            raise ValueError("请选择至少一种有效的成品图类型")
+        kinds = sorted(set(kinds))
     version = store.version(jid, vid)
     members = [m for m in version["members"] if not mid or m["member_id"] == mid]
     if not members:
         raise KeyError("会员不存在")
-    path = job_dir(jid) / "downloads" / f'{vid}-{mid or "all"}.zip'
+    if kinds is not None:
+        members = [
+            dict(m, products=[p for p in m["products"] if p.get("kind") in kinds])
+            for m in members
+        ]
+        members = [m for m in members if m["products"]]
+        if not members:
+            raise ValueError("当前范围内没有所选类型的成品图，请调整选择")
+    suffix = "-types-" + signature(kinds)[:20] if kinds is not None else ""
+    path = job_dir(jid) / "downloads" / f'{vid}-{mid or "all"}{suffix}.zip'
     path.parent.mkdir(exist_ok=True)
     if not path.exists():
         used = set()

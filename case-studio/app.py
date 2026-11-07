@@ -5,7 +5,7 @@ from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
-from fastapi import FastAPI, Request, UploadFile, File, HTTPException
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from studio import store, config, review, workflow, copywriter, parallel
@@ -300,8 +300,13 @@ def media(jid: str, mid: str):
 
 
 @app.get("/api/jobs/{jid}/download/{vid}")
-def download(jid: str, vid: str, member: str | None = None):
-    path, name = review.archive(jid, vid, member)
+def download(
+    jid: str,
+    vid: str,
+    member: str | None = None,
+    types: list[str] | None = Query(default=None),
+):
+    path, name = review.archive(jid, vid, member, types)
     return FileResponse(path, filename=name, media_type="application/zip")
 
 

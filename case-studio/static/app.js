@@ -1,6 +1,11 @@
 import { openCrop } from "./crop.js";
 import { openCoverAI } from "./cover-ai.js";
 import { imageURL, clearMediaCache } from "./media-cache.js";
+import {
+  productTypes as products,
+  downloadPlan,
+  archiveURL,
+} from "./download-options.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 export const escape = (s) =>
@@ -28,6 +33,7 @@ let timer,
   poll,
   previewSeq = 0;
 const previewBooks = new Map();
+const downloadSelections = new Map();
 function previewBook(jid = state.job.id, mid = state.member) {
   const key = jid + "/" + mid;
   if (!previewBooks.has(key))
@@ -58,16 +64,6 @@ const kinds = {
   life_photo: "生活照",
   testimonial: "会员感言",
   other: "其他",
-};
-const products = {
-  three_views: "完整三视图",
-  vs: "同朝向对比图",
-  single: "朝向单图",
-  cover: "会员案例封面",
-  report: "体测报告对比",
-  training: "会员训练日常",
-  testimonial: "会员感言",
-  life: "会员生活照",
 };
 const media = (jid, id) => `/api/jobs/${jid}/media/${id}`;
 const member = () => state.review?.members.find((m) => m.id === state.member);
@@ -1059,6 +1055,51 @@ async function generate() {
     toast(e.message, true);
   }
 }
+function downloadPicker(version) {
+  const key = state.job.id + "/" + version.id;
+  const plan = downloadPlan(version, downloadSelections.get(key) ?? null);
+  return `<fieldset class="download-options"><legend>下载成品类型</legend><div class="download-options-head"><span class="muted">默认全部下载，适用于本会员与整批打包。</span><div><button type="button" class="quiet" id="download-all">全选</button><button type="button" class="quiet" id="download-clear">清空</button></div></div><div class="download-types">${plan.available.map((kind) => `<label><input type="checkbox" name="download-type" value="${E(kind)}" ${plan.selected.includes(kind) ? "checked" : ""}><span>${E(products[kind])}</span><small>${plan.counts[kind]} 张</small></label>`).join("")}</div><p id="download-count" class="muted" aria-live="polite"></p></fieldset>`;
+}
+function bindDownloads(version, member) {
+  const key = state.job.id + "/" + version.id;
+  const boxes = $$('.download-types input[name="download-type"]');
+  function update() {
+    const selected = boxes.filter((box) => box.checked).map((box) => box.value);
+    downloadSelections.set(key, selected);
+    const plan = downloadPlan(version, selected);
+    $("#download-count").textContent = selected.length
+      ? `已选 ${selected.length} 类 · 本会员 ${plan.byMember[member.member_id]} 张 · 整批 ${plan.total} 张`
+      : "请至少选择一种成品图类型。";
+    for (const [id, mid, count] of [
+      ["download-member", member.member_id, plan.byMember[member.member_id]],
+      ["download-batch", null, plan.total],
+    ]) {
+      const link = $("#" + id);
+      link.setAttribute("aria-disabled", String(!count));
+      link.tabIndex = count ? 0 : -1;
+      if (count)
+        link.href = archiveURL(state.job.id, version.id, mid, plan.queryTypes);
+      else link.removeAttribute("href");
+      link.title = count
+        ? `下载 ${count} 张成品图`
+        : "当前范围内没有所选类型的成品图";
+      link.onclick = (event) => {
+        if (!count) event.preventDefault();
+      };
+    }
+  }
+  for (const box of boxes) box.onchange = update;
+  for (const [id, checked] of [
+    ["download-all", true],
+    ["download-clear", false],
+  ]) {
+    $("#" + id).onclick = () => {
+      for (const box of boxes) box.checked = checked;
+      update();
+    };
+  }
+  update();
+}
 function outputs() {
   const v =
     state.versions.find(
@@ -1071,7 +1112,7 @@ function outputs() {
     return;
   }
   $("#review-main").innerHTML =
-    `<div class="review-heading"><div><span class="eyebrow">READY TO SHARE</span><h2>${E(m.profile.name)}的成品</h2><p class="muted">${m.products.length} 张成品 · ${formatDate(v.created_at)} · 审核版本 ${v.review_version}</p></div><button id="back-review">返回审核 ↶</button></div><div class="download-bar"><div><b>案例成品已就绪</b><small>${m.review_required.length ? "有 " + m.review_required.length + " 张阶段标记仍需核对，审核说明已随包附带。" : "本会员的阶段标记已确认。"}</small></div><a class="button" href="/api/jobs/${state.job.id}/download/${encodeURIComponent(v.id)}?member=${m.member_id}">下载本会员 ZIP ↓</a><a class="button primary" href="/api/jobs/${state.job.id}/download/${encodeURIComponent(v.id)}">整批打包下载 ↓</a></div><div class="version-bar"><label>成品版本 <select id="version">${state.versions.map((x) => `<option value="${E(x.id)}" ${x.id === v.id ? "selected" : ""}>${formatDate(x.created_at)} · 审核 v${x.review_version}</option>`).join("")}</select></label><span class="muted">修改审核内容后，生成新的成品版本。</span></div>${Object.entries(
+    `<div class="review-heading"><div><span class="eyebrow">READY TO SHARE</span><h2>${E(m.profile.name)}的成品</h2><p class="muted">${m.products.length} 张成品 · ${formatDate(v.created_at)} · 审核版本 ${v.review_version}</p></div><button id="back-review">返回审核 ↶</button></div><div class="download-bar"><div><b>案例成品已就绪</b><small>${m.review_required.length ? "有 " + m.review_required.length + " 张阶段标记仍需核对，审核说明已随包附带。" : "本会员的阶段标记已确认。"}</small></div><a class="button" id="download-member">下载本会员 ZIP ↓</a><a class="button primary" id="download-batch">整批打包下载 ↓</a></div>${downloadPicker(v)}<div class="version-bar"><label>成品版本 <select id="version">${state.versions.map((x) => `<option value="${E(x.id)}" ${x.id === v.id ? "selected" : ""}>${formatDate(x.created_at)} · 审核 v${x.review_version}</option>`).join("")}</select></label><span class="muted">修改审核内容后，生成新的成品版本。</span></div>${Object.entries(
       products,
     )
       .map(([kind, title]) => {
@@ -1083,6 +1124,7 @@ function outputs() {
       .join(
         "",
       )}${m.gaps.length ? `<details class="card"><summary>素材缺项与未生成原因 · ${m.gaps.length}</summary>${m.gaps.map((g) => `<p>${E(products[g.product] || g.product)}：${E(g.reason)}</p>`).join("")}</details>` : ""}`;
+  bindDownloads(v, m);
   $("#back-review").onclick = () => {
     state.output = false;
     renderJob();
