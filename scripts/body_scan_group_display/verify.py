@@ -58,6 +58,15 @@ def verify(out):
         if row['status'] != 'displayed':
             continue
         plan = plans[row['cohort_id']]; crop = plan['crop_rectangle']
+        recheck = row.get('common_frame_boundary_review', {})
+        if recheck.get('status') == 'accepted':
+            require(recheck['approved_image_sha256'] == row['approved_image_sha256'], 'boundary_recheck_source_mismatch')
+            require(digest(recheck['mask_path']) == recheck['mask_sha256'], 'boundary_recheck_mask_changed')
+            require(row['visible_bounds_normalized'] == recheck['revised_bounds'], 'boundary_recheck_bounds_mismatch')
+            if 'head' in recheck['edges']:
+                require(crop[1] <= recheck['revised_bounds'][1], 'rechecked_head_cut')
+            if 'feet' in recheck['edges']:
+                require(crop[3] >= recheck['revised_bounds'][3], 'rechecked_feet_cut')
         require(plan == row['group_plan'], 'inconsistent_group_plan')
         require(contains(row['normalized_bounds'], crop), 'crop_outside_approved_rectangle')
         require(contains(crop, plan['required_rectangle']), 'required_body_part_cut')

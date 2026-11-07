@@ -6,12 +6,12 @@
   "previous_snapshot": "../body-scan-group-display",
   "input_contract": "approved standardized directory, original images; optional fingerprint-matched previous display",
   "output_contract": "standardized scale results + one shared display frame per person; separate scale and crop review status",
-  "algorithm_changes": "existing processing kernels and prompts unchanged; optional cover-pair branch added separately",
+  "algorithm_changes": "2026-11-08: bounded SAM pixel recheck for tiny common-frame VLM head/feet conflicts; scale, geometry, crop constraints and prompts unchanged",
   "archive_adaptations": "workflow orchestration, optional baseline generation, integrity and provenance metadata only",
   "files": [
     {
       "path": "README.md",
-      "sha256": "f1fd1de628afa5ec6f54667b8d4837372575d5732e8b5f904b81b8e8b4293eed",
+      "sha256": "96eb7f0c1860af0cbfa3779c93e7c4c79da4becc8f035c9e540ba76a205a3bfa",
       "role": "archive_support"
     },
     {
@@ -231,11 +231,12 @@
     },
     {
       "path": "scripts/body_scan_group_display/pipeline.py",
-      "sha256": "bca5cc4a591ad24805d37a07735dd0555b1c1aff317fe3d373d9381ed4f116b6",
+      "sha256": "7c5f435fc0e25f76c0dd1759a379c6094b6e6f8e1d09d55be3a3b41715b1f668",
       "source": "scripts/body_scan_group_display/pipeline.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "bca5cc4a591ad24805d37a07735dd0555b1c1aff317fe3d373d9381ed4f116b6",
-      "role": "unchanged_source"
+      "role": "boundary_recheck_revision",
+      "revision": "common-frame-boundary-recheck-v1"
     },
     {
       "path": "scripts/body_scan_group_display/planning.py",
@@ -263,11 +264,12 @@
     },
     {
       "path": "scripts/body_scan_group_display/verify.py",
-      "sha256": "57100a3f51643e14130895e7db8eb84a1d973e0003829fd0c8d48020cfa3120d",
+      "sha256": "3c2ce860da048cf22df2e496679bba6ee8de747863f59ceb83fcd9e1f7de5db7",
       "source": "scripts/body_scan_group_display/verify.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "57100a3f51643e14130895e7db8eb84a1d973e0003829fd0c8d48020cfa3120d",
-      "role": "unchanged_source"
+      "role": "boundary_recheck_revision",
+      "revision": "common-frame-boundary-recheck-v1"
     },
     {
       "path": "scripts/body_scan_group_display/visibility.py",
@@ -493,6 +495,25 @@
       "path": "cover-validation.json",
       "role": "archive_support",
       "sha256": "4d79fbe83fcc01443b6dd8822914851e7e621a7a4561dc44a217343a21f930be"
+    },
+    {
+      "path": "scripts/body_scan_group_display/recovery.py",
+      "role": "boundary_recheck_revision",
+      "revision": "common-frame-boundary-recheck-v1",
+      "source": "scripts/body_scan_group_display/recovery.py",
+      "sha256": "6690ca23aa33814f3c2a1e3ea65837c21526943bec4acf2e9e4992f2c6a677b0"
+    },
+    {
+      "path": "scripts/body_scan_group_display/tests/test_boundary_recovery.py",
+      "role": "boundary_recheck_revision",
+      "revision": "common-frame-boundary-recheck-v1",
+      "source": "scripts/body_scan_group_display/tests/test_boundary_recovery.py",
+      "sha256": "c02c440de7f5f1eb4bf35384a1873d1147262c661401cf1251993c4628cdb48d"
+    },
+    {
+      "path": "boundary-recheck-validation.json",
+      "sha256": "0a252d2bb4818452541fc10e25886ef9bda79138d2437b215d16e7d0fa0eb0c6",
+      "role": "validation_record"
     }
   ],
   "previous_snapshot_status": "retired; path exists only in Git history",
@@ -504,5 +525,6 @@
     "source_base_commit": "976526ddf269b5065ce05f4703f0e9c5f989eb77",
     "input_contract": "cover-frame-request-v1 with bound stage rows, display summaries and original sources",
     "output_contract": "body-scan-cover-frames-v2; head-to-hip composition, locked shoulder frame, explicit partial/width limits; inherited labels"
-  }
+  },
+  "boundary_recheck_version": "common-frame-boundary-recheck-v1"
 }

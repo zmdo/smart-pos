@@ -14,8 +14,9 @@ from scripts.body_scan.pipeline import save_json, VIEW_ORDER
 from . import VERSION
 from .audit import run as classify
 from .inputs import digest, load_inputs
-from .planning import Config, PROFILES, PlanUnavailable, plan_person
+from .planning import Config, PROFILES, PlanUnavailable
 from .visibility import profile_name
+from .recovery import plan_with_boundary_review
 
 
 def reuse_audit(inputs, audit):
@@ -142,7 +143,8 @@ def run(inputs, out, audit=None, config=None, profiles=None, workers=3):
             for item in cohort:
                 item['cohort_id'] = cid
             try:
-                plan = plan_person(cohort, config, profiles)
+                plan = plan_with_boundary_review(cohort, config, profiles,
+                                                 evidence_dir=out/'boundary-rechecks')
                 row.update({'status': 'planned', 'profile': plan['profile'], 'plan': plan})
                 group.update({'output_size': plan['output_size'], 'display_profile': plan['profile']})
                 for item in cohort:

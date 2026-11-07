@@ -1,0 +1,129 @@
+{
+  "version": "common-frame-boundary-recheck-v1",
+  "validated_at": "2026-11-08",
+  "environment": "remote GPU server, isolated outputs and cached input visibility audits",
+  "unit_tests": {
+    "scale": 19,
+    "group_display_including_recovery": 41,
+    "cover": 11,
+    "total": 71,
+    "passed": true
+  },
+  "dataset": {
+    "groups": 9,
+    "accepted_photos_before": 36,
+    "accepted_photos_after": 42,
+    "recovered_asset_ids": [
+      "a0078",
+      "a0079",
+      "a0081",
+      "a0082",
+      "a0083",
+      "a0085"
+    ],
+    "normal_groups": 8,
+    "normal_photos": 36,
+    "normal_display_uniform_bytes_and_plan_identical": true
+  },
+  "regression": [
+    {
+      "member_id": "m009",
+      "before": 0,
+      "after": 6,
+      "existing_pixels_and_plan_identical": null,
+      "rechecked": [
+        "a0078"
+      ]
+    },
+    {
+      "member_id": "m008",
+      "before": 2,
+      "after": 2,
+      "existing_pixels_and_plan_identical": true,
+      "rechecked": []
+    },
+    {
+      "member_id": "m007",
+      "before": 4,
+      "after": 4,
+      "existing_pixels_and_plan_identical": true,
+      "rechecked": []
+    },
+    {
+      "member_id": "m006",
+      "before": 6,
+      "after": 6,
+      "existing_pixels_and_plan_identical": true,
+      "rechecked": []
+    },
+    {
+      "member_id": "m005",
+      "before": 4,
+      "after": 4,
+      "existing_pixels_and_plan_identical": true,
+      "rechecked": []
+    },
+    {
+      "member_id": "m004",
+      "before": 5,
+      "after": 5,
+      "existing_pixels_and_plan_identical": true,
+      "rechecked": []
+    },
+    {
+      "member_id": "m003",
+      "before": 4,
+      "after": 4,
+      "existing_pixels_and_plan_identical": true,
+      "rechecked": []
+    },
+    {
+      "member_id": "m002",
+      "before": 5,
+      "after": 5,
+      "existing_pixels_and_plan_identical": true,
+      "rechecked": []
+    },
+    {
+      "member_id": "m001",
+      "before": 6,
+      "after": 6,
+      "existing_pixels_and_plan_identical": true,
+      "rechecked": []
+    }
+  ],
+  "recovered_group": {
+    "output_size": [
+      768,
+      1792
+    ],
+    "common_rectangle": [
+      -384,
+      -383.16,
+      384,
+      1287.84
+    ],
+    "vertical_stretch": 1.0724117295032916,
+    "resegmented_assets": [
+      "a0078"
+    ],
+    "sam_first_foreground_y": 33,
+    "padded_head_edge_y": 30.5,
+    "common_top_y": 28.5,
+    "all_complete_heads_retained": true,
+    "all_output_pixels_from_valid_photo": true,
+    "calibration_and_shoulder_alignment_unchanged": true
+  },
+  "delivery": {
+    "photos": 6,
+    "products": 13,
+    "phase_labels_require_review": true,
+    "remaining_gap": "testimonial screenshot occupies less than required 50% area; unrelated to body crop"
+  },
+  "outputs": "/root/autodl-fs/case-studio/experiments/common-frame-boundary-recheck-v1",
+  "limitations": [
+    "Validated on these 9 groups, not all historic material",
+    "SAM boundary estimates are evidence, not physical measurement truth",
+    "Existing scale-review flags and phase-review flags remain"
+  ]
+}
