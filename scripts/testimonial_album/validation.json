@@ -1,0 +1,42 @@
+{
+  "validated_on": "2026-11-07",
+  "status": "passed",
+  "unit_tests": 13,
+  "groups": 18,
+  "candidate_sources": 17,
+  "accepted_sources": 16,
+  "rejected_sources": 1,
+  "generated_products": 16,
+  "missing_groups": 2,
+  "canvas": [
+    1080,
+    1440
+  ],
+  "border": "#e60012",
+  "layout_counts": {
+    "long_story": 2,
+    "short_reply": 9,
+    "focused_story": 4,
+    "wide_reply": 1
+  },
+  "model_requests_analysis": 17,
+  "model_requests_render": 0,
+  "checks": [
+    "Every actual product has one screenshot, placed exactly once",
+    "One unique source yields one single-image product",
+    "Synthetic multi-page tests check hash deduplication and global dimensions",
+    "All PNG and JPG dimensions are identical",
+    "Every accepted source is used, and rejected source is excluded",
+    "All member message boxes are inside the crop",
+    "Every placed screenshot pixel matches uniform resampling of its original crop",
+    "No screenshot is stretched, obscured, repeated or rewritten",
+    "All bound source files remain unchanged",
+    "Scores match deterministic weights and only member messages count",
+    "Gallery filters and all image/download links checked offline"
+  ],
+  "limitations": [
+    "Real dataset has one accepted screenshot per member; multi-image layout uses synthetic regression tests",
+    "Wide source screenshots retain whitespace on the fixed portrait canvas",
+    "Model role and crop boundaries remain reviewable in HTML; original redactions are preserved"
+  ]
+}
