@@ -2,6 +2,7 @@
 import numpy as np
 
 from .background import relative
+from .grid_consensus import reconcile
 
 
 def spread(values):
@@ -54,6 +55,9 @@ def plan(contexts):
                  'base_scale': base, 'raised_arms': c['measurement']['raised_arms'], 'review_reasons': []}
         numeric = [v['scale'] for v in background]
         body_values = list(body.values())
+        audit['body_background_disagreement'] = (float(abs(np.median(body_values)/np.median(numeric)-1))
+                                                  if body_values and numeric else None)
+        audit['background_vote_spread'] = spread(numeric)
         chosen = None; method = None
         if aid in ref_scales and numeric and spread(numeric+[ref_scales[aid]]) <= .08:
             # Use its independently measured neutral-body vote too. Omitting it
@@ -69,7 +73,7 @@ def plan(contexts):
             audit.update(status='retained_for_review', reason='insufficient_or_conflicting_scale_votes', scale=base)
         else:
             disagreement = float(abs(np.median(body_values)/chosen-1)) if body_values else None
-            audit['body_background_disagreement'] = disagreement
+            audit['body_selected_scale_disagreement'] = disagreement
             if disagreement is not None and disagreement > .05:
                 audit['review_reasons'].append('segment_scale_difference_above_5_percent')
             # Independent gross conflict never gets averaged into a forced output.
@@ -82,4 +86,19 @@ def plan(contexts):
         audit['relative_scale'] = audit['scale']/base
         audit['neutral_torso_pixels'] = template['torso']
         output[aid] = audit
+    recovery = reconcile(contexts, output)
+    if recovery:
+        reference['grid_scale_recovery'] = recovery
+    for audit in output.values():
+        if audit.get('grid_common_scale') or audit.get('method') != 'multiple_body_segments':
+            continue
+        disagreement = audit['body_background_disagreement']
+        bg_spread = audit['background_vote_spread']
+        if (disagreement is not None and bg_spread <= .08 and disagreement > .12
+                or bg_spread is not None and bg_spread > .08 and abs(audit['relative_scale']-1) > .02):
+            audit.update(proposed_scale=audit['scale'], status='retained_for_review',
+                         reason='independent_background_conflicts_with_body_scale',
+                         scale=audit['base_scale'], relative_scale=1., requires_review=True)
+        elif disagreement is not None and disagreement > .05:
+            audit['review_reasons'].append('independent_body_background_difference_above_5_percent')
     return output, reference

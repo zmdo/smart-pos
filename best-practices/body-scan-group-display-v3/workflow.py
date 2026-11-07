@@ -11,6 +11,7 @@ import cv2
 from snapshot import verify_integrity
 from scripts.body_scan.pipeline import save_json
 from scripts.body_scan_person_scale.pipeline import run as calibrate, digest
+from scripts.body_scan_person_scale.grid_consensus import VERSION as SCALE_RULE_REVISION
 from scripts.body_scan_person_scale.verify import verify as verify_scale
 from scripts.body_scan_person_scale.report import run as comparison
 from scripts.body_scan_group_display.pipeline import run as display
@@ -36,6 +37,7 @@ def run(args):
             raise ValueError('missing_required_input_file')
     out.mkdir(parents=True)
     state = {'version': VERSION, 'status': 'running', 'stage': 'baseline_display',
+             'scale_rule_revision': SCALE_RULE_REVISION,
              'input': str(source), 'snapshot': snapshot, 'display_parameters': asdict(config),
              'baseline_display_generated': args.baseline_display is None}
     save_json(out/'workflow.json', state)
@@ -63,7 +65,8 @@ def run(args):
         display_verification = verify_display(out/'display')
         make_previews(out/'display')
         comparison(out/'standardized', baseline, out/'display', out/'comparison', args.font, args.focus)
-        review_ids = [r['asset_id'] for r in rows if r.get('person_scale', {}).get('status') == 'retained_for_review']
+        review_ids = [r['asset_id'] for r in rows if r.get('person_scale', {}).get('status') == 'retained_for_review'
+                      or r.get('person_scale', {}).get('requires_review')]
         display_review_ids = [r['asset_id'] for r in final_rows if r['status'] != 'displayed']
         state.update(stage='finished', status='completed_with_review' if review_ids or display_review_ids else 'complete',
                      scale_review_asset_ids=review_ids, display_review_asset_ids=display_review_ids,

@@ -6,12 +6,12 @@
   "previous_snapshot": "../body-scan-group-display",
   "input_contract": "approved standardized directory, original images; optional fingerprint-matched previous display",
   "output_contract": "standardized scale results + one shared display frame per person; separate scale and crop review status",
-  "algorithm_changes": "2026-11-08: bounded SAM pixel recheck for tiny common-frame VLM head/feet conflicts; scale, geometry, crop constraints and prompts unchanged",
+  "algorithm_changes": "2026-11-08: independent scale conflict checks; worsening same-board scale proposals recover using an atomic shared grid scale with bounded coverage search; previous tiny-boundary recheck retained",
   "archive_adaptations": "workflow orchestration, optional baseline generation, integrity and provenance metadata only",
   "files": [
     {
       "path": "README.md",
-      "sha256": "96eb7f0c1860af0cbfa3779c93e7c4c79da4becc8f035c9e540ba76a205a3bfa",
+      "sha256": "f7e3be761fa45e002677d8d70495aa4e34b60612052a67b692431ecd4c715103",
       "role": "archive_support"
     },
     {
@@ -329,11 +329,12 @@
     },
     {
       "path": "scripts/body_scan_person_scale/pipeline.py",
-      "sha256": "7a5c9ab00ee3a32a5a4cf2c35e2c1ee4bb5cab38febda01ca397d5be78c6a8e6",
+      "sha256": "ec8667b0f4406c73a75fa9f663616dad133684f8a0c8272df7e249308f295f81",
       "source": "scripts/body_scan_person_scale/pipeline.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "7a5c9ab00ee3a32a5a4cf2c35e2c1ee4bb5cab38febda01ca397d5be78c6a8e6",
-      "role": "unchanged_source"
+      "role": "scale_recovery_revision",
+      "revision": "common-grid-scale-recovery-v1"
     },
     {
       "path": "scripts/body_scan_person_scale/report.py",
@@ -345,11 +346,12 @@
     },
     {
       "path": "scripts/body_scan_person_scale/solve.py",
-      "sha256": "6e82ca383737f3edeab0aab98f0abcc28d35d4b925774ff149039c584bb5303b",
+      "sha256": "897135078b019b30807d6efa59a9198d7222b602ab0fe221b4cc099158cac66d",
       "source": "scripts/body_scan_person_scale/solve.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "6e82ca383737f3edeab0aab98f0abcc28d35d4b925774ff149039c584bb5303b",
-      "role": "unchanged_source"
+      "role": "scale_recovery_revision",
+      "revision": "common-grid-scale-recovery-v1"
     },
     {
       "path": "scripts/body_scan_person_scale/tests/test_scale.py",
@@ -361,11 +363,12 @@
     },
     {
       "path": "scripts/body_scan_person_scale/verify.py",
-      "sha256": "068d50327768de0b07f568396e2d7d6f90e77017193d08c5b041c93178a5a131",
+      "sha256": "802389233137fb676f9ff55ebd829178e37a5b58a1cc915da92c710d32022d25",
       "source": "scripts/body_scan_person_scale/verify.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "068d50327768de0b07f568396e2d7d6f90e77017193d08c5b041c93178a5a131",
-      "role": "unchanged_source"
+      "role": "scale_recovery_revision",
+      "revision": "common-grid-scale-recovery-v1"
     },
     {
       "path": "scripts/body_scan_phase_sessions/__init__.py",
@@ -438,7 +441,7 @@
     },
     {
       "path": "workflow.py",
-      "sha256": "2a23d9e89fc43aa36dbd711c541fcdf2b4613fce44090986cf03f67a10830d95",
+      "sha256": "07bc352ded178e1803b608046909e88bc44e93d327db3e664e7f40a8656701aa",
       "role": "archive_support"
     },
     {
@@ -514,6 +517,25 @@
       "path": "boundary-recheck-validation.json",
       "sha256": "0a252d2bb4818452541fc10e25886ef9bda79138d2437b215d16e7d0fa0eb0c6",
       "role": "validation_record"
+    },
+    {
+      "path": "scripts/body_scan_person_scale/grid_consensus.py",
+      "role": "scale_recovery_revision",
+      "revision": "common-grid-scale-recovery-v1",
+      "source": "scripts/body_scan_person_scale/grid_consensus.py",
+      "sha256": "3510c5171a616c940efeecec32c0297d5e944102a8e419426f32c617f7bb08d8"
+    },
+    {
+      "path": "scripts/body_scan_person_scale/tests/test_grid_consensus.py",
+      "role": "scale_recovery_revision",
+      "revision": "common-grid-scale-recovery-v1",
+      "source": "scripts/body_scan_person_scale/tests/test_grid_consensus.py",
+      "sha256": "1feb3f540fc230c4b423f0f5c2bd64c401bee7b031f4f14929e2c7982d7ff330"
+    },
+    {
+      "path": "grid-scale-recovery-validation.json",
+      "role": "validation_record",
+      "sha256": "26f9d0d1d6b77436f575be12aa30e38a1bc3eae79aa44043d30190d87f9f6ea2"
     }
   ],
   "previous_snapshot_status": "retired; path exists only in Git history",
@@ -526,5 +548,6 @@
     "input_contract": "cover-frame-request-v1 with bound stage rows, display summaries and original sources",
     "output_contract": "body-scan-cover-frames-v2; head-to-hip composition, locked shoulder frame, explicit partial/width limits; inherited labels"
   },
-  "boundary_recheck_version": "common-frame-boundary-recheck-v1"
+  "boundary_recheck_version": "common-frame-boundary-recheck-v1",
+  "scale_rule_revision": "common-grid-scale-recovery-v1"
 }

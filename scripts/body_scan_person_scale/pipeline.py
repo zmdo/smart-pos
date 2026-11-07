@@ -25,6 +25,7 @@ from .coverage import check as check_coverage, measure_bounds
 from .evidence import PROMPT, validate
 from .measurements import measure
 from .solve import plan
+from .grid_consensus import finalize, refine_coverage, VERSION as SCALE_RULE_REVISION
 
 
 def digest(path):
@@ -42,6 +43,19 @@ def render_plan(row, audit, config):
         anchor_basis = 'actual_shoulder_anchor'
     return {'method': VERSION, 'uniform_scale': scale, 'target_hip_y': hip_y,
             'anchor_basis': anchor_basis, 'reference_method': audit['method']}
+
+
+def checked_render(context, audit, config, prior):
+    row = context['row']
+    result = compose(context['source'], row, np.asarray(row['geometry']['H_source_to_corrected']),
+                     config, render_plan(row, audit, config))
+    bounds = audit['boundary_measurement']['bounds_aligned']
+    audit['coverage_guard'] = check_coverage(prior, row['frame'], result[4], bounds)
+    if audit['coverage_guard']['reason']:
+        raise ValueError(audit['coverage_guard']['reason'])
+    if result[4]['padding_fraction'] > row['frame']['padding_fraction']+.04:
+        raise ValueError('new_padding_above_four_percentage_points')
+    return result
 
 
 def run(baseline, out, settings, cache, baseline_display, workers=3):
@@ -81,6 +95,7 @@ def run(baseline, out, settings, cache, baseline_display, workers=3):
     out.mkdir(parents=True)
     save_json(out/'input-manifest.json', manifest)
     save_json(out/'config.json', {**config_data, 'experimental': True, 'person_scale_version': VERSION,
+        'scale_rule_revision': SCALE_RULE_REVISION,
         'baseline': str(baseline), 'baseline_display': str(Path(baseline_display).resolve()),
         'scale_policy': 'one_person_reference_one_isotropic_scale_per_image',
         'camera_geometry_changed': False, 'upstream_best_practice_version': config_data.get('best_practice_version')})
@@ -130,6 +145,7 @@ def run(baseline, out, settings, cache, baseline_display, workers=3):
             except ValueError as error:
                 record.update(status='retained_for_review', reason=str(error))
                 plans = {}
+            pending = {}
             for context in contexts:
                 row = context['row']; aid = row['asset_id']
                 audit = plans.get(aid, {'status': 'retained_for_review', 'reason': record.get('reason'),
@@ -139,8 +155,6 @@ def run(baseline, out, settings, cache, baseline_display, workers=3):
                     previous_frame=copy.deepcopy(row['frame']))
                 if audit['status'] == 'calibrated':
                     try:
-                        result = compose(context['source'], row, np.asarray(row['geometry']['H_source_to_corrected']),
-                                         config, render_plan(row, audit, config))
                         prior = previous_display[aid]
                         prior_image = effective_image(prior)
                         h, w = prior_image.shape[:2]
@@ -153,18 +167,29 @@ def run(baseline, out, settings, cache, baseline_display, workers=3):
                         audit['boundary_measurement']['bounds_aligned'] = bounds
                         if not cv2.imwrite(str(out/aid/'previous_body_mask.png'), boundary_mask.astype(np.uint8)*255):
                             raise OSError('boundary_mask_write_failed')
-                        audit['coverage_guard'] = check_coverage(prior, row['frame'], result[4], bounds)
-                        if audit['coverage_guard']['reason']:
-                            raise ValueError(audit['coverage_guard']['reason'])
-                        if result[4]['padding_fraction'] > row['frame']['padding_fraction']+.04:
-                            raise ValueError('new_padding_above_four_percentage_points')
+                        result = checked_render(context, audit, config, prior)
                     except ValueError as error:
                         audit.update(status='retained_for_review', reason=str(error),
                             proposed_scale=audit['scale'], scale=audit['base_scale'], relative_scale=1.)
                     else:
                         # I/O failures abort the experiment instead of claiming a partial write was retained.
-                        save_render(out, row, result)
+                        pending[aid] = result
                 row['person_scale'] = audit
+                plans[aid] = audit
+            refine_coverage(contexts, plans, pending,
+                            lambda c, a: checked_render(c, a, config, previous_display[c['row']['asset_id']]))
+            finalize(plans, pending)
+            recovery = record.get('reference', {}).get('grid_scale_recovery')
+            common = next((a['grid_common_scale'] for a in plans.values() if a.get('grid_common_scale')), None)
+            if recovery and common:
+                recovery.update(status='applied' if common['applied'] else 'retained_for_review',
+                                final_grid_pitch=common['target_grid_pitch'],
+                                coverage_zoom=common.get('coverage_zoom', 1.),
+                                coverage_failure_reasons=common['coverage_failure_reasons'])
+            for context in contexts:
+                row = context['row']; aid = row['asset_id']; audit = plans[aid]
+                if aid in pending:
+                    save_render(out, row, pending[aid])
                 save_json(out/aid/'report.json', row)
                 print(aid, audit['status'], round(audit['relative_scale'], 4), audit['reason'], flush=True)
         else:

@@ -1,0 +1,243 @@
+{
+  "version": "common-grid-scale-recovery-v1",
+  "date": "2026-11-08",
+  "tests": {
+    "scale_including_recovery": 31,
+    "group_display": 41,
+    "cover": 11,
+    "total": 83,
+    "passed": true
+  },
+  "evidence_reuse": "Existing VLM/background evidence reused after source SHA, geometry and keypoint binding checks; no new eligibility judgments. Real source rendering and SAM crop guards rerun; changed output visibility freshly classified.",
+  "groups": [
+    {
+      "member_id": "m009",
+      "photos": 6,
+      "standardized_pixels_identical": false,
+      "display_uniform_pixels_identical": false,
+      "common_grid_cohorts": [
+        {
+          "asset_ids": [
+            "a0078",
+            "a0079",
+            "a0081",
+            "a0082",
+            "a0083",
+            "a0085"
+          ],
+          "grid_pitch": 44.28266439093071,
+          "actual_pitch_spread": 2.220446049250313e-16,
+          "applied_atomically": true
+        }
+      ],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "黄海丽",
+          "output_size": [
+            768,
+            1689
+          ],
+          "displayed_images": 6,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    },
+    {
+      "member_id": "m008",
+      "photos": 2,
+      "standardized_pixels_identical": true,
+      "display_uniform_pixels_identical": true,
+      "common_grid_cohorts": [],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "蒲小东",
+          "output_size": [
+            768,
+            1719
+          ],
+          "displayed_images": 2,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    },
+    {
+      "member_id": "m007",
+      "photos": 4,
+      "standardized_pixels_identical": true,
+      "display_uniform_pixels_identical": true,
+      "common_grid_cohorts": [],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "蒋先亮",
+          "output_size": [
+            768,
+            1982
+          ],
+          "displayed_images": 4,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    },
+    {
+      "member_id": "m006",
+      "photos": 6,
+      "standardized_pixels_identical": true,
+      "display_uniform_pixels_identical": true,
+      "common_grid_cohorts": [],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "董彦琦",
+          "output_size": [
+            768,
+            1890
+          ],
+          "displayed_images": 6,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    },
+    {
+      "member_id": "m005",
+      "photos": 4,
+      "standardized_pixels_identical": true,
+      "display_uniform_pixels_identical": true,
+      "common_grid_cohorts": [],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "杜明钢",
+          "output_size": [
+            768,
+            1797
+          ],
+          "displayed_images": 4,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    },
+    {
+      "member_id": "m004",
+      "photos": 5,
+      "standardized_pixels_identical": true,
+      "display_uniform_pixels_identical": true,
+      "common_grid_cohorts": [],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "易丽云",
+          "output_size": [
+            768,
+            1792
+          ],
+          "displayed_images": 5,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    },
+    {
+      "member_id": "m003",
+      "photos": 4,
+      "standardized_pixels_identical": true,
+      "display_uniform_pixels_identical": true,
+      "common_grid_cohorts": [],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "张小飞",
+          "output_size": [
+            768,
+            2016
+          ],
+          "displayed_images": 4,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    },
+    {
+      "member_id": "m002",
+      "photos": 5,
+      "standardized_pixels_identical": true,
+      "display_uniform_pixels_identical": true,
+      "common_grid_cohorts": [],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "卢家俊",
+          "output_size": [
+            768,
+            1906
+          ],
+          "displayed_images": 5,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    },
+    {
+      "member_id": "m001",
+      "photos": 6,
+      "standardized_pixels_identical": true,
+      "display_uniform_pixels_identical": true,
+      "common_grid_cohorts": [],
+      "output_formats": [
+        {
+          "group_id": "g001",
+          "store": "景田店",
+          "member": "关文博",
+          "output_size": [
+            768,
+            1152
+          ],
+          "displayed_images": 6,
+          "single_crop_scale_and_shoulder": true
+        }
+      ]
+    }
+  ],
+  "target": {
+    "member_id": "m009",
+    "asset_ids": [
+      "a0078",
+      "a0079",
+      "a0081",
+      "a0082",
+      "a0083",
+      "a0085"
+    ],
+    "common_grid_pitch": 44.28266439093071,
+    "coverage_zoom_from_median": 1.02,
+    "baseline_pitch_spread": 0.2961979836838322,
+    "prior_output_pitch_spread": 0.3856912519696769,
+    "new_pitch_spread": 0.0,
+    "a0078_scale_vs_previous_output": 0.8250703658445514,
+    "output_size": [
+      768,
+      1689
+    ],
+    "products": 13,
+    "stage_labels_preserved": true,
+    "all_framing_is_isotropic": true,
+    "camera_geometry_unchanged": true,
+    "scale_requires_review": true
+  },
+  "normal_groups": 8,
+  "normal_photos": 36,
+  "normal_standardized_display_uniform_bytes_unchanged": true,
+  "outputs": "/root/autodl-fs/case-studio/experiments/common-grid-scale-recovery-v2",
+  "limitations": [
+    "Grid agreement is not proof of exact physical body-size equivalence; distance from wall and pose remain factors",
+    "Existing phase decisions are preserved, not independently confirmed",
+    "Only these 9 groups were rerendered; not all historic material"
+  ]
+}
