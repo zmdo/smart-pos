@@ -1,6 +1,6 @@
 {
-  "version": "body-scan-delivery-best-practice-v3",
-  "authority": "user-authorized five-family product generation",
+  "version": "body-scan-delivery-best-practice-v4",
+  "authority": "user-authorized six-family product generation",
   "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
   "entrypoint": "run.sh",
   "components": {
@@ -8,14 +8,15 @@
     "view_comparison": "body-same-view-reference-v5",
     "single_view": "body-delivery-v1",
     "member_cover": "body-member-cover-v3",
-    "report_comparison": "report-comparison-product-v5"
+    "report_comparison": "report-comparison-product-v5",
+    "testimonial_album": "testimonial-album-approved-v5"
   },
-  "dependencies": "Frozen local scripts and four sibling renderer packages; data-only upstream frame contract, no development imports",
+  "dependencies": "Frozen local contracts and six product categories; testimonial preparation is explicit and separate from model-free rendering",
   "excluded_tests": "14 classification/ranking tests remain with the classification node; revision fixtures now use preclassified labels",
   "files": [
     {
       "path": "README.md",
-      "sha256": "2bf4c6d2672dfd178ed109852996cb0d9eded9e03a34cb3f45b910b99aea18ae"
+      "sha256": "05fcb8fadd3313e627b0b756c08be0473a24eb3953e973fc628bc6f1c5582f04"
     },
     {
       "path": "category.py",
@@ -23,7 +24,7 @@
     },
     {
       "path": "launch.py",
-      "sha256": "4c910ec28c8869b4134b13d646b9c8d056e11edc0b0ae97b0bb450e5506e7051"
+      "sha256": "e3e36a5fc42b903afebe4ccfcef0faef260fd19d81d815a00f67c71d8ae52bd4"
     },
     {
       "path": "member_cover/README.md",
@@ -280,7 +281,7 @@
     },
     {
       "path": "requirements.verified.txt",
-      "sha256": "c41585cccd66b016e6893ddb335c00db7bb40097ab9d19b6eabd2ecd6be496bb"
+      "sha256": "23f1e1bf88c6591eaaeb9a8b5e9954b9018db340b67e6100067b5a6f19e0cc35"
     },
     {
       "path": "run.sh",
@@ -500,8 +501,137 @@
       "unchanged": true
     },
     {
+      "path": "testimonial_album/README.md",
+      "sha256": "030b6c4ccbd0aab3bae53a9e0e40bce9a9f6172e3612cb919a51442abefc74ba",
+      "source": "scripts/testimonial_album/README.md",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "5f37ae794acd60f0da8cb6814d0439de795b9664b594719252d87b99dde2817d",
+      "unchanged": false,
+      "adaptation": "Relocate package/model-client imports, archive documentation and CLI examples; approved behavior unchanged"
+    },
+    {
+      "path": "testimonial_album/__init__.py",
+      "sha256": "faa64c6f2e91556b8e5b26a69422daec79c9620eca6b49ef9776c02464d992cb",
+      "source": "scripts/testimonial_album/__init__.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "faa64c6f2e91556b8e5b26a69422daec79c9620eca6b49ef9776c02464d992cb",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/__main__.py",
+      "sha256": "27a1e54f8edf4456e6252b91e0c21f93dd3fbcbd0ccb2dc7c850f864ad987e8e",
+      "source": "scripts/testimonial_album/__main__.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "27a1e54f8edf4456e6252b91e0c21f93dd3fbcbd0ccb2dc7c850f864ad987e8e",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/annotate.py",
+      "sha256": "96a7e483b615010a2c96b34dc845cc15806f7b1a9654c27e0731c1a80a0835d7",
+      "source": "scripts/testimonial_album/annotate.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "de2b79d99a9dace781e4ae75eb14f8fe12a0f17f52078a01b4c869f26c23562d",
+      "unchanged": false,
+      "adaptation": "Relocate package/model-client imports, archive documentation and CLI examples; approved behavior unchanged"
+    },
+    {
+      "path": "testimonial_album/annotate.sh",
+      "sha256": "356566f8f6611422b0a7249409f2c668abde66d36974f9c2c3894d2f58e2f062"
+    },
+    {
+      "path": "testimonial_album/client.py",
+      "sha256": "969a7876f073300aea4510e5954d7567ed928e353f51b3c9bbb43fd10808d975",
+      "source": "scripts/body_scan_contracts/client.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "969a7876f073300aea4510e5954d7567ed928e353f51b3c9bbb43fd10808d975",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/evidence.py",
+      "sha256": "536d3a780b66342af05336b124081efcf8366de506ec7d0ed8841a909e0fc475",
+      "source": "scripts/testimonial_album/evidence.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "f14e098d58e71587e485ee7640dd911f5ed5776cd785cf8dfb059c8b450f1578",
+      "unchanged": false,
+      "adaptation": "Relocate package/model-client imports, archive documentation and CLI examples; approved behavior unchanged"
+    },
+    {
+      "path": "testimonial_album/evidence.sh",
+      "sha256": "71a509996ee61236e57e762d0470f82d7e3fe56664d16f909f7fe7798834abbd"
+    },
+    {
+      "path": "testimonial_album/pipeline.py",
+      "sha256": "30a691712a995d8fbe12ebe3ccd65e861baa4082ae0d69278ce9a56a0e4f1b81",
+      "source": "scripts/testimonial_album/pipeline.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "30a691712a995d8fbe12ebe3ccd65e861baa4082ae0d69278ce9a56a0e4f1b81",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/policy.py",
+      "sha256": "ce55a2b8d8b8cc9ffc23e45d57c2d369f540254aa4afd299e5e5f67a88096f2d",
+      "source": "scripts/testimonial_album/policy.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "ce55a2b8d8b8cc9ffc23e45d57c2d369f540254aa4afd299e5e5f67a88096f2d",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/presentation.example.json",
+      "sha256": "a23fd942638eefdfed2b7d31a9825375c9a790fe31d1e353845af7059990e7a0",
+      "source": "scripts/testimonial_album/presentation.example.json",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "a23fd942638eefdfed2b7d31a9825375c9a790fe31d1e353845af7059990e7a0",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/privacy.py",
+      "sha256": "35aa4f65adf7a1d9ebfac0fd8d98a965bdf184839f07d1bed09f316638f79e4f",
+      "source": "scripts/testimonial_album/privacy.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "35aa4f65adf7a1d9ebfac0fd8d98a965bdf184839f07d1bed09f316638f79e4f",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/render.py",
+      "sha256": "132cfb2d9cc42b3c920ba5cce6f09c8cad852b449b6c2ccc3a1b75569ca9205d",
+      "source": "scripts/testimonial_album/render.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "132cfb2d9cc42b3c920ba5cce6f09c8cad852b449b6c2ccc3a1b75569ca9205d",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/run.sh",
+      "sha256": "bde2638b5876170d4f0aafc2844517ee86603c68741720a106628b80c61234d3"
+    },
+    {
+      "path": "testimonial_album/source-validation.json",
+      "sha256": "686591f1be0586d048a09c560b27aa50a572e3a284287eb16e635695453d5068",
+      "source": "scripts/testimonial_album/validation.json",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "686591f1be0586d048a09c560b27aa50a572e3a284287eb16e635695453d5068",
+      "unchanged": true
+    },
+    {
+      "path": "testimonial_album/tests/test_album.py",
+      "sha256": "25cefa49a32fc2d588e9b28ec3f56481efed34c5afb86cfc66c07821be56c29d",
+      "source": "scripts/testimonial_album/tests/test_album.py",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "9e7a8368f995eb8b1a8363f93df6935a1f4eeccc6a425273f489828043e131ee",
+      "unchanged": false,
+      "adaptation": "Relocate package/model-client imports, archive documentation and CLI examples; approved behavior unchanged"
+    },
+    {
+      "path": "testimonial_album/validation.json",
+      "sha256": "0ffffe8f5eeeee5774631e9c231f76578818e12421909929af3ff0be2c6e50df",
+      "source": "scripts/testimonial_album/validation.json",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "source_sha256": "686591f1be0586d048a09c560b27aa50a572e3a284287eb16e635695453d5068",
+      "unchanged": false,
+      "adaptation": "Relocate package/model-client imports, archive documentation and CLI examples; approved behavior unchanged"
+    },
+    {
       "path": "tests/test_snapshot.py",
-      "sha256": "d7ed9a3f9f2f4cb1e9ccde47fd66141c6436b4e579889a9c30120f2fad222958"
+      "sha256": "f67a1c510c7dc69e258938a84fdf45b11dc966be2f7b9fcbbf688f629cb8063d"
     },
     {
       "path": "three_views/README.md",
@@ -523,6 +653,10 @@
     {
       "path": "three_views/run.sh",
       "sha256": "25d64bccb5d080489a92ddcde40805a3a2dee4cb32e859c3f97b84f62c368491"
+    },
+    {
+      "path": "validation.json",
+      "sha256": "6619d56606d60e470e7debd58c047b556156bed7a0eaee68ac261e2b56311551"
     },
     {
       "path": "view_comparison/README.md",
@@ -559,12 +693,13 @@
     "view_comparison": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "single_view": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "member_cover": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
-    "report_comparison": "f1320dd32b3a2d3bec451ab9e2520058b15b3506"
+    "report_comparison": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+    "testimonial_album": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152"
   },
   "cover_entrypoint": "member_cover/run.sh",
   "cover_input_contract": "existing verified delivery + body-scan-cover-frames-v2 + optional text overrides",
   "report_entrypoint": "report_comparison/run.sh",
-  "extension_base_commit": "a6af050984febcfcef9513aa15b507d6dfe72489",
+  "extension_base_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
   "component_approvals": {
     "report_comparison": {
       "version": "report-comparison-product-v5",
@@ -577,6 +712,21 @@
       "recommended_width": 2160,
       "reference_validation": "report_comparison/validation-compact-v5.json",
       "archive_validation": "report_comparison/validation-approved-v5.json"
+    },
+    "testimonial_album": {
+      "version": "testimonial-album-approved-v5",
+      "status": "user-approved",
+      "approved_on": "2026-11-07",
+      "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
+      "entrypoint": "testimonial_album/run.sh",
+      "deployment_unit": "entire body-scan-delivery directory",
+      "preparation_entrypoints": [
+        "testimonial_album/evidence.sh",
+        "testimonial_album/annotate.sh"
+      ],
+      "input_contract": "member-testimonial-layout-privacy-v1; member_images_keep_coach_and_text; verified privacy audit",
+      "reference_validation": "testimonial_album/source-validation.json",
+      "archive_validation": "testimonial_album/validation.json"
     }
   }
 }

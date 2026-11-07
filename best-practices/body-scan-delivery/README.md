@@ -1,6 +1,6 @@
 # 体测成品生成最佳实践
 
-2026-11-06 归档三种体测成品，来源为开发版 `6d6e20f3767a24ff7d2f26e82abbdf3586183316`。2026-11-07 加入用户确认的会员案例封面，来源为 `eaf9964b24ed85e52b70dfaae348ef54c572996c`。2026-11-07 正式确认报告对比成品 v5，来源为 `f1320dd32b3a2d3bec451ab9e2520058b15b3506`。同一目录下分别维护五类成品，保留已确认的照片、配对、版式和审核规则。
+2026-11-06 归档三种体测成品，来源为开发版 `6d6e20f3767a24ff7d2f26e82abbdf3586183316`。2026-11-07 加入用户确认的会员案例封面，来源为 `eaf9964b24ed85e52b70dfaae348ef54c572996c`。2026-11-07 正式确认报告对比成品 v5，来源为 `f1320dd32b3a2d3bec451ab9e2520058b15b3506`。2026-11-07 加入已确认的会员感言 v5，来源为 `4ae1d98aef16ca6a2ccf65b6927c23522d90a152`。同一目录下分别维护六类成品，保留已确认的照片、配对、版式和审核规则。
 
 | 子目录 | 成品 | 绘图入口 |
 | --- | --- | --- |
@@ -9,14 +9,15 @@
 | [single_view](single_view/README.md) | 训练前／训练后的各朝向单图 | `single_view/render.py:draw_single` |
 | [report_comparison](report_comparison/README.md) | 前后报告与九项五列表格；无报告图则紧凑表格 | `report_comparison/render.py:render` |
 | [member_cover](member_cover/README.md) | 会员案例封面，专用正面双图与报告故事 | `member_cover/render.py:draw_cover` |
+| [testimonial_album](testimonial_album/README.md) | 会员感言，固定红框、统一标题区、图片隐私遮盖 | `testimonial_album/render.py:render_page` |
 
 `scripts/body_scan_delivery/` 是本目录冻结的公共配对、配置、渲染调度、版本、审核和预览代码；体测图调度直接调用三个原有体测图子目录。`scripts/body_scan_contracts/` 只包含离线数据契约，不含模型客户端。封面目录另外消费现有任务和封面专用双图包，复用本目录的公共工具。这些子目录不能将其中一个子目录单独搬走；部署时复制整个 `body-scan-delivery`。
 
 ## 环境与独立性
 
-在远程服务器运行，默认 Python 为 `/root/apps/non-grid-calibration/.venv/bin/python`；可用 `CASE_PYTHON` 指定。渲染使用 Pillow，SVG Logo 需要 CairoSVG 和系统 Cairo；可选 API 适配器及其测试使用 FastAPI/httpx，已验证版本见 [requirements.verified.txt](requirements.verified.txt)。字体、Logo、照片、报告包和配置均由外部数据路径提供，不归档用户素材或密钥。
+在远程服务器运行，默认 Python 为 `/root/apps/non-grid-calibration/.venv/bin/python`；可用 `CASE_PYTHON` 指定。渲染使用 Pillow，SVG Logo 需要 CairoSVG 和系统 Cairo；会员感言的独立识别与隐私标注入口使用 NumPy、OpenCV、httpx；可选 API 适配器及其测试使用 FastAPI/httpx，已验证版本见 [requirements.verified.txt](requirements.verified.txt)。字体、Logo、照片、报告包和配置均由外部数据路径提供，不归档用户素材或密钥。
 
-`run.sh` 清空外部 `PYTHONPATH`，固定到本快照目录，从 `manifest.json` 校验全部文件及 Python 模块集合。所有 `scripts.*` 导入均来自本目录，不依赖开发树或其他最佳实践。输入是已完成的阶段分类包，或既有成品任务；封面还需对应的专用双图包。成品排版不运行拆分、标准化、OCR 或大模型。
+`run.sh` 清空外部 `PYTHONPATH`，固定到本快照目录，从 `manifest.json` 校验全部文件及 Python 模块集合。所有 `scripts.*` 导入均来自本目录，不依赖开发树或其他最佳实践。输入是已完成的阶段分类包，或既有成品任务；封面还需对应的专用双图包。成品排版不运行拆分、标准化、OCR 或大模型。感言的 `evidence.sh` / `annotate.sh` 是另行显式运行的模型准备节点，不由渲染隐式调用。
 
 ```bash
 ./run.sh check
@@ -78,7 +79,7 @@
 
 服务器部署：`/root/apps/case-studio/best-practices/body-scan-delivery`。独立验证目录：`/root/autodl-fs/case-studio/experiments/body-scan-delivery-best-practice-20261106`。
 
-更新时在开发目录实验，经用户确认后更新本快照、来源清单与验证记录。当前包括会员案例封面及体测报告对比成品；生活照、感言和训练日常等其他模板尚未归档。
+更新时在开发目录实验，经用户确认后更新本快照、来源清单与验证记录。当前包括会员案例封面及体测报告对比成品；另含已确认的会员感言 v5；生活照和训练日常等其他模板尚未归档。
 
 ## 报告对比成品
 
@@ -90,3 +91,20 @@
 当前权威版本为 `report-comparison-product-v5`。独立消费 `body-report-five-column-v1` 数据包和报告原图矩形取景，不调用模型或重新判断照片阶段。九项按有值展示，表格总高 860px；有报告图输出 2160×2700，无报告图输出 2160×1068 紧凑表格。根 `create` / `restyle` 尚不自动编排该入口，部署时复制整个成品包。
 
 当前规则、缺失及审核约定见 [报告成品说明](report_comparison/README.md)。已确认效果与验证保存在 [validation-compact-v5.json](report_comparison/validation-compact-v5.json)，正式独立归档验证见 [validation-approved-v5.json](report_comparison/validation-approved-v5.json)。
+
+## 会员感言成品
+
+```bash
+# 复用已完成主要内容和隐私复核的证据，无模型调用。
+./testimonial_album/run.sh --input /path/to/私教会员案例项目 \
+  --evidence /path/to/testimonial-layout-evidence --font /path/to/NotoSansSC.ttf \
+  --config testimonial_album/presentation.example.json --out /path/to/new-testimonials
+```
+
+会员感言与其余五类成品并列维护，根 `create` / `restyle` 不自动编排它。固定 1080×1440、红边框，整个标题模块位置与大小统一；使用已确认的对称心形。每张截图只使用一次，主要内容完整、等比取景；不合格或缺素材返回原因。
+
+只遮会员头像与人物照片，保留对话名字、文字和右侧教练头像。当前隐私政策与复核状态是渲染输入的硬性条件。HTML 提供已遮盖预览、下载及审核数据。独立的 `evidence.sh`、`annotate.sh` 可准备评分、内容框和隐私复核数据，详见[会员感言说明](testimonial_album/README.md)。提示词与客户端随该节点冻结，其他成品不依赖这些模型准备模块。
+
+归档验证见 [testimonial_album/validation.json](testimonial_album/validation.json)，已确认版的历史效果验证保留在 [source-validation.json](testimonial_album/source-validation.json)。
+
+会员感言归档后，完整成品包 87 项测试通过；在无开发树的隔离目录重绘 15 张感言成品，图片及结果共 69 个文件与获准版逐字节一致，0 次模型调用。其他五类成品及共享模块的 71 个文件保持不变。

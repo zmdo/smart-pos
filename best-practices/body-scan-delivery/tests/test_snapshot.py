@@ -16,7 +16,10 @@ class SnapshotTests(unittest.TestCase):
         import three_views.render as grid
         import view_comparison.render as vs
         import single_view.render as single
-        for module in (renderer, contracts, grid, vs, single):
+        import testimonial_album.render as testimonial
+        import testimonial_album.pipeline as testimonial_pipeline
+        import testimonial_album.privacy as privacy
+        for module in (renderer, contracts, grid, vs, single, testimonial, testimonial_pipeline, privacy):
             self.assertTrue(Path(module.__file__).resolve().is_relative_to(ROOT))
         self.assertIs(renderer.seamless_grid, grid.seamless_grid)
         self.assertIs(renderer.draw_vs, vs.draw_vs)

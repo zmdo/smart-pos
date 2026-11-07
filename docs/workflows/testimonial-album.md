@@ -1,6 +1,6 @@
 # 会员感言相册成品
 
-2026-11-07：独立模板已实现，当前先通过 HTML 确认效果，尚未归档为正式最佳实践。
+2026-11-07：用户已确认 v5，归档为成品最佳实践第六类。权威入口：[testimonial_album](../../best-practices/body-scan-delivery/testimonial_album/README.md)，来源提交 `4ae1d98aef16ca6a2ccf65b6927c23522d90a152`。
 
 ```mermaid
 flowchart LR
@@ -25,6 +25,8 @@ flowchart LR
 7. 每张截图全组只用一次，按 SHA 去重。一张单图，多张主辅分页，每页至多两张。两张各自合格但合成不合格时拆两页，保持标题模块不变。
 8. 没素材返回 `missing_material`；有素材但取景/隐私不通过返回 `unsuitable_screenshot` 及详细代码/原因，不写占位成品。HTML“未生成”、结果 JSON、审核清单一致返回。
 
-入口：[scripts/testimonial_album](../../scripts/testimonial_album/README.md)。三个节点独立：感言识别评分 → 内容与隐私标注/复核 → 无模型渲染。第二节点可复用已绑定的内容框，第三节点可复用完整证据；上游体测、报告和封面流程不变。
+开发入口：[scripts/testimonial_album](../../scripts/testimonial_album/README.md)。权威快照与其余成品同目录维护，通过 `testimonial_album/evidence.sh`、`annotate.sh`、`run.sh` 分别运行；部署复制整个 `body-scan-delivery`，不依赖开发目录。三个节点独立：感言识别评分 → 内容与隐私标注/复核 → 无模型渲染。第二节点可复用已绑定的内容框，第三节点可复用完整证据；上游体测、报告和封面流程不变。
 
 验证：23 项测试覆盖固定尺寸、一图一次、保护区内文字/教练头像原像素不变、人物背景遮盖、坐标映射、等比渲染、未通过复核不导出与公共数据限制。全量实测和跳过统计见 [validation.json](../../scripts/testimonial_album/validation.json)。预览在工作区 `artifacts/testimonial-album-v5/validated/index.html`，旧预览保留，不再作为当前遮盖规则的结果。
+
+归档验收见 [validation.json](../../best-practices/body-scan-delivery/testimonial_album/validation.json)：在隔离目录复用已批准的数据重绘，核对获准 v5 的成品和审核结果。根成品 `create` / `restyle` 暂不自动编排感言节点。

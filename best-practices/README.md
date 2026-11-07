@@ -9,11 +9,11 @@
 | 同组展示 v3 | [body-scan-group-display-v3](body-scan-group-display-v3/README.md) | 共同人物尺度、完整头脚保护、肩部共同取景、一人一画幅；附封面正面双图独立取景入口 |
 | 体检表单对比 | [body-report-compare](body-report-compare/README.md) | 独立提取门店报告；原始报告优先、汇总补缺、有效日期校验及天数/变化量重算 |
 | 训练阶段自动分类 | [body-scan-phase-classification](body-scan-phase-classification/README.md) | 盲评视觉与可选报告辅助，补齐全部阶段标签及推断/待审标记 |
-| 体测成品生成 | [body-scan-delivery](body-scan-delivery/README.md) | 同目录下五类成品：完整三视图、各朝向 VS、阶段单图、会员案例封面、体测报告对比成品 |
+| 体测成品生成 | [body-scan-delivery](body-scan-delivery/README.md) | 同目录下六类成品：完整三视图、各朝向 VS、阶段单图、会员案例封面、体测报告对比、会员感言 |
 
 推荐链路：**拆分 `--split-only` → 单图标准化 v4 → 同组展示 v3**。拆分的默认一键入口也已迁移到 v4；已经默认完成标准化时，不要再接一次标准化节点。
 
-拆分需要与 v4 一起部署：它从 v4 导入已冻结的公共人物定位模块，并锁定 v4 清单指纹。v4及同组v3均不读取已删除的旧目录或开发代码。表单对比、阶段分类和成品生成均包含独立依赖及完整性检查，互不导入。成品生成开发入口仍在 `scripts/body_scan_delivery`，权威快照位于 `body-scan-delivery`，只消费数据，不调用模型。接口及运行说明见[三节点解耦工作流](../docs/workflows/report-phase-delivery.md)。
+拆分需要与 v4 一起部署：它从 v4 导入已冻结的公共人物定位模块，并锁定 v4 清单指纹。v4及同组v3均不读取已删除的旧目录或开发代码。表单对比、阶段分类和成品生成均包含独立依赖及完整性检查，互不导入。成品生成开发入口仍在 `scripts/body_scan_delivery`，权威快照位于 `body-scan-delivery`，渲染只消费数据，不调用模型。感言另附显式运行的识别评分及内容/隐私复核准备入口，渲染不会调用它们。接口及运行说明见[三节点解耦工作流](../docs/workflows/report-phase-delivery.md)。
 
 2026-11-06按用户要求删除 `grid-portrait`、`body-scan-wall`（旧v3）、`body-scan-group-display`（旧v2）。历史代码和验证仍可从Git恢复，不再复制到当前目录；来源清单中的旧路径是指定提交中的历史来源，不是运行依赖。清理范围、恢复方式及远程验证见[版本清理记录](retired-snapshots.md)。
 
@@ -22,3 +22,5 @@
 封面分支：既有阶段结果选定正面前后素材 → 同组展示 v3 的 `run_cover.sh` 复用已确认几何及尺度，从原图生成封面双图 → 成品最佳实践 `member_cover/run.sh`。封面排版已归档为第四类成品，标准组六图及原三类成品算法不变，详见[封面工作流](../docs/workflows/member-cover.md)。
 
 报告成品分支：`body-report-compare/run.sh tables` 生成五列表格数据 → [report_comparison/run.sh](body-scan-delivery/report_comparison/README.md) 消费数据与已裁剪的报告图。当前权威版本为用户于 2026-11-07 确认的 v5：九项指标按有值展示、表格等高，有报告图则上下拼版，无报告图则仅输出去留白的紧凑表格。来源代码为 `f1320dd32b3a2d3bec451ab9e2520058b15b3506`，详见[报告成品工作流](../docs/workflows/report-table-product.md)。
+
+会员感言分支：门店感言候选 → `testimonial_album/evidence.sh` 识别评分 → `annotate.sh` 主要内容及图片隐私复核 → `run.sh` 固定红框成品。第六类已归档用户确认的 v5（来源 `4ae1d98aef16ca6a2ccf65b6927c23522d90a152`），保留对话名字与右侧教练头像，一图一次、统一标题模块及对称信封心形。详见[会员感言最佳实践](body-scan-delivery/testimonial_album/README.md)。

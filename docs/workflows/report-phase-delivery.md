@@ -79,3 +79,7 @@ flowchart LR
 ## 报告图片与五列表格扩展（2026-11-07）
 
 新增 `body-report-compare tables` 和 `body-scan-delivery report-comparison` 两个独立入口，流程见 [报告成品工作流](report-table-product.md)。旧报告 JSON、阶段分类与成品接口维持兼容；新的视觉转录包不自动替代旧报告证据，避免无意触发阶段重分类。
+
+## 会员感言成品分支
+
+2026-11-07：会员感言 v5 归档为 [testimonial_album](../../best-practices/body-scan-delivery/testimonial_album/README.md)，与另外五类成品共处 `body-scan-delivery`。独立的识别评分、主要内容及隐私复核准备好证据后，由无模型渲染入口生成。此分支不使用训练前后标签或体测报告；根 `create` / `restyle` 尚不自动调用，当前工作流见[会员感言](testimonial-album.md)。
