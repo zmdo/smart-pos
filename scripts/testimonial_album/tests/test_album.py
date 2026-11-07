@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from PIL import Image,ImageChops
 from scripts.testimonial_album.policy import normalize,score,rank_messages,choose_layout,box
-from scripts.testimonial_album.render import render_page,pixel_box
+from scripts.testimonial_album.render import render_page,pixel_box,assess_page,UnsuitableScreenshot
 from scripts.testimonial_album.evidence import inventory
 from scripts.testimonial_album.pipeline import run
 from scripts.testimonial_album import EVIDENCE_SCHEMA
@@ -144,24 +144,66 @@ class AlbumTests(unittest.TestCase):
     @unittest.skipUnless(FONT.exists(),'font not installed')
     def test_adaptive_brand_elements_do_not_overlap_or_leave_the_panel(self):
         from scripts.testimonial_album.render import draw_brand
-        for w,h in ((1050,130),(1050,400),(1050,600),(1050,1200),(150,1410),(330,1410)):
-            elements=draw_brand(Image.new('RGB',(w,h)),[0,0,w,h],FONT,{})
+        for w,h,orientation in ((1050,200,'horizontal'),(1050,400,'horizontal'),(1050,600,'horizontal'),(270,1410,'vertical'),(330,1410,'vertical')):
+            elements=draw_brand(Image.new('RGB',(1080,1440)),[0,0,w,h],FONT,{},orientation)
             for i,element in enumerate(elements):
                 l,t,r,b=element['bounds'];self.assertTrue(0<=l<r<=w and 0<=t<b<=h,(w,h,element))
+                if element['role']=='title':self.assertEqual(element['font_px'],97 if orientation=='horizontal' else 69)
+                if element['role']=='icon':self.assertAlmostEqual(r-l,193.6 if orientation=='horizontal' else 145.6)
                 for other in elements[:i]:
                     ol,ot,orr,ob=other['bounds']
                     self.assertFalse(max(l,ol)<min(r,orr) and max(t,ot)<min(b,ob),(element,other))
 
     @unittest.skipUnless(FONT.exists(),'font not installed')
-    def test_short_and_tall_images_fill_their_frame_without_losing_pixels(self):
+    def test_qualified_square_and_tall_images_fill_their_frame_without_losing_pixels(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
-            for w,h in ((1200,220),(1000,1000),(600,1300)):
+            for w,h in ((1000,1000),(600,1300)):
                 p=root/f'{w}-{h}.png';Image.new('RGB',(w,h),'#e9ecef').save(p)
                 r=record();r['context_bbox']=[0,0,1000,1000]
                 result=render_page([r],{'a0001':p},rank_messages([r])[0],FONT,root/'out.png',{})
                 layer=result['layers'][0]
                 self.assertEqual(layer['crop'],[0,0,w,h]);self.assertEqual(len(result['layers']),1)
                 self.assertGreaterEqual(layer['frame_fill'],.99)
+
+    @unittest.skipUnless(FONT.exists(),'font not installed')
+    def test_wide_sources_are_rejected_before_any_product_file_is_written(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            for w,h in ((1200,220),(1200,650)):
+                p=root/f'{w}-{h}.png';Image.new('RGB',(w,h),'#e9ecef').save(p)
+                r=record();r['context_bbox']=[0,0,1000,1000];hero=rank_messages([r])[0]
+                quality=assess_page([r],{'a0001':p},hero,{})
+                self.assertFalse(quality['passed']);self.assertIn('chat_area_too_small',quality['codes'])
+                self.assertIn('brand_area_too_large',quality['codes'])
+                out=root/'rejected.png'
+                with self.assertRaises(UnsuitableScreenshot):render_page([r],{'a0001':p},hero,FONT,out,{})
+                self.assertFalse(out.exists());self.assertFalse(out.with_suffix('.jpg').exists())
+
+    @unittest.skipUnless(FONT.exists(),'font not installed')
+    def test_pipeline_keeps_valid_sources_and_splits_weak_pairs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base=Path(tmp);root=base/'input';evidence=base/'evidence';records=[]
+            groups=[dict(store='测试店',member=m,directory='测试店/'+m) for m in ('混合','不合格','方图双图')]
+            items=[(0,(1200,220)),(0,(600,1000)),(1,(1200,220)),(2,(1000,1000)),(2,(1000,1000))]
+            for i,(group_index,size) in enumerate(items,1):
+                group=groups[group_index];p=root/group['directory']/f'{i}.png';p.parent.mkdir(parents=True,exist_ok=True)
+                Image.new('RGB',size,(i*20,50,90)).save(p)
+                r=record();r.update(group,asset_id=f'a{i:04}',source=str(p.relative_to(root)),source_sha256=sha(p))
+                r['messages'][0]['message_id']=r['asset_id']+'-m01';records.append(r)
+            for name,value in [('records.json',records),('groups.json',groups),('sources.json',{})]:save(evidence/name,value)
+            seal(evidence,EVIDENCE_SCHEMA,('records.json','groups.json','sources.json'))
+            out=base/'products';counts=run(root,evidence,out,FONT)
+            self.assertEqual(counts['generated_groups'],2);self.assertEqual(counts['quality_skipped_groups'],1)
+            self.assertEqual(counts['layout_rejected_sources'],2);self.assertEqual(counts['pages'],3)
+            rows=read(out/'results.json');self.assertEqual([len(r['pages']) for r in rows],[1,0,2])
+            self.assertEqual(rows[1]['skip_kind'],'unsuitable_screenshot');self.assertTrue(rows[1]['reason'])
+            self.assertEqual(list((out/'t002').glob('page-*')),[])
+            used=[l['asset_id'] for r in rows for p in r['pages'] for l in p['layers']]
+            self.assertEqual(used,['a0002','a0004','a0005'])
+            self.assertEqual(rows[0]['sources'][0]['status'],'accepted')
+            self.assertFalse(rows[0]['sources'][0]['presentation']['passed'])
+            self.assertIn('截图不合格',(out/'index.html').read_text())
+            self.assertTrue(next(r for r in read(out/'review.json') if r['case_id']=='t002')['reason'])
 
 if __name__=='__main__':unittest.main()

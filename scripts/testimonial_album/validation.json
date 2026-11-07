@@ -1,29 +1,30 @@
 {
   "validated_on": "2026-11-07",
   "status": "passed",
-  "unit_tests": 15,
+  "unit_tests": 17,
   "groups": 18,
   "candidate_sources": 17,
   "accepted_sources": 16,
   "rejected_sources": 1,
-  "generated_products": 16,
+  "generated_products": 14,
+  "layout_rejected_sources": 2,
+  "quality_skipped_groups": 2,
   "missing_groups": 2,
   "canvas": [
     1080,
     1440
   ],
   "border": "#e60012",
-  "zoom_vs_previous": [
+  "zoom_vs_v1": [
     1.0203,
-    1.2299
+    1.069
   ],
-  "mean_screenshot_frame_fill": 0.9806,
-  "frames_at_least_98_percent": 14,
+  "mean_screenshot_frame_fill": 0.934,
+  "frames_at_least_98_percent": 8,
   "layout_counts": {
     "long_story": 2,
-    "short_reply": 9,
-    "focused_story": 4,
-    "wide_reply": 1
+    "short_reply": 8,
+    "focused_story": 4
   },
   "model_requests_analysis": 17,
   "model_requests_render": 0,
@@ -32,19 +33,23 @@
     "One unique source yields one single-image product",
     "Synthetic multi-page tests check hash deduplication and global dimensions",
     "All PNG and JPG dimensions are identical",
-    "Every accepted source is used, and rejected source is excluded",
+    "Every source passing content and layout checks is used once; all rejected sources are excluded",
     "All member message boxes are inside the crop",
     "Every placed screenshot pixel matches uniform resampling of its original crop",
     "No screenshot is stretched, obscured, repeated or rewritten",
     "All bound source files remain unchanged",
     "Scores match deterministic weights and only member messages count",
     "Gallery filters and all image/download links checked offline",
-    "All images are larger than previous layout with identical crop bounds",
-    "Brand icon and text fit inside their panels without overlaps"
+    "Source crop bounds are unchanged, and screenshots are at least as large as red-border v1",
+    "Brand icon and text fit inside their panels without overlaps",
+    "Horizontal title stays 97 px and icon 193.6 px; vertical title stays 69 px and icon 145.6 px",
+    "Every product has chat screenshot area at least 50 percent and brand area at most 40 percent",
+    "Layout-rejected members have no product files and retain machine-readable reasons",
+    "Mixed good and bad sources keep good screenshots; weak two-image compositions fall back to two single-image products"
   ],
   "limitations": [
     "Real dataset has one accepted screenshot per member; multi-image layout uses synthetic regression tests",
-    "Very wide sources use a short full-width photo frame with a larger title area; portrait canvas cannot be filled with photo pixels without losing text",
+    "Very wide or short screenshots are skipped when they cannot dominate the fixed canvas without cropping text",
     "Model role and crop boundaries remain reviewable in HTML; original redactions are preserved"
   ]
 }

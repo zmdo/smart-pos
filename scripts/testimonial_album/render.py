@@ -23,69 +23,87 @@ def open_crop(path,bounds):
     crop=pixel_box(bounds,im.size)
     return im.crop(tuple(crop)),crop,im.size
 
-def fit_font(draw,text,path,size,width,weight=700,error='display_text_too_long_for_canvas'):
-    font=load_font(path,size,weight)
-    while draw.textlength(text,font=font)>width:
-        if font.size<=8:raise ValueError(error)
-        font=load_font(path,font.size-1,weight)
-    return font
+# Match the red-border v1 title sizes. Only the global canvas width scales them.
+BRAND_PRESETS={
+    'horizontal':{'icon_width':193.6,'title_font_px':97,'brand_font_px':29},
+    'vertical':{'icon_width':145.6,'title_font_px':69,'brand_font_px':13},
+}
 
-def draw_brand(canvas,rect,font_path,config):
+class UnsuitableScreenshot(ValueError):
+    def __init__(self,assessment):
+        super().__init__(assessment['reason']);self.assessment=assessment
+
+def brand_metrics(canvas_width,orientation):
+    unit=canvas_width/1080
+    return dict(orientation=orientation,icon_width=BRAND_PRESETS[orientation]['icon_width']*unit,
+                title_font_px=round(BRAND_PRESETS[orientation]['title_font_px']*unit),
+                brand_font_px=round(BRAND_PRESETS[orientation]['brand_font_px']*unit))
+
+def draw_brand(canvas,rect,font_path,config,orientation=None):
     x,y,w,h=rect;draw=ImageDraw.Draw(canvas);red=config.get('accent','#e60012')
     draw.rounded_rectangle((x,y,x+w,y+h),radius=12,fill='#fffdf9')
     title=config.get('title','会员感言');brand=config.get('brand','UP 健身私教馆');elements=[]
+    orientation=orientation or ('horizontal' if w>=h*1.6 else 'vertical')
+    metrics=brand_metrics(canvas.width,orientation);unit=canvas.width/1080
+    title_font=load_font(font_path,metrics['title_font_px'])
+    brand_font=load_font(font_path,metrics['brand_font_px'],450)
+    if draw.textlength(brand,font=brand_font)>w-24*unit:raise ValueError('brand_text_too_long_for_canvas')
+    draw.line((x+w*.18,y+16*unit,x+w*.82,y+16*unit),fill=red,width=max(2,round(2*unit)))
+
     def text_center(text,font,cx,top,role):
         b=draw.textbbox((0,0),text,font=font);tw,th=b[2]-b[0],b[3]-b[1]
         left=cx-tw/2;draw.text((left-b[0],top-b[1]),text,font=font,fill=red if role=='title' else '#8a7770')
-        elements.append({'role':role,'bounds':[left,top,left+tw,top+th]})
+        elements.append({'role':role,'bounds':[left,top,left+tw,top+th],'font_px':font.size})
     def envelope(left,top,ew):
         eh=ew*.64
         draw.rounded_rectangle((left,top,left+ew,top+eh),radius=ew*.055,fill='#dce5eb')
         draw.polygon([(left,top),(left+ew/2,top+eh*.66),(left+ew,top)],fill='#edf2f5')
         draw.polygon([(left,top+eh),(left+ew/2,top+eh*.42),(left+ew,top+eh)],fill='#c6d4de')
-        cx=left+ew/2;cy=top+eh*.45;r=ew*.105
+        cx=left+ew/2;cy=top+eh*.52;r=ew*.115
         draw.ellipse((cx-2*r,cy-r,cx,cy+r),fill=red);draw.ellipse((cx,cy-r,cx+2*r,cy+r),fill=red)
         draw.polygon([(cx-2*r,cy),(cx+2*r,cy),(cx,cy+2.6*r)],fill=red)
         elements.append({'role':'icon','bounds':[left,top,left+ew,top+eh]})
-    if w>=h*1.6:
-        # Separate icon and text columns even for a large bottom title panel.
-        inset=min(w,h)*.10;ew=min(h*.68,w*.22);gap=w*.04
-        available=w-2*inset-ew-gap
-        title_font=fit_font(draw,title,font_path,min(h*.43,w*.12),available)
-        brand_font=fit_font(draw,brand,font_path,min(h*.13,w*.035),available,450,'brand_text_too_long_for_canvas')
+    ew=metrics['icon_width']
+    if orientation=='horizontal':
+        gap=42*unit
         tb=draw.textbbox((0,0),title,font=title_font);bb=draw.textbbox((0,0),brand,font=brand_font)
         th=tb[3]-tb[1];bh=bb[3]-bb[1];textw=max(tb[2]-tb[0],bb[2]-bb[0])
-        totalw=ew+gap+textw;left=x+(w-totalw)/2;ty=y+(h-th-bh-h*.08)/2
+        totalw=ew+gap+textw;totalh=max(ew*.64,th+bh+18*unit)
+        if totalw>w-24*unit or totalh>h-24*unit:raise ValueError('fixed_brand_does_not_fit_panel')
+        left=x+(w-totalw)/2;ty=y+(h-th-bh-18*unit)/2
         envelope(left,y+(h-ew*.64)/2,ew)
         text_center(title,title_font,left+ew+gap+textw/2,ty,'title')
-        text_center(brand,brand_font,left+ew+gap+textw/2,ty+th+h*.08,'brand')
+        text_center(brand,brand_font,left+ew+gap+textw/2,ty+th+18*unit,'brand')
     else:
         lines=[title[:2],title[2:]] if len(title)==4 else [title]
-        title_font=fit_font(draw,max(lines,key=len),font_path,min(w*.32,h*.17),w*.84)
-        brand_font=fit_font(draw,brand,font_path,min(w*.045,h*.06),w*.84,450,'brand_text_too_long_for_canvas')
-        heights=[draw.textbbox((0,0),line,font=title_font)[3]-draw.textbbox((0,0),line,font=title_font)[1] for line in lines]
-        bb=draw.textbbox((0,0),brand,font=brand_font);bh=bb[3]-bb[1]
-        ew=min(w*.60,h*.29);gap=min(w*.08,h*.045)
+        bounds=[draw.textbbox((0,0),line,font=title_font) for line in lines]
+        heights=[b[3]-b[1] for b in bounds]
+        bb=draw.textbbox((0,0),brand,font=brand_font);bh=bb[3]-bb[1];gap=18*unit
         total=ew*.64+sum(heights)+bh+gap*(len(lines)+1)
+        if max(ew,max(b[2]-b[0] for b in bounds))>w-24*unit or total>h-24*unit:
+            raise ValueError('fixed_brand_does_not_fit_panel')
         top=y+(h-total)/2
         envelope(x+(w-ew)/2,top,ew);top+=ew*.64+gap
         for line,th in zip(lines,heights):text_center(line,title_font,x+w/2,top,'title');top+=th+gap
         text_center(brand,brand_font,x+w/2,top,'brand')
     return elements
 
-def paste_card(canvas,im,rect,asset_id,role,crop,original_size):
-    x,y,w,h=map(round,rect);pad=max(3,round(canvas.width*.003))
-    ImageDraw.Draw(canvas).rounded_rectangle((x,y,x+w,y+h),radius=12,fill='#f7f5f1')
+def card_geometry(im,rect,width):
+    x,y,w,h=map(round,rect);pad=max(3,round(width*.003))
     scale=min((w-2*pad)/im.width,(h-2*pad)/im.height)
     size=(max(1,round(im.width*scale)),max(1,round(im.height*scale)))
-    placed=im.resize(size,Image.Resampling.LANCZOS)
-    px=x+(w-size[0])//2;py=y+(h-size[1])//2;canvas.paste(placed,(px,py))
-    return {'asset_id':asset_id,'role':role,'original_size':list(original_size),'crop':crop,
-            'placement':[px,py,*size],'frame':[x,y,w,h],
-            'frame_fill':round(size[0]*size[1]/((w-2*pad)*(h-2*pad)),4),
-            'scale':scale,'uniform_scale':True,'content_clipped':False}
+    px=x+(w-size[0])//2;py=y+(h-size[1])//2
+    return {'placement':[px,py,*size],'frame':[x,y,w,h],
+            'frame_fill':round(size[0]*size[1]/((w-2*pad)*(h-2*pad)),4),'scale':scale}
 
-def render_page(records,paths,hero,font_path,out,config):
+def paste_card(canvas,im,rect,asset_id,role,crop,original_size):
+    geometry=card_geometry(im,rect,canvas.width);x,y,w,h=geometry['frame']
+    ImageDraw.Draw(canvas).rounded_rectangle((x,y,x+w,y+h),radius=12,fill='#f7f5f1')
+    px,py,pw,ph=geometry['placement'];canvas.paste(im.resize((pw,ph),Image.Resampling.LANCZOS),(px,py))
+    return dict(geometry,asset_id=asset_id,role=role,original_size=list(original_size),crop=crop,
+                uniform_scale=True,content_clipped=False)
+
+def prepare_page(records,paths,hero,config):
     width=int(config.get('width',1080))
     height=int(config.get('height',1440))
     if not 720<=width<=2400 or not width<=height<=width*2:raise ValueError('canvas_size_out_of_range')
@@ -105,8 +123,7 @@ def render_page(records,paths,hero,font_path,out,config):
         # Give screenshot pixels priority over a large title panel. Compare two
         # compact title positions, then fit the photo frame to its actual extent.
         # Wide screenshots must remain readable, rather than being cover-cropped.
-        richness=min(1,hero['score']/100)
-        band_h=round(width*(.16-.04*richness));side=round(width*(.18-.035*richness))
+        band_h=round(width/1080*200);side=round(width/1080*270)
         bottom_main=[margin,margin,inner,content_h-band_h-gap]
         side_main=[margin,margin,inner-side-gap,content_h]
         fit=lambda rect:min((rect[2]-pad)/main.width,(rect[3]-pad)/main.height)
@@ -129,16 +146,43 @@ def render_page(records,paths,hero,font_path,out,config):
         context_rect=[margin+col+gap,margin,side,content_h-brand_h-gap]
         brand_rect=[margin+col+gap,margin+content_h-brand_h,side,brand_h]
         composition='pair_feature'
+    prepared=[(main,main_rect,primary['asset_id'],'context',main_crop,main_size)]
+    if secondary is not None:prepared.append((context,context_rect,secondary['asset_id'],'context',context_crop,context_size))
+    plan={'layout':layout,'composition':composition,'width':width,'height':height,'brand_frame':brand_rect,
+          'brand_orientation':'horizontal' if composition=='single_bottom_band' else 'vertical'}
+    return plan,prepared
+
+def assess_plan(plan,prepared):
+    area=plan['width']*plan['height']
+    placements=[card_geometry(im,rect,plan['width'])['placement'] for im,rect,*_ in prepared]
+    chat_ratio=sum(w*h for _,_,w,h in placements)/area
+    brand_ratio=plan['brand_frame'][2]*plan['brand_frame'][3]/area
+    codes=[];reasons=[]
+    if chat_ratio<.50:
+        codes.append('chat_area_too_small');reasons.append(f'聊天截图仅占成品面积的 {chat_ratio:.1%}，低于 50%，无法成为画面主体')
+    if brand_ratio>.40:
+        codes.append('brand_area_too_large');reasons.append(f'标题区占成品面积的 {brand_ratio:.1%}，超过 40% 上限')
+    return {'passed':not codes,'reason':'；'.join(reasons),'codes':codes,
+            'chat_area_ratio':round(chat_ratio,6),'brand_area_ratio':round(brand_ratio,6),
+            'min_chat_area_ratio':.50,'max_brand_area_ratio':.40}
+
+def assess_page(records,paths,hero,config):
+    return assess_plan(*prepare_page(records,paths,hero,config))
+
+def render_page(records,paths,hero,font_path,out,config):
+    plan,prepared=prepare_page(records,paths,hero,config);quality=assess_plan(plan,prepared)
+    # Rejected layouts never create a PNG/JPG, even when invoked outside pipeline.
+    if not quality['passed']:raise UnsuitableScreenshot(quality)
+    width,height=plan['width'],plan['height'];brand_rect=plan['brand_frame']
     canvas=Image.new('RGB',(width,height),config.get('accent','#e60012'))
-    layers=[paste_card(canvas,main,main_rect,primary['asset_id'],'context',main_crop,main_size)]
-    if secondary is not None:
-        layers.append(paste_card(canvas,context,context_rect,secondary['asset_id'],'context',context_crop,context_size))
-    brand_elements=draw_brand(canvas,brand_rect,font_path,config)
+    layers=[paste_card(canvas,*args) for args in prepared]
+    brand_elements=draw_brand(canvas,brand_rect,font_path,config,plan['brand_orientation'])
+    main_size=prepared[0][-1]
     estimate=hero['text_line_height']/1000*main_size[1]*layers[0]['scale']
     issues=[]
     if hero['requires_review']:issues.append('主要回复角色、边界或原图完整性待核对，主图区已使用完整上下文')
     if estimate and estimate<16:issues.append('主图文字预计偏小，请放大原图核对')
     out=Path(out);canvas.save(out,format='PNG');canvas.save(out.with_suffix('.jpg'),quality=94,subsampling=0)
-    return {'layout':layout,'composition':composition,'width':width,'height':height,'hero_message_id':hero['message_id'],
-            'hero_score':hero['score'],'hero_char_count':hero['char_count'],'estimated_main_text_px':round(estimate,2),
-            'layers':layers,'brand_frame':brand_rect,'brand_elements':brand_elements,'issues':issues}
+    return dict(plan,hero_message_id=hero['message_id'],hero_score=hero['score'],hero_char_count=hero['char_count'],
+                estimated_main_text_px=round(estimate,2),layers=layers,brand_elements=brand_elements,
+                brand_style=brand_metrics(width,plan['brand_orientation']),quality=quality,issues=issues)
