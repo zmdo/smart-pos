@@ -1,4 +1,4 @@
-"""Do not newly crop a head/foot previously verified as complete."""
+"""Protect previously visible anatomy, including already partial body photos."""
 import numpy as np
 
 from scripts.body_scan.geometry import project
@@ -31,6 +31,22 @@ def check(previous, old_frame, new_frame, measured_bounds=None):
         result['reason'] = 'would_crop_previously_complete_head'
     elif protect_feet and corners[:, 1].max() > rect[3]-.5-foot_margin:
         result['reason'] = 'would_crop_previously_complete_feet'
+    # Partial or touching feet still contain useful lower-body pixels. Clip the
+    # old measured span to what the previous FINAL image actually retained,
+    # then carry that span through the candidate transform. Missing toes do
+    # not authorize removing ankles/calves. Two pixels allow raster rounding.
+    retained = old_visible.copy()
+    retained[:, 1] = np.clip(retained[:, 1], -.5, old_height-.5)
+    retained_aligned = project(retained, np.linalg.inv(old_to_display))
+    retained_new = project(retained_aligned, old_to_new)
+    top, bottom = retained_new[:, 1].min(), retained_new[:, 1].max()
+    result.update(protect_previously_visible_span=True,
+                  retained_span_candidate=[float(top), float(bottom)], raster_tolerance=2.)
+    if result['reason'] is None:
+        if top < rect[1]-.5-2.:
+            result['reason'] = 'would_reduce_previously_visible_upper_body'
+        elif bottom > rect[3]-.5+2.:
+            result['reason'] = 'would_reduce_previously_visible_lower_body'
     return result
 
 

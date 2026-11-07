@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--input', type=Path, nargs='+', required=True, help='Approved single-photo result directories')
     parser.add_argument('--out', type=Path, required=True, help='A new experiment directory')
     parser.add_argument('--audit', type=Path, help='Reuse a fingerprint-matched visibility audit including boundary guards')
+    parser.add_argument('--reference-display', type=Path, help='Matching pre-calibration display for stable presentation after a scale veto')
     parser.add_argument('--settings', type=Path)
     parser.add_argument('--workers', type=int, choices=range(1, 5), default=3)
     parser.add_argument('--width', type=int, default=768)
@@ -42,7 +43,7 @@ def main():
     config = Config(args.width, args.max_stretch, args.max_crop_loss, args.crop_step, args.max_steps,
                     adaptive_group_ratio=not args.fixed_group_ratio)
     cv2.setNumThreads(4)
-    run(args.input, args.out, args.audit, config, profiles, args.workers)
+    run(args.input, args.out, args.audit, config, profiles, args.workers, reference_display=args.reference_display)
     verify(args.out)
     make_previews(args.out)
 

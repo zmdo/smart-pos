@@ -25,7 +25,7 @@ from .coverage import check as check_coverage, measure_bounds
 from .evidence import PROMPT, validate
 from .measurements import measure
 from .solve import plan
-from .grid_consensus import finalize, refine_coverage, VERSION as SCALE_RULE_REVISION
+from .proposal_guard import VERSION as SCALE_RULE_REVISION
 
 
 def digest(path):
@@ -176,16 +176,6 @@ def run(baseline, out, settings, cache, baseline_display, workers=3):
                         pending[aid] = result
                 row['person_scale'] = audit
                 plans[aid] = audit
-            refine_coverage(contexts, plans, pending,
-                            lambda c, a: checked_render(c, a, config, previous_display[c['row']['asset_id']]))
-            finalize(plans, pending)
-            recovery = record.get('reference', {}).get('grid_scale_recovery')
-            common = next((a['grid_common_scale'] for a in plans.values() if a.get('grid_common_scale')), None)
-            if recovery and common:
-                recovery.update(status='applied' if common['applied'] else 'retained_for_review',
-                                final_grid_pitch=common['target_grid_pitch'],
-                                coverage_zoom=common.get('coverage_zoom', 1.),
-                                coverage_failure_reasons=common['coverage_failure_reasons'])
             for context in contexts:
                 row = context['row']; aid = row['asset_id']; audit = plans[aid]
                 if aid in pending:

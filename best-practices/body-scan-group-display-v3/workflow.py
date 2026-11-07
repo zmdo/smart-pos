@@ -11,7 +11,7 @@ import cv2
 from snapshot import verify_integrity
 from scripts.body_scan.pipeline import save_json
 from scripts.body_scan_person_scale.pipeline import run as calibrate, digest
-from scripts.body_scan_person_scale.grid_consensus import VERSION as SCALE_RULE_REVISION
+from scripts.body_scan_person_scale.proposal_guard import VERSION as SCALE_RULE_REVISION
 from scripts.body_scan_person_scale.verify import verify as verify_scale
 from scripts.body_scan_person_scale.report import run as comparison
 from scripts.body_scan_group_display.pipeline import run as display
@@ -61,7 +61,8 @@ def run(args):
         state.update(stage='final_display', calibration_counts=dict(Counter(
             r.get('person_scale', {}).get('status', r['status']) for r in rows)))
         save_json(out/'workflow.json', state)
-        final_rows, _ = display([out/'standardized'], out/'display', config=config, workers=args.workers)
+        final_rows, _ = display([out/'standardized'], out/'display', config=config, workers=args.workers,
+                                reference_display=baseline)
         display_verification = verify_display(out/'display')
         make_previews(out/'display')
         comparison(out/'standardized', baseline, out/'display', out/'comparison', args.font, args.focus)

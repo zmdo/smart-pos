@@ -153,7 +153,32 @@ class ScaleTests(unittest.TestCase):
         new = copy.deepcopy(frame); new['H_source_to_aligned'][1][2] = 12
         self.assertEqual(check_coverage(previous, frame, new)['reason'], 'would_crop_previously_complete_feet')
         previous['visibility']['lower_extent'] = 'feet_cut'
-        self.assertIsNone(check_coverage(previous, frame, new)['reason'])
+        self.assertEqual(check_coverage(previous, frame, new)['reason'], 'would_reduce_previously_visible_lower_body')
+
+    def test_touching_feet_and_already_missing_calves_keep_visible_extent(self):
+        frame = {'content_rectangle_xyxy': [0, 0, 200, 400], 'H_source_to_aligned': np.eye(3).tolist()}
+        previous = {'visibility': {'visible_bbox': [.1, .05, .9, 1.], 'head': 'complete', 'lower_extent': 'feet_touching_border'},
+                    'output': {'H_aligned_to_display': np.eye(3).tolist()}, 'group_plan': {'output_size': [200, 400]}}
+        new = copy.deepcopy(frame); new['H_source_to_aligned'][1][2] = 12
+        for lower in ('feet_touching_border', 'feet_cut', 'calves_cut', 'knees_cut'):
+            previous['visibility']['lower_extent'] = lower
+            self.assertEqual(check_coverage(previous, frame, new, [20, 20, 180, 399])['reason'],
+                             'would_reduce_previously_visible_lower_body')
+
+    def test_old_final_crop_limits_required_span(self):
+        frame = {'content_rectangle_xyxy': [0, 0, 200, 400], 'H_source_to_aligned': np.eye(3).tolist()}
+        previous = {'visibility': {'visible_bbox': [.1, .05, .9, 1.], 'head': 'complete', 'lower_extent': 'feet_cut'},
+                    'output': {'H_aligned_to_display': np.eye(3).tolist()}, 'group_plan': {'output_size': [200, 370]}}
+        new = copy.deepcopy(frame); new['H_source_to_aligned'][1][2] = 12
+        self.assertIsNone(check_coverage(previous, frame, new, [20, 20, 180, 399])['reason'])
+
+    def test_previously_cut_head_cannot_be_cut_further(self):
+        frame = {'content_rectangle_xyxy': [0, 0, 200, 400], 'H_source_to_aligned': np.eye(3).tolist()}
+        previous = {'visibility': {'visible_bbox': [.1, 0, .9, 1.], 'head': 'cut', 'lower_extent': 'feet_cut'},
+                    'output': {'H_aligned_to_display': np.eye(3).tolist()}, 'group_plan': {'output_size': [200, 400]}}
+        new = copy.deepcopy(frame); new['H_source_to_aligned'][1][2] = -12
+        self.assertEqual(check_coverage(previous, frame, new, [20, 0, 180, 399])['reason'],
+                         'would_reduce_previously_visible_upper_body')
 
     def test_boundary_uses_measured_contour_not_rough_vlm_box(self):
         frame = {'content_rectangle_xyxy': [0, 0, 200, 400], 'H_source_to_aligned': np.eye(3).tolist()}

@@ -9,7 +9,8 @@ import numpy as np
 from scripts.body_scan.pipeline import save_json
 from scripts.body_scan.landmarks import member_key
 from .inputs import digest
-from .planning import contains
+from .planning import contains, Config
+from .stability import preserve
 
 
 def require(value, reason):
@@ -50,6 +51,19 @@ def verify(out):
     groups = json.loads((out/'groups.json').read_text(encoding='utf-8'))
     config = json.loads((out/'config.json').read_text(encoding='utf-8'))
     person_formats = verify_person_groups(rows, groups)
+    stable = [g for g in groups if any(c.get('plan', {}).get('presentation_stability') for c in g['cohorts'])]
+    if stable:
+        ref_path = config.get('reference_display')
+        require(ref_path and digest(ref_path) == config.get('reference_display_sha256'), 'reference_presentation_changed')
+        previous = {r['asset_id']: r for r in json.loads(Path(ref_path).read_text())}
+        settings = Config(**{k: config[k] for k in Config.__dataclass_fields__})
+        for group in stable:
+            members = [r for r in rows if member_key(r) == member_key(group)]
+            actual = group['cohorts'][0]['plan']
+            checked = preserve(members, actual, previous, settings)
+            for key in ('output_size', 'crop_rectangle', 'vertical_stretch', 'shoulder_target',
+                        'H_normalized_to_display', 'H_normalized_to_uniform'):
+                require(actual[key] == checked[key], 'reference_presentation_not_preserved')
     plans = {c['cohort_id']: c['plan'] for g in groups for c in g['cohorts'] if 'plan' in c}
     accepted = []
     for row in rows:
@@ -104,7 +118,8 @@ def verify(out):
                 use = (xx >= l) & (xx < r) & (yy >= t) & (yy < b)
                 require((valid[use] == 255).all(), 'reference_has_missing_photo_pixels')
         accepted.append(row['asset_id'])
-    result = {'passed': True, 'source_hashes_checked': len(rows), 'baseline_copies_checked': len(accepted),
+    result = {'passed': True, 'stable_reference_groups_checked': len(stable),
+              'source_hashes_checked': len(rows), 'baseline_copies_checked': len(accepted),
               'person_formats': person_formats,
               'derivative_images_checked': 2*len(accepted), 'displayed_asset_ids': accepted,
               'needs_review_asset_ids': [r['asset_id'] for r in rows if r['status'] != 'displayed'],

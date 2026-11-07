@@ -6,12 +6,12 @@
   "previous_snapshot": "../body-scan-group-display",
   "input_contract": "approved standardized directory, original images; optional fingerprint-matched previous display",
   "output_contract": "standardized scale results + one shared display frame per person; separate scale and crop review status",
-  "algorithm_changes": "2026-11-08: independent scale conflict checks; worsening same-board scale proposals recover using an atomic shared grid scale with bounded coverage search; previous tiny-boundary recheck retained",
+  "algorithm_changes": "2026-11-08: cancel independently worsening scale proposals only; remove forced common-grid scaling; protect partial-body extent and preserve accepted group presentation",
   "archive_adaptations": "workflow orchestration, optional baseline generation, integrity and provenance metadata only",
   "files": [
     {
       "path": "README.md",
-      "sha256": "f7e3be761fa45e002677d8d70495aa4e34b60612052a67b692431ecd4c715103",
+      "sha256": "b1fd9cf66ab693a0b9dc4cbd11bbaaad2cb2c266d3e06ca05e025cf1d93ca51e",
       "role": "archive_support"
     },
     {
@@ -199,7 +199,7 @@
     },
     {
       "path": "scripts/body_scan_group_display/__main__.py",
-      "sha256": "bf7f415227770d2f2a92553b50cce055740e118aa37c691c79fa749d49df90e4",
+      "sha256": "99b53fb0a6335b408c49e472371e297ae1484f0505047de725829001b873983d",
       "source": "scripts/body_scan_group_display/__main__.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "bf7f415227770d2f2a92553b50cce055740e118aa37c691c79fa749d49df90e4",
@@ -231,7 +231,7 @@
     },
     {
       "path": "scripts/body_scan_group_display/pipeline.py",
-      "sha256": "7c5f435fc0e25f76c0dd1759a379c6094b6e6f8e1d09d55be3a3b41715b1f668",
+      "sha256": "b81b4ecfde478cc616c6c807b45632241ac5959fde7591230b9824096d7391f7",
       "source": "scripts/body_scan_group_display/pipeline.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "bca5cc4a591ad24805d37a07735dd0555b1c1aff317fe3d373d9381ed4f116b6",
@@ -264,7 +264,7 @@
     },
     {
       "path": "scripts/body_scan_group_display/verify.py",
-      "sha256": "3c2ce860da048cf22df2e496679bba6ee8de747863f59ceb83fcd9e1f7de5db7",
+      "sha256": "3e291ac1997344845d0b048cada6781cd9ec249ad751adddc1470356815ba538",
       "source": "scripts/body_scan_group_display/verify.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "57100a3f51643e14130895e7db8eb84a1d973e0003829fd0c8d48020cfa3120d",
@@ -305,7 +305,7 @@
     },
     {
       "path": "scripts/body_scan_person_scale/coverage.py",
-      "sha256": "abd539b3475f5bd2c50789359a990691e4ff970bcfd39eef89d10b6e1bf1134c",
+      "sha256": "1352540243fb61b5fba7b0224fccef2951c8c29de3b42affc14627775ea75834",
       "source": "scripts/body_scan_person_scale/coverage.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "abd539b3475f5bd2c50789359a990691e4ff970bcfd39eef89d10b6e1bf1134c",
@@ -329,7 +329,7 @@
     },
     {
       "path": "scripts/body_scan_person_scale/pipeline.py",
-      "sha256": "ec8667b0f4406c73a75fa9f663616dad133684f8a0c8272df7e249308f295f81",
+      "sha256": "bb076b3468f953e62a7ae05ccd6864739c054c8278b65adfdaa1095bd7ca023f",
       "source": "scripts/body_scan_person_scale/pipeline.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "7a5c9ab00ee3a32a5a4cf2c35e2c1ee4bb5cab38febda01ca397d5be78c6a8e6",
@@ -346,7 +346,7 @@
     },
     {
       "path": "scripts/body_scan_person_scale/solve.py",
-      "sha256": "897135078b019b30807d6efa59a9198d7222b602ab0fe221b4cc099158cac66d",
+      "sha256": "03a849c17e24fe954735fe523a16a65ff7d734c8bde0bc21b765a36453e02853",
       "source": "scripts/body_scan_person_scale/solve.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "6e82ca383737f3edeab0aab98f0abcc28d35d4b925774ff149039c584bb5303b",
@@ -355,7 +355,7 @@
     },
     {
       "path": "scripts/body_scan_person_scale/tests/test_scale.py",
-      "sha256": "910fe39222a04dbb746ff82d013df10f58955afe7d5f26ea6d15809d9b95d894",
+      "sha256": "2ab5d3f635bf2a99cf803c7ab2621c0cca8f39146cd5e3366c502f482305c6f8",
       "source": "scripts/body_scan_person_scale/tests/test_scale.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "910fe39222a04dbb746ff82d013df10f58955afe7d5f26ea6d15809d9b95d894",
@@ -363,7 +363,7 @@
     },
     {
       "path": "scripts/body_scan_person_scale/verify.py",
-      "sha256": "802389233137fb676f9ff55ebd829178e37a5b58a1cc915da92c710d32022d25",
+      "sha256": "0b52dc34082c2136ef68c54c9384759345f257b72998694c77196dcc68a2c192",
       "source": "scripts/body_scan_person_scale/verify.py",
       "source_commit": "137054176720ab1b0348364961548a304b4ed754",
       "source_sha256": "068d50327768de0b07f568396e2d7d6f90e77017193d08c5b041c93178a5a131",
@@ -441,7 +441,7 @@
     },
     {
       "path": "workflow.py",
-      "sha256": "07bc352ded178e1803b608046909e88bc44e93d327db3e664e7f40a8656701aa",
+      "sha256": "e3e358ee59baf6454d3c153795ae3639f297e575c662c1aace19c0a22a250e13",
       "role": "archive_support"
     },
     {
@@ -519,23 +519,38 @@
       "role": "validation_record"
     },
     {
-      "path": "scripts/body_scan_person_scale/grid_consensus.py",
-      "role": "scale_recovery_revision",
-      "revision": "common-grid-scale-recovery-v1",
-      "source": "scripts/body_scan_person_scale/grid_consensus.py",
-      "sha256": "3510c5171a616c940efeecec32c0297d5e944102a8e419426f32c617f7bb08d8"
-    },
-    {
-      "path": "scripts/body_scan_person_scale/tests/test_grid_consensus.py",
-      "role": "scale_recovery_revision",
-      "revision": "common-grid-scale-recovery-v1",
-      "source": "scripts/body_scan_person_scale/tests/test_grid_consensus.py",
-      "sha256": "1feb3f540fc230c4b423f0f5c2bd64c401bee7b031f4f14929e2c7982d7ff330"
-    },
-    {
       "path": "grid-scale-recovery-validation.json",
       "role": "validation_record",
       "sha256": "26f9d0d1d6b77436f575be12aa30e38a1bc3eae79aa44043d30190d87f9f6ea2"
+    },
+    {
+      "path": "scripts/body_scan_person_scale/proposal_guard.py",
+      "role": "adapted_source",
+      "source": "scripts/body_scan_person_scale/proposal_guard.py",
+      "sha256": "cc6cf20d4136ccc5961a45f262a15d0e036c5fe5645e8dc601f0af1d4029dde5"
+    },
+    {
+      "path": "scripts/body_scan_person_scale/tests/test_proposal_guard.py",
+      "role": "adapted_source",
+      "source": "scripts/body_scan_person_scale/tests/test_proposal_guard.py",
+      "sha256": "5f54f9e15b3a2d32f47d28b12c6d01e3ef7427e151f58c5a49514f8602d820a0"
+    },
+    {
+      "path": "scripts/body_scan_group_display/stability.py",
+      "role": "adapted_source",
+      "source": "scripts/body_scan_group_display/stability.py",
+      "sha256": "374ca2d75f10df8bb5e5ed6f3e66fcb44195239d96f5b9c693fcdf319b8f504f"
+    },
+    {
+      "path": "scripts/body_scan_group_display/tests/test_stability.py",
+      "role": "adapted_source",
+      "source": "scripts/body_scan_group_display/tests/test_stability.py",
+      "sha256": "8c4eafe459e822dc29637946aa53c4bd7f0361585f74bcb19994c8a3bf5bad06"
+    },
+    {
+      "path": "proposal-guard-validation.json",
+      "role": "archive_support",
+      "sha256": "873f523bc593ec29ee2fe258e9b551263eb1a3c8472bcf42326fc4d7755ac6ac"
     }
   ],
   "previous_snapshot_status": "retired; path exists only in Git history",
@@ -549,5 +564,5 @@
     "output_contract": "body-scan-cover-frames-v2; head-to-hip composition, locked shoulder frame, explicit partial/width limits; inherited labels"
   },
   "boundary_recheck_version": "common-frame-boundary-recheck-v1",
-  "scale_rule_revision": "common-grid-scale-recovery-v1"
+  "scale_rule_revision": "independent-scale-proposal-guard-v1"
 }

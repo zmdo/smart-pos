@@ -9,7 +9,6 @@ import numpy as np
 from scripts.body_scan_group_display.inputs import load_inputs
 from scripts.body_scan.pipeline import save_json
 from .pipeline import digest
-from .grid_consensus import verify_cohorts
 
 
 def verify(out):
@@ -46,7 +45,10 @@ def verify(out):
         if np.any((mask > 0) & (available == 0)):
             raise ValueError('invented_content: '+aid)
         checked.append(aid)
-    result = {'common_grid_cohorts': verify_cohorts(rows),
+    if any(r.get('person_scale', {}).get('grid_common_scale') for r in rows):
+        raise ValueError('forced_common_grid_scale_is_not_supported')
+    result = {'common_grid_cohorts': [],
+              'proposal_guard_rejections': [r['asset_id'] for r in rows if r.get('person_scale', {}).get('proposal_guard', {}).get('status') == 'rejected_worsening_proposal'],
               'input_hashes_unchanged': True, 'input_files_checked': len(manifest),
               'geometry_unchanged': True, 'source_landmarks_unchanged': True,
               'new_framing_isotropic': True, 'retained_pixels_identical': True,

@@ -1,0 +1,150 @@
+{
+  "version": "independent-scale-proposal-guard-v1",
+  "date": "2026-11-08",
+  "branch": "investigate/grid-scale-regression",
+  "test_counts": {
+    "scale": 32,
+    "display": 49,
+    "cover": 11,
+    "total": 92,
+    "passed": true
+  },
+  "real_groups": 9,
+  "real_photos": 42,
+  "unchanged_other_groups": 8,
+  "unchanged_other_photos": 36,
+  "target": {
+    "member_id": "m009",
+    "photos": 6,
+    "output_size": [
+      768,
+      1792
+    ],
+    "shoulder_target": [
+      383.5,
+      410.4052782764811
+    ],
+    "vertical_stretch": 1.0724117295032916,
+    "presentation_stability": {
+      "version": "scale-review-stable-presentation-v1",
+      "source_asset_ids": [
+        "a0078",
+        "a0079",
+        "a0081",
+        "a0082",
+        "a0083",
+        "a0085"
+      ],
+      "output_size_crop_stretch_and_shoulders_preserved": true,
+      "visible_body_span_checked_in_source_coordinates": true
+    },
+    "comparison_to_pre_grid_version": [
+      {
+        "asset_id": "a0078",
+        "same_as_pre_grid_version": {
+          "display": false,
+          "uniform": false,
+          "standardized": false
+        },
+        "scale_vs_pre_grid_version": 0.9354161555406837,
+        "proposal_guard": {
+          "version": "independent-scale-proposal-guard-v1",
+          "status": "rejected_worsening_proposal",
+          "peer_asset_ids": [
+            "a0079",
+            "a0081",
+            "a0083",
+            "a0085"
+          ],
+          "peer_pitch_interval": [
+            38.73256688713452,
+            44.20232399367868
+          ],
+          "background_is_soft_evidence": true,
+          "torso_error_before": 0.0,
+          "torso_error_after": 0.06904290039975414,
+          "background_distance_before": 0.1446693485427839,
+          "background_distance_after": 0.2282090343397199,
+          "proposed_scale": 1.5403151242978586
+        }
+      },
+      {
+        "asset_id": "a0079",
+        "same_as_pre_grid_version": {
+          "display": true,
+          "uniform": true,
+          "standardized": true
+        },
+        "scale_vs_pre_grid_version": 1.0,
+        "proposal_guard": null
+      },
+      {
+        "asset_id": "a0081",
+        "same_as_pre_grid_version": {
+          "display": true,
+          "uniform": true,
+          "standardized": true
+        },
+        "scale_vs_pre_grid_version": 1.0,
+        "proposal_guard": null
+      },
+      {
+        "asset_id": "a0082",
+        "same_as_pre_grid_version": {
+          "display": true,
+          "uniform": true,
+          "standardized": true
+        },
+        "scale_vs_pre_grid_version": 1.0,
+        "proposal_guard": {
+          "version": "independent-scale-proposal-guard-v1",
+          "status": "observed",
+          "peer_asset_ids": [
+            "a0079",
+            "a0081",
+            "a0083",
+            "a0085"
+          ],
+          "peer_pitch_interval": [
+            38.73256688713452,
+            44.20232399367868
+          ],
+          "background_is_soft_evidence": true,
+          "torso_error_before": 0.0,
+          "torso_error_after": 0.060665813026795745,
+          "background_distance_before": 0.06973580290498486,
+          "background_distance_after": 0.0008780274948947813
+        }
+      },
+      {
+        "asset_id": "a0083",
+        "same_as_pre_grid_version": {
+          "display": true,
+          "uniform": true,
+          "standardized": true
+        },
+        "scale_vs_pre_grid_version": 1.0,
+        "proposal_guard": null
+      },
+      {
+        "asset_id": "a0085",
+        "same_as_pre_grid_version": {
+          "display": true,
+          "uniform": true,
+          "standardized": true
+        },
+        "scale_vs_pre_grid_version": 1.0,
+        "proposal_guard": null
+      }
+    ]
+  },
+  "total_unchanged_photos_vs_pre_grid_version": 41,
+  "evidence_reuse": "Prior semantic/background evidence reused only after source SHA, geometry and keypoint checks; candidate SAM coverage rerun; target visibility rerun (bound cache allowed); unchanged other-group visibility reused only after pixel/transform verification",
+  "output_root": "/root/autodl-fs/case-studio/experiments/independent-scale-guard-v1",
+  "limits": [
+    "This cancels unsupported magnification; it does not estimate exact physical body scale",
+    "Existing other solver proposals remain subject to review; not all body/background conflicts have a unique numeric solution",
+    "Previously generated phase labels retained; no stage reinference",
+    "Regression covers 9 groups, not the entire historic corpus"
+  ]
+}

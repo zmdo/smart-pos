@@ -17,6 +17,7 @@ from .inputs import digest, load_inputs
 from .planning import Config, PROFILES, PlanUnavailable
 from .visibility import profile_name
 from .recovery import plan_with_boundary_review
+from .stability import preserve as preserve_presentation
 
 
 def reuse_audit(inputs, audit):
@@ -105,11 +106,15 @@ def render(item, plan, dest):
                 ((item['normalized_bounds'][2]-item['normalized_bounds'][0])*(item['normalized_bounds'][3]-item['normalized_bounds'][1])))}
 
 
-def run(inputs, out, audit=None, config=None, profiles=None, workers=3):
+def run(inputs, out, audit=None, config=None, profiles=None, workers=3, reference_display=None):
     out = Path(out).resolve()
     if out.exists():
         raise ValueError('output_directory_already_exists')
     config = config or Config(); profiles = profiles or copy.deepcopy(PROFILES)
+    reference = None
+    if reference_display is not None:
+        reference_path = Path(reference_display).resolve()/'summary.json'
+        reference = {r['asset_id']: r for r in json.loads(reference_path.read_text())}
     if audit:
         items, excluded, sources = reuse_audit(inputs, audit)
         out.mkdir(parents=True)
@@ -121,7 +126,9 @@ def run(inputs, out, audit=None, config=None, profiles=None, workers=3):
         'visibility_audit': str(Path(audit).resolve()), 'audit_items_sha256': digest(Path(audit)/'items.json'),
         'group_policy': 'one_frame_per_store_member', 'presentation_only': True,
         'resampling': 'compose approved geometry with display matrix, sample original once',
-        'threshold_meaning': 'vertical_scale / horizontal_scale; not absolute pixel enlargement'})
+        'threshold_meaning': 'vertical_scale / horizontal_scale; not absolute pixel enlargement',
+        'reference_display': str(reference_path) if reference is not None else None,
+        'reference_display_sha256': digest(reference_path) if reference is not None else None})
     grouped = defaultdict(list)
     for item in items:
         grouped[member_key(item)].append(item)
@@ -145,6 +152,7 @@ def run(inputs, out, audit=None, config=None, profiles=None, workers=3):
             try:
                 plan = plan_with_boundary_review(cohort, config, profiles,
                                                  evidence_dir=out/'boundary-rechecks')
+                plan = preserve_presentation(cohort, plan, reference, config)
                 row.update({'status': 'planned', 'profile': plan['profile'], 'plan': plan})
                 group.update({'output_size': plan['output_size'], 'display_profile': plan['profile']})
                 for item in cohort:

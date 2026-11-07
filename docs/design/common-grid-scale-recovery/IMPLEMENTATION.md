@@ -1,4 +1,6 @@
-# 共同网格尺度冲突修复
+# 共同网格尺度冲突修复（已撤销）
+
+本方案因同组侧面/背面劣化已由[独立尺度提案保护](../independent-scale-guard/IMPLEMENTATION.md)替代，下文为历史实施记录。
 
 2026-11-08，用户确认修复唐怡婷黑衣正面偏大，并要求尽量保留正常结果。开发代码在 `scripts/body_scan_person_scale`，已同步到 `best-practices/body-scan-group-display-v3`。不改原图、上游几何、关键点、训练阶段判断或成品模板。
 
