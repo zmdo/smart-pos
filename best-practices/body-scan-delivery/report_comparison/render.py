@@ -1,14 +1,16 @@
-"""Fixed layout; uniform image scale; every source table row remains visible."""
+"""Fixed-height core table; uniform report image scale; full data stays separate."""
 from functools import lru_cache
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from . import VERSION
+from .presentation import DISPLAY_POLICY, select_display_rows
 
 RED='#e60012';INK='#242821';MUTED='#70736d';PAPER='#f5f2ed';LINE='#e4e0d9'
 HEADERS=['类型','初始数据（训练前）','阶段数据（训练后）','变化量（+/-）','单位']
 
 def render(case,images,width,font_path,out):
-    if not case['rows']:raise ValueError('no_table_no_product')
+    rows=select_display_rows(case['rows'])
+    if not rows:raise ValueError('no_table_no_product')
     if width<400:raise ValueError('reference_width_too_small')
     height=round(width*1.25);canvas=Image.new('RGB',(width,height),PAPER);draw=ImageDraw.Draw(canvas)
     @lru_cache(maxsize=256)
@@ -39,7 +41,7 @@ def render(case,images,width,font_path,out):
     margin=round(width*.025);inner=width-2*margin
     draw.rectangle((0,0,width,round(width*.009)),fill=RED)
     draw.text((margin,width*.025),'体测数据 · 前后对比',font=font(.029),fill=INK)
-    geometry=[]
+    geometry=[];table_height=round(width*.398)
     if images:
         half=inner//2; y=round(width*.111); ih=round(half*4/3)
         for i,side in enumerate(('before','after')):
@@ -51,27 +53,34 @@ def render(case,images,width,font_path,out):
             px=x+(half-sz[0])//2;py=y+(ih-sz[1])//2;canvas.paste(scaled,(px,py))
             geometry.append({'side':side,'source_size':list(im.size),'placement':[px,py,*sz],
                              'scale':scale,'uniform_scale':True,'content_clipped':False})
-        table_y=round(width*.807);table_bottom=round(width*1.205)
+        table_y=round(width*.807)
         label('阶段性训练成果',(margin,width*.761,inner,width*.039),size=.025,fill=RED)
     else:
         # Missing pair does not justify duplicating a report or guessing order.
-        table_y=round(width*.145);table_bottom=round(width*1.15)
-        label('阶段性训练成果',(margin,width*.088,inner,width*.045),size=.026,fill=RED)
+        # Center a standalone table, keeping the same height as report-pair tables.
+        table_y=round((height-table_height)/2)
+        label('阶段性训练成果',(margin,table_y-width*.046,inner,width*.039),size=.025,fill=RED)
+    table_bottom=table_y+table_height
     cols=[.17,.24,.24,.22,.13]; xs=[margin]
     for fraction in cols:xs.append(xs[-1]+round(inner*fraction))
     xs[-1]=width-margin
-    header_h=round(width*.043); row_h=(table_bottom-table_y-header_h)/len(case['rows'])
+    header_h=round(width*.043); row_h=(table_height-header_h)/len(rows)
     draw.rounded_rectangle((margin,table_y,width-margin,table_bottom),radius=round(width*.008),fill='white')
     draw.rectangle((margin,table_y,width-margin,table_y+header_h),fill=RED)
     for i,title in enumerate(HEADERS):label(title,(xs[i],table_y,xs[i+1]-xs[i],header_h),size=.017,fill='white')
-    for index,row in enumerate(case['rows']):
+    for index,row in enumerate(rows):
         y=table_y+header_h+index*row_h
         if index%2==1:draw.rectangle((margin,round(y),width-margin,round(y+row_h)),fill='#faf8f5')
         for col,key in enumerate(('type','before','after','delta','unit')):
-            label(str(row.get(key) or '—'),(xs[col],y,xs[col+1]-xs[col],row_h),size=min(.019,row_h/width*.52),
+            value=row.get(key)
+            label(str(value) if value is not None and str(value).strip() else '—',(xs[col],y,xs[col+1]-xs[col],row_h),size=min(.019,row_h/width*.52),
                   fill=RED if key=='delta' else INK)
         draw.line((margin,round(y+row_h),width-margin,round(y+row_h)),fill=LINE,width=max(1,round(width*.0006)))
     canvas.save(out)
-    return {'version':VERSION,'width':width,'height':height,'row_count':len(case['rows']),
+    return {'version':VERSION,'width':width,'height':height,'row_count':len(rows),
+            'source_row_count':len(case['rows']),'display_policy':DISPLAY_POLICY,
+            'display_metrics':[r['type'] for r in rows],
+            'table_frame':[margin,table_y,inner,table_height],'header_height':header_h,'row_height':row_h,
+            'table_height_rule':'round(width * 0.398); independent of row count and report images',
             'images':geometry,'width_rule':'2 * max(original before width, original after width)',
             'height_rule':'round(width * 1.25)','table_only':not bool(images)}

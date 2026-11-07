@@ -8,7 +8,7 @@
     "view_comparison": "body-same-view-reference-v5",
     "single_view": "body-delivery-v1",
     "member_cover": "body-member-cover-v3",
-    "report_comparison": "report-comparison-product-v3"
+    "report_comparison": "report-comparison-product-v4"
   },
   "dependencies": "Frozen local scripts and four sibling renderer packages; data-only upstream frame contract, no development imports",
   "excluded_tests": "14 classification/ranking tests remain with the classification node; revision fixtures now use preclassified labels",
@@ -204,19 +204,23 @@
     },
     {
       "path": "report_comparison/README.md",
-      "sha256": "b8c5977d96289bc39f1d614c290640d9acf7e83d37c34f131d516513b9c2c1e4"
+      "sha256": "cb8e472818d57624da87a66060e660434ac7da8c93c4836af8e0317d603d8775"
     },
     {
       "path": "report_comparison/__init__.py",
-      "sha256": "087a316e45f1d6e3e504579ec0036ee7a12f7003cb84333cd9cefedbea700d9e"
+      "sha256": "70d930d701c35958038f84092f23a4c5129000deaa61921009d17618d12632e8"
     },
     {
       "path": "report_comparison/__main__.py",
-      "sha256": "88bcb20bdf2a02567bdab31e456ab281ca24a80569bbb990c8f8bbb35e794bb3"
+      "sha256": "e8bd5953590847b002d4cdf9841ba7225c6bfdf737f5334174cd92c3316109e5"
+    },
+    {
+      "path": "report_comparison/presentation.py",
+      "sha256": "9cbf1537135ab7b7589a0ea5e311214986adeca23ad58a7737548e17182ec349"
     },
     {
       "path": "report_comparison/render.py",
-      "sha256": "25d2b7df47eae998b3180c3680029113846c03006021d7642c9d37c18c93d262"
+      "sha256": "90381ad59a18efcfc759f33690da898764ea33cea3b1f0f310217d6202a02909"
     },
     {
       "path": "report_comparison/run.sh",
@@ -224,11 +228,15 @@
     },
     {
       "path": "report_comparison/tests/test_report_product.py",
-      "sha256": "c6973e79b1ec820c6a923a56f657272030603e6640bf2f6a8d04aac529380fb6"
+      "sha256": "f58256d532853fc490af57cc88741325527d546a9731048af87b6e145e448f61"
     },
     {
       "path": "report_comparison/validation-clean-v2.json",
       "sha256": "62dda840fa210e012a8c9579b97db6aadd5e1f556350834a34e5fae127faa347"
+    },
+    {
+      "path": "report_comparison/validation-core-nine-v4.json",
+      "sha256": "99480b05a9a1654358029521fb32bbf9fa1d5838dd6025ad60a65494b7c33d2e"
     },
     {
       "path": "report_comparison/validation-original-first-v3.json",

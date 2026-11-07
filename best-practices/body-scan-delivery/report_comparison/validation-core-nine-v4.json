@@ -1,0 +1,40 @@
+{
+  "version": "report-comparison-product-v4",
+  "date": "2026-11-07",
+  "cases": 18,
+  "generated": 18,
+  "errors": 0,
+  "dimensions": [
+    2160,
+    2700
+  ],
+  "table_height_px": 860,
+  "display_row_distribution": {
+    "5": 2,
+    "7": 5,
+    "8": 1,
+    "9": 10
+  },
+  "display_rows": 143,
+  "full_rows_preserved": 261,
+  "report_photo_regions_checked": 30,
+  "all_input_hashes_unchanged": true,
+  "dates_values_corrections_unchanged": true,
+  "product_suite_tests": 64,
+  "model_calls": 0,
+  "remote_output": "/root/autodl-fs/case-studio/experiments/report-comparison-core-nine-v4-20261107/validated",
+  "tables_bundle_sha256": "844dee169b9b035daf5029977e69f7aafb4bbf4920f7c3b1d9a4be0f9ec17d50",
+  "products_bundle_sha256": "6a68366d0abe2b1c4b1ee8215e02a130315b4fcf73cd6d0128ed3f46a47e27d3",
+  "local_filters": {
+    "all": 18,
+    "computed": 18,
+    "review": 16,
+    "none": 0
+  },
+  "full_data_html_rows": 261,
+  "visual_review": [
+    "c014 nine rows",
+    "c007 five rows",
+    "c011 standalone table"
+  ]
+}
