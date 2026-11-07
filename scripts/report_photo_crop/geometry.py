@@ -1,9 +1,7 @@
-"""Only axis-aligned cropping, background masking and a uniform affine scale."""
+"""A fixed-ratio rectangle inside the source, with no masking or padding."""
 import math
 
-import cv2
-import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image
 
 
 def box_pixels(value, size):
@@ -36,8 +34,36 @@ def parse_ratio(text):
     return rw//divisor, rh//divisor
 
 
-def make_frame(original, selection, ratio=(3, 4), max_side=None):
-    if not selection.get('is_report') is True:
+def rectangle_in_source(size, content, preferred, ratio, anchor_y='center', anchor_x='center'):
+    """Contain the preferred box when possible, otherwise maximize content coverage."""
+    w, h = size
+    rw, rh = ratio
+    max_units = min(w//rw, h//rh)
+    if max_units < 1:
+        raise ValueError('source_too_small_for_ratio')
+    preferred_units = math.ceil(max((preferred[2]-preferred[0])/rw,
+                                    (preferred[3]-preferred[1])/rh))
+    core_units = math.ceil(max((content[2]-content[0])/rw, (content[3]-content[1])/rh))
+    units = min(preferred_units, max_units)
+    cw, ch = rw*units, rh*units
+    target = preferred if preferred_units <= max_units else content
+
+    def origin(lo, hi, length, available, anchor='center'):
+        desired = (lo if anchor in ('top', 'start') else hi-length if anchor == 'bottom'
+                   else round((lo+hi-length)/2))
+        if hi-lo <= length:
+            lower, upper = max(0, hi-length), min(lo, available-length)
+        else:
+            lower, upper = max(0, lo), min(hi-length, available-length)
+        return max(lower, min(desired, upper))
+
+    x = origin(target[0], target[2], cw, w, anchor_x)
+    y = origin(target[1], target[3], ch, h, anchor_y)
+    return [x, y, x+cw, y+ch], core_units <= max_units
+
+
+def make_frame(original, selection, ratio=(3, 4), max_side=None, priority=None):
+    if selection.get('is_report') is not True:
         raise ValueError('not_a_report')
     medium = selection.get('medium')
     if medium not in ('screenshot', 'paper_photo'):
@@ -45,71 +71,60 @@ def make_frame(original, selection, ratio=(3, 4), max_side=None):
     rw, rh = parse_ratio(':'.join(map(str, ratio)))
     if max_side is not None and max_side < max(64, rw, rh):
         raise ValueError('invalid_max_side')
-    size = original.size
-    content = box_pixels(selection.get('content_box'), size)
-    # VLM bounds are approximate; screenshots need room for thin table borders.
-    margin = max(4, round(min(size)*(.03 if medium == 'screenshot' else .006)))
-    crop_box = padded(content, size, margin)
-    working = original
-    mask_applied = False
-    content_coverage = 1.0
-    flags = list(selection.get('issues') or [])
+    content = box_pixels(selection.get('content_box'), original.size)
+    margin = max(4, round(min(original.size)*(.03 if medium == 'screenshot' else .006)))
+    preferred = content
     if medium == 'paper_photo':
-        paper = box_pixels(selection.get('paper_box'), size)
-        # Retain every claimed useful-content pixel even if paper detection is tighter.
-        crop_box = padded([min(paper[0], content[0]), min(paper[1], content[1]),
-                           max(paper[2], content[2]), max(paper[3], content[3])], size, margin)
-        polygon = selection.get('paper_polygon')
-        if (not isinstance(polygon, list) or not 4 <= len(polygon) <= 16
-                or any(not isinstance(p, list) or len(p) != 2
-                       or any(not isinstance(v, (int, float)) or isinstance(v, bool)
-                              or not math.isfinite(v) or not 0 <= v <= 1000 for v in p)
-                       for p in polygon)):
-            raise ValueError('invalid_paper_polygon')
-        points = np.array([[p[0]*size[0]/1000, p[1]*size[1]/1000] for p in polygon], dtype=np.float32)
-        hull = cv2.convexHull(points).reshape(-1, 2)
-        if cv2.contourArea(hull) < .1*size[0]*size[1]:
-            raise ValueError('paper_region_too_small')
-        mask = Image.new('L', size)
-        ImageDraw.Draw(mask).polygon([tuple(p) for p in hull], fill=255)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (4*margin+1, 4*margin+1))
-        mask = Image.fromarray(cv2.dilate(np.asarray(mask), kernel))
-        # A useful-content rectangle includes background corners of tilted pages.
-        # Do not union that whole rectangle back into the paper mask. Reject a
-        # strongly conflicting paper estimate instead of trusting a narrow polygon.
-        cx1, cy1, cx2, cy2 = content
-        content_coverage = float(np.mean(np.asarray(mask)[cy1:cy2, cx1:cx2] == 255))
-        if content_coverage >= .88:
-            working = Image.composite(original, Image.new('RGB', size, 'white'), mask)
-            mask_applied = True
+        paper = box_pixels(selection.get('paper_box'), original.size)
+        preferred = [min(paper[0], content[0]), min(paper[1], content[1]),
+                     max(paper[2], content[2]), max(paper[3], content[3])]
+    preferred = padded(preferred, original.size, margin)
+    anchor_y = 'top' if medium == 'screenshot' else 'center'
+    box, contained = rectangle_in_source(original.size, content, preferred, (rw, rh), anchor_y)
+    priority_box = content
+    priority_used = not contained and priority is not None
+    if priority_used:
+        priority_box = box_pixels(priority.get('primary_box'), original.size)
+        # Keep the largest available window, positioned around the important data.
+        box, _ = rectangle_in_source(original.size, priority_box, preferred, (rw, rh),
+                                      'bottom' if medium == 'screenshot' else 'center',
+                                      'start' if medium == 'screenshot' else 'center')
+    crop = original.crop(box)
+    output = crop.copy()
+    scale = 1.
+    if max_side is not None and max(crop.size) > max_side:
+        units = max_side//max(rw, rh)
+        output = crop.resize((rw*units, rh*units), Image.Resampling.LANCZOS)
+        scale = output.width/crop.width
+    cx1, cy1, cx2, cy2 = content
+    x1, y1, x2, y2 = box
+    intersection = max(0, min(x2, cx2)-max(x1, cx1))*max(0, min(y2, cy2)-max(y1, cy1))
+    coverage = intersection/((cx2-cx1)*(cy2-cy1))
+    cuts = [max(0, x1-cx1), max(0, y1-cy1), max(0, cx2-x2), max(0, cy2-y2)]
+    assert contained == (not any(cuts))
+    px1, py1, px2, py2 = priority_box
+    primary_intersection = max(0, min(x2, px2)-max(x1, px1))*max(0, min(y2, py2)-max(y1, py1))
+    primary_coverage = primary_intersection/((px2-px1)*(py2-py1))
+    primary_contained = x1 <= px1 and y1 <= py1 and x2 >= px2 and y2 >= py2
+    flags = list(selection.get('issues') or [])
+    if not contained:
+        if priority_used:
+            flags.append('原图无法容纳全部正文，已优先主要指标及前后数据；次要内容允许裁去')
+            flags.extend(priority.get('issues') or [])
+            if not primary_contained:
+                flags.append('原图边界仍不足以容纳完整核心区域，候选保留尽可能多的核心内容，需审核')
         else:
-            flags.append('纸边与正文范围冲突，已保留原像素；外围背景需检查')
-    crop = working.crop(crop_box)
-    cw, ch = crop.size
-    # The ratio is fixed; pixel dimensions follow the useful source crop.
-    units = math.ceil(max(cw/rw, ch/rh))
-    if max_side is not None:
-        units = min(units, max_side//max(rw, rh))
-    fw, fh = rw*units, rh*units
-    frame_size = (fw, fh)
-    scale = min(1., fw/cw, fh/ch)
-    if scale == 1:
-        dx, dy = (fw-cw)//2, (fh-ch)//2
-        output = Image.new('RGB', frame_size, 'white')
-        output.paste(crop, (dx, dy))
-    else:
-        # An explicitly requested export cap uses one continuous scalar for both axes.
-        dx, dy = (fw-cw*scale)/2, (fh-ch*scale)/2
-        output = crop.transform(frame_size, Image.Transform.AFFINE,
-                                (1/scale, 0, -dx/scale, 0, 1/scale, -dy/scale),
-                                resample=Image.Resampling.BICUBIC, fillcolor='white')
-    evidence = {'medium': medium, 'crop_xyxy': crop_box, 'content_xyxy': content,
-                'frame_size': list(frame_size), 'margin_pixels': margin, 'scale_x': scale, 'scale_y': scale,
-                'ratio': [rw, rh], 'pixel_policy': 'native_crop_pixels' if scale == 1 else 'explicit_max_side_cap',
-                'placement_xy': [dx, dy], 'occupied_fraction': cw*ch*scale**2/(fw*fh),
-                'background_mask_applied': mask_applied,
-                'geometry': 'crop_translation_no_resampling' if scale == 1 else 'crop_uniform_scale_translation',
-                'paper_mask_content_box_coverage': content_coverage,
-                'perspective_correction': False, 'dewarping': False,
-                'rotation': False, 'review_reasons': flags}
+            flags.append('原图无法容纳全部正文，尚未获得核心区域定位；候选需审核')
+    evidence = {'medium': medium, 'crop_xyxy': box, 'content_xyxy': content,
+                'preferred_xyxy': preferred, 'frame_size': list(output.size), 'ratio': [rw, rh],
+                'margin_pixels': margin, 'scale_x': scale, 'scale_y': scale,
+                'pixel_policy': 'source_rectangle_pixels' if scale == 1 else 'explicit_max_side_cap',
+                'geometry': 'source_rectangle_crop' if scale == 1 else 'source_rectangle_uniform_resize',
+                'crop_inside_source': True, 'background_mask_applied': False, 'padding_applied': False,
+                'content_fully_contained': contained, 'content_box_coverage': coverage,
+                'priority_used': priority_used, 'priority_xyxy': priority_box,
+                'priority_fully_contained': primary_contained, 'priority_box_coverage': primary_coverage,
+                'content_cut_pixels_ltrb': cuts, 'source_bounds_limited': not contained,
+                'perspective_correction': False, 'dewarping': False, 'rotation': False,
+                'review_reasons': flags}
     return output, crop, evidence

@@ -1,221 +1,49 @@
 {
-  "version": "report-photo-crop-v2",
+  "version": "report-photo-crop-v3",
   "date": "2026-11-07",
-  "remote_output": "/root/autodl-fs/case-studio/experiments/report-photo-crop-v2-20261107/validated",
-  "selected": 46,
-  "generated": 46,
+  "remote_output": "/root/autodl-fs/case-studio/experiments/report-photo-crop-v3-20261107/validated-v2",
+  "total": 46,
   "media_counts": {
     "paper_photo": 37,
     "screenshot": 9
   },
-  "fixed_ratio": [
+  "status_counts": {
+    "cropped": 45,
+    "needs_review": 1
+  },
+  "full_content_crops": 35,
+  "priority_crops": 11,
+  "core_complete_priority_crops": 10,
+  "needs_review_ids": [
+    "a0011"
+  ],
+  "all_rectangles_inside_source": true,
+  "all_crop_rectangles_exact_ratio": [
     3,
     4
   ],
-  "fixed_pixel_size": false,
-  "all_frames_exact_ratio": true,
-  "all_original_crop_pixels_preserved_in_frame": true,
-  "all_scales": 1,
-  "crop_png_identical_to_reviewed_v1": true,
-  "original_png_identical_to_v1": true,
-  "source_bindings_and_selections_unchanged": true,
+  "all_output_pixels_equal_original_rectangle": true,
+  "all_source_hashes_unchanged": true,
+  "padding_calls": 0,
+  "mask_calls": 0,
   "dewarping_calls": 0,
   "phase_classification_calls": 0,
-  "new_localization_requests": 0,
-  "unit_tests_passed": 5,
+  "localization_requests": 0,
+  "priority_requests": 11,
+  "non_priority_images_unchanged_during_refinement": 35,
+  "tests_passed": 10,
+  "randomized_geometry_cases": 500,
   "html_links_checked": 276,
-  "frame_sizes": {
-    "a0173": [
-      4080,
-      5440
-    ],
-    "a0177": [
-      4221,
-      5628
-    ],
-    "a0006": [
-      1281,
-      1708
-    ],
-    "a0011": [
-      1920,
-      2560
-    ],
-    "a0012": [
-      1260,
-      1680
-    ],
-    "a0082": [
-      1074,
-      1432
-    ],
-    "a0084": [
-      1080,
-      1440
-    ],
-    "a0089": [
-      888,
-      1184
-    ],
-    "a0037": [
-      1083,
-      1444
-    ],
-    "a0039": [
-      1014,
-      1352
-    ],
-    "a0040": [
-      1083,
-      1444
-    ],
-    "a0044": [
-      1005,
-      1340
-    ],
-    "a0045": [
-      1035,
-      1380
-    ],
-    "a0048": [
-      792,
-      1056
-    ],
-    "a0061": [
-      1167,
-      1556
-    ],
-    "a0062": [
-      1038,
-      1384
-    ],
-    "a0065": [
-      1242,
-      1656
-    ],
-    "a0067": [
-      1284,
-      1712
-    ],
-    "a0016": [
-      1278,
-      1704
-    ],
-    "a0017": [
-      1137,
-      1516
-    ],
-    "a0019": [
-      1131,
-      1508
-    ],
-    "a0054": [
-      1065,
-      1420
-    ],
-    "a0056": [
-      1080,
-      1440
-    ],
-    "a0057": [
-      1119,
-      1492
-    ],
-    "a0027": [
-      1062,
-      1416
-    ],
-    "a0032": [
-      1062,
-      1416
-    ],
-    "a0033": [
-      1047,
-      1396
-    ],
-    "a0035": [
-      1017,
-      1356
-    ],
-    "a0069": [
-      1281,
-      1708
-    ],
-    "a0074": [
-      1281,
-      1708
-    ],
-    "a0077": [
-      1281,
-      1708
-    ],
-    "a0078": [
-      1281,
-      1708
-    ],
-    "a0138": [
-      1365,
-      1820
-    ],
-    "a0139": [
-      1302,
-      1736
-    ],
-    "a0147": [
-      1380,
-      1840
-    ],
-    "a0154": [
-      1089,
-      1452
-    ],
-    "a0155": [
-      1023,
-      1364
-    ],
-    "a0157": [
-      1077,
-      1436
-    ],
-    "a0119": [
-      1374,
-      1832
-    ],
-    "a0121": [
-      876,
-      1168
-    ],
-    "a0124": [
-      1497,
-      1996
-    ],
-    "a0114": [
-      1254,
-      1672
-    ],
-    "a0117": [
-      1179,
-      1572
-    ],
-    "a0099": [
-      1281,
-      1708
-    ],
-    "a0100": [
-      1281,
-      1708
-    ],
-    "a0106": [
-      1518,
-      2024
-    ]
-  },
-  "visual_review": "v1 contact sheets checked for all 46; same crop pixels reused in v2 at native resolution",
-  "manifest_sha256": "86b4795c040fdd58aec7ddee4ac4fb38eb2715dfff0efc201ed5d4a60c03d957",
+  "content_coverage_is_model_box_geometry_not_ocr": true,
+  "manifest_sha256": "966eca6ee21a44c640ab2f42cd3880f09f27ff0c1ca175cd2e1046fb8661ce32",
   "offline_gallery_filters": {
     "all": 46,
     "screenshot": 9,
     "paper_photo": 37,
-    "reset_to_all": 46
-  }
+    "priority": 11,
+    "review": 1,
+    "review_asset_id": "a0011"
+  },
+  "local_html_links_checked": 276,
+  "visual_review": "Reviewed all 11 priority crops in contact sheet and inspected full previews for a0011, a0039, a0106, a0114, a0147; a0011 remains explicitly marked for review."
 }
