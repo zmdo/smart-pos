@@ -1,0 +1,22 @@
+{
+  "version": "report-comparison-product-v5",
+  "approval_date": "2026-11-07",
+  "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+  "independent_package": "/root/autodl-fs/case-studio/experiments/report-comparison-best-practice-v5-20261107/package",
+  "working_directory": "/tmp",
+  "external_pythonpath_ignored": true,
+  "snapshot_check_passed": true,
+  "cli_help_passed": true,
+  "tests_passed": 64,
+  "generated": 18,
+  "report_pairs": 15,
+  "compact_tables": 3,
+  "matched_reference_files": 77,
+  "all_18_products_byte_identical": true,
+  "table_data_gallery_and_review_byte_identical": true,
+  "all_input_hashes_unchanged": true,
+  "model_calls": 0,
+  "reference_output": "/root/autodl-fs/case-studio/experiments/report-comparison-compact-v5-20261107/validated",
+  "independent_output": "/root/autodl-fs/case-studio/experiments/report-comparison-best-practice-v5-20261107/validated",
+  "products_bundle_sha256": "91b70af23d10990648c2cbe04ecdd900367369557e594e86800c2994a98fbd1f"
+}

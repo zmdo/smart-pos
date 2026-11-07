@@ -2,6 +2,8 @@
 
 2026-11-07 最新规则：原始体测报告优先；缺失指标允许由阶段汇总表补充；天数、变化量由程序重新计算。原图取景沿用 3:4 矩形，成品保留去右上角姓名/门店、去底部来源提示的版式。
 
+成品 v5 已由用户确认并正式归入 `best-practices/body-scan-delivery/report_comparison`，来源提交 `f1320dd32b3a2d3bec451ab9e2520058b15b3506`。使用独立入口 `report_comparison/run.sh`，部署时复制整个 `body-scan-delivery`。归档过程保留已确认算法和图片，独立验证记录见 [validation-approved-v5.json](../../best-practices/body-scan-delivery/report_comparison/validation-approved-v5.json)。
+
 ```mermaid
 flowchart LR
     A[原始体测报告] --> C[有效日期与实测指标]

@@ -7,9 +7,9 @@
 | 硬拼接拆分 | [body-scan-pairs](body-scan-pairs/README.md) | 仅处理两张照片硬拼接，独立分类子图；工作流使用 `--split-only` |
 | 单图标准化 v4 | [body-scan-wall-v4](body-scan-wall-v4/README.md) | 海报过滤、网格/非网格校正、可靠几何检查及回退、最大有效矩形 |
 | 同组展示 v3 | [body-scan-group-display-v3](body-scan-group-display-v3/README.md) | 共同人物尺度、完整头脚保护、肩部共同取景、一人一画幅；附封面正面双图独立取景入口 |
-| 体检表单对比 | [body-report-compare](body-report-compare/README.md) | 独立提取门店报告、按明确前后列核验；新增图片五列表格 / 数据计算包 |
+| 体检表单对比 | [body-report-compare](body-report-compare/README.md) | 独立提取门店报告；原始报告优先、汇总补缺、有效日期校验及天数/变化量重算 |
 | 训练阶段自动分类 | [body-scan-phase-classification](body-scan-phase-classification/README.md) | 盲评视觉与可选报告辅助，补齐全部阶段标签及推断/待审标记 |
-| 体测成品生成 | [body-scan-delivery](body-scan-delivery/README.md) | 同目录下分为完整三视图、各朝向 VS、训练前后朝向单图、会员案例封面；封面独立消费专用双图和报告 |
+| 体测成品生成 | [body-scan-delivery](body-scan-delivery/README.md) | 同目录下五类成品：完整三视图、各朝向 VS、阶段单图、会员案例封面、体测报告对比成品 |
 
 推荐链路：**拆分 `--split-only` → 单图标准化 v4 → 同组展示 v3**。拆分的默认一键入口也已迁移到 v4；已经默认完成标准化时，不要再接一次标准化节点。
 
@@ -20,3 +20,5 @@
 下游链路：**同组展示 → 阶段分类 → 成品生成**；**体检表单对比**可先独立运行，同时向分类与成品提供数据。
 
 封面分支：既有阶段结果选定正面前后素材 → 同组展示 v3 的 `run_cover.sh` 复用已确认几何及尺度，从原图生成封面双图 → 成品最佳实践 `member_cover/run.sh`。封面排版已归档为第四类成品，标准组六图及原三类成品算法不变，详见[封面工作流](../docs/workflows/member-cover.md)。
+
+报告成品分支：`body-report-compare/run.sh tables` 生成五列表格数据 → [report_comparison/run.sh](body-scan-delivery/report_comparison/README.md) 消费数据与已裁剪的报告图。当前权威版本为用户于 2026-11-07 确认的 v5：九项指标按有值展示、表格等高，有报告图则上下拼版，无报告图则仅输出去留白的紧凑表格。来源代码为 `f1320dd32b3a2d3bec451ab9e2520058b15b3506`，详见[报告成品工作流](../docs/workflows/report-table-product.md)。

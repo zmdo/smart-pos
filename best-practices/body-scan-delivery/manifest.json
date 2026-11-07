@@ -15,7 +15,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "07b189fd821a5f59d2603726b03f09994f32a160ead4065563ff27cc7a86740b"
+      "sha256": "2bf4c6d2672dfd178ed109852996cb0d9eded9e03a34cb3f45b910b99aea18ae"
     },
     {
       "path": "category.py",
@@ -204,31 +204,59 @@
     },
     {
       "path": "report_comparison/README.md",
-      "sha256": "db607be47f544d57cf4c103522ee12193236937ed25071f335cd8ebd4695ef84"
+      "sha256": "3d2e6dea82e397811fd47f18ae8584e0e310390d482b831409ebcc4081faa46f"
     },
     {
       "path": "report_comparison/__init__.py",
-      "sha256": "783e576ebd6b337c2bbeb3235991ac8865198e00b30748e216c8438b02ea54e8"
+      "sha256": "783e576ebd6b337c2bbeb3235991ac8865198e00b30748e216c8438b02ea54e8",
+      "source": "best-practices/body-scan-delivery/report_comparison/__init__.py",
+      "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+      "source_sha256": "783e576ebd6b337c2bbeb3235991ac8865198e00b30748e216c8438b02ea54e8",
+      "unchanged": true
     },
     {
       "path": "report_comparison/__main__.py",
-      "sha256": "e8bd5953590847b002d4cdf9841ba7225c6bfdf737f5334174cd92c3316109e5"
+      "sha256": "e8bd5953590847b002d4cdf9841ba7225c6bfdf737f5334174cd92c3316109e5",
+      "source": "best-practices/body-scan-delivery/report_comparison/__main__.py",
+      "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+      "source_sha256": "e8bd5953590847b002d4cdf9841ba7225c6bfdf737f5334174cd92c3316109e5",
+      "unchanged": true
     },
     {
       "path": "report_comparison/presentation.py",
-      "sha256": "9cbf1537135ab7b7589a0ea5e311214986adeca23ad58a7737548e17182ec349"
+      "sha256": "9cbf1537135ab7b7589a0ea5e311214986adeca23ad58a7737548e17182ec349",
+      "source": "best-practices/body-scan-delivery/report_comparison/presentation.py",
+      "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+      "source_sha256": "9cbf1537135ab7b7589a0ea5e311214986adeca23ad58a7737548e17182ec349",
+      "unchanged": true
     },
     {
       "path": "report_comparison/render.py",
-      "sha256": "0706515352851e68432981082565de4b0d2af6a9ed40964315f0a4b3aed2b922"
+      "sha256": "0706515352851e68432981082565de4b0d2af6a9ed40964315f0a4b3aed2b922",
+      "source": "best-practices/body-scan-delivery/report_comparison/render.py",
+      "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+      "source_sha256": "0706515352851e68432981082565de4b0d2af6a9ed40964315f0a4b3aed2b922",
+      "unchanged": true
     },
     {
       "path": "report_comparison/run.sh",
-      "sha256": "f8c8f26e509d85f063f02d89be6df0e4b41faa90461f0007bf2885e063f343e1"
+      "sha256": "f8c8f26e509d85f063f02d89be6df0e4b41faa90461f0007bf2885e063f343e1",
+      "source": "best-practices/body-scan-delivery/report_comparison/run.sh",
+      "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+      "source_sha256": "f8c8f26e509d85f063f02d89be6df0e4b41faa90461f0007bf2885e063f343e1",
+      "unchanged": true
     },
     {
       "path": "report_comparison/tests/test_report_product.py",
-      "sha256": "4e8ffcc924c9c9966c8e9e113d3a202cb52957bf21471362420445b4f45676b9"
+      "sha256": "4e8ffcc924c9c9966c8e9e113d3a202cb52957bf21471362420445b4f45676b9",
+      "source": "best-practices/body-scan-delivery/report_comparison/tests/test_report_product.py",
+      "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+      "source_sha256": "4e8ffcc924c9c9966c8e9e113d3a202cb52957bf21471362420445b4f45676b9",
+      "unchanged": true
+    },
+    {
+      "path": "report_comparison/validation-approved-v5.json",
+      "sha256": "9fa2fd34986d4d8b54de7c4da4d0eba093dbc138417ad1b2b3cc01dc33af47fb"
     },
     {
       "path": "report_comparison/validation-clean-v2.json",
@@ -531,10 +559,24 @@
     "view_comparison": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "single_view": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
     "member_cover": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
-    "report_comparison": "original-report-first update on fc03972"
+    "report_comparison": "f1320dd32b3a2d3bec451ab9e2520058b15b3506"
   },
   "cover_entrypoint": "member_cover/run.sh",
   "cover_input_contract": "existing verified delivery + body-scan-cover-frames-v2 + optional text overrides",
   "report_entrypoint": "report_comparison/run.sh",
-  "extension_base_commit": "a6af050984febcfcef9513aa15b507d6dfe72489"
+  "extension_base_commit": "a6af050984febcfcef9513aa15b507d6dfe72489",
+  "component_approvals": {
+    "report_comparison": {
+      "version": "report-comparison-product-v5",
+      "status": "user-approved",
+      "approved_on": "2026-11-07",
+      "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
+      "entrypoint": "report_comparison/run.sh",
+      "deployment_unit": "entire body-scan-delivery directory",
+      "input_contract": "body-report-five-column-v1 with original_measurements_first_summary_fills_gaps; report-photo-crop-v3 frames",
+      "recommended_width": 2160,
+      "reference_validation": "report_comparison/validation-compact-v5.json",
+      "archive_validation": "report_comparison/validation-approved-v5.json"
+    }
+  }
 }

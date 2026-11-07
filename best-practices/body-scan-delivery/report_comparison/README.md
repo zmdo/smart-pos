@@ -1,13 +1,17 @@
 # 报告照片 + 五列表格成品
 
+**当前权威版本：`report-comparison-product-v5`。** 用户于 2026-11-07 确认，代码来源为 `f1320dd32b3a2d3bec451ab9e2520058b15b3506`。当前推荐规则以本节和下方 v5 为准，v1/v3/v4 记录保留用于追溯。
+
 独立成品节点，只消费报告数据和已裁剪的报告图，不调用模型、OCR、阶段分类或上游处理代码。
 
 ```bash
 ./report_comparison/run.sh \
   --tables /path/to/five-column-bundle \
   --crops /path/to/report-photo-crop-v3-output \
-  --font /path/to/NotoSansSC.ttf --out /path/to/new-report-products
+  --font /path/to/NotoSansSC.ttf --width 2160 --out /path/to/new-report-products
 ```
+
+从 `body-scan-delivery` 根目录执行以上命令，或使用入口的绝对路径。部署需复制整个 `body-scan-delivery`，`report_comparison` 与其公共契约、启动器共同冻结，不能只拷贝此子目录。运行环境和 `CASE_PYTHON` 配置见[成品包说明](../README.md)；输入包、字体、模型密钥均不随代码归档，成品节点不需要模型密钥。
 
 - 上方：按照明确表格日期或报告测试日期，左前右后等比展示两张 3:4 报告矩形。原图来源 SHA 与裁剪清单绑定，绝不混用其他人的报告。
 - 下方：类型 / 初始数据（训练前） / 阶段数据（训练后） / 变化量（+/-） / 单位。按时间、身高、体重、体脂率、BMI、腰围、臀围、胸围、臂围的顺序，只展示有数据的项目。原始体测报告优先，缺失指标由汇总表补充；时间行和全部变化量由上游重算。
@@ -44,3 +48,5 @@
 无原始报告图的三组成品只保留表格区及其标题。保持宽度、表格高度、行高、字号和内容，画布高度由 `round(宽度 × 0.071) + round(宽度 × 0.398) + round(宽度 × 0.025) + 1` 确定；有报告图的成品布局不变。继续复用既有数据，无模型调用。
 
 验收：18 组生成成功，三张独立表格与 v4 对应表格区裁剪结果逐像素一致，另外 15 张组合成品 PNG 哈希不变。所有表格数据保持一致，64 项测试通过。见 `validation-compact-v5.json`。
+
+正式归档验证：将整个成品包复制到独立目录，从 `/tmp` 运行，外部 `PYTHONPATH` 不参与导入；完整性检查、命令入口和 64 项测试通过。重新生成 15 张报告组合图与 3 张紧凑表格，18 张 PNG、预览、逐组数据及公共画廊/审核文件共 77 个文件与用户确认版逐字节一致，0 次模型调用。见 [validation-approved-v5.json](validation-approved-v5.json)。
