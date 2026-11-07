@@ -12,6 +12,10 @@ def main():
 
         run(*map(Path, args))
         return
+    if action == "privacy":
+        from .privacy import prepare_review
+        prepare_review(Path(args[0]), args[1])
+        return
     sys.path.insert(0, str(REPO / "best-practices/body-scan-delivery"))
     from snapshot import verify_integrity
 

@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from studio import store, config, review, workflow, copywriter, parallel
+from studio import store, config, review, workflow, copywriter, parallel, privacy, stickers
 from studio.common import APP_ROOT, DATA, WEB_DATA, PUBLIC_URL, job_dir, read, save
 
 
@@ -124,6 +124,26 @@ def logout(request: Request):
 @app.get("/api/settings")
 def settings():
     return config.public()
+
+
+@app.get("/api/stickers")
+def sticker_catalog():
+    return [stickers.public(s) for s in stickers.catalog()]
+
+
+@app.get("/api/stickers/{sid}/image")
+def sticker_image(sid: str):
+    return FileResponse(stickers.get(sid)["path"], media_type="image/png")
+
+
+@app.post("/api/jobs/{jid}/members/{mid}/privacy")
+async def prepare_privacy(jid: str, mid: str, request: Request):
+    return privacy.start(jid, mid, await request.json())
+
+
+@app.get("/api/jobs/{jid}/members/{mid}/privacy")
+def privacy_status(jid: str, mid: str):
+    return privacy.status(jid, mid)
 
 
 @app.put("/api/settings")

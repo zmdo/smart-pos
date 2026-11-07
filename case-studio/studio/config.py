@@ -15,6 +15,8 @@ DEFAULTS = {
     "titles": {"front": "体测正视图", "side": "体测侧视图", "back": "体测后视图"},
     "logo_path": None,
     "model": {"base_url": "", "model": "", "api_key": ""},
+    "image_model": {"base_url": "https://maas.qianwenaiapi.com/api/v1",
+                    "model": "qwen-image-2.1-pro", "api_key": "", "reuse_model_key": True},
     "model_workers": 3,
     "gender_confidence_threshold": 0.90,
 }
@@ -46,6 +48,7 @@ def public(config=None):
     result.pop("access_token", None)
     result.pop("session_secret", None)
     result["model"]["key_configured"] = bool(result["model"].pop("api_key", None))
+    result["image_model"]["key_configured"] = bool(result["image_model"].pop("api_key", None))
     result["logo_configured"] = bool(result.pop("logo_path", None))
     return result
 
@@ -113,6 +116,24 @@ def update(values):
                     or u.password
                 ):
                     raise ValueError("模型 Base URL 无效")
+            elif key == "image_model":
+                if not isinstance(value, dict) or set(value) - {"base_url", "model", "api_key", "reuse_model_key", "key_configured"}:
+                    raise ValueError("生图模型设置格式错误")
+                for k in ("base_url", "model", "api_key"):
+                    if k in value:
+                        if not isinstance(value[k], str) or len(value[k]) > 2048:
+                            raise ValueError("生图模型设置格式错误")
+                        if k != "api_key" or value[k].strip():
+                            cfg["image_model"][k] = value[k].strip()
+                if "reuse_model_key" in value:
+                    if type(value["reuse_model_key"]) is not bool:
+                        raise ValueError("共用 Key 设置无效")
+                    cfg["image_model"]["reuse_model_key"] = value["reuse_model_key"]
+                u = urlparse(cfg["image_model"]["base_url"])
+                if u.scheme != "https" or not u.hostname or u.username or u.password or u.query or u.fragment:
+                    raise ValueError("生图 Base URL 必须是有效 HTTPS API 地址")
+                if cfg["image_model"]["model"] not in ("qwen-image-2.1-pro", "qwen-image-2.1-turbo"):
+                    raise ValueError("请选择支持原生透明通道的 Qwen Image 2.1 模型")
         if values.get("clear_api_key"):
             cfg["model"]["api_key"] = ""
         save(WEB_DATA / "settings.json", cfg, True)

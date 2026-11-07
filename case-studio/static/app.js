@@ -1,6 +1,7 @@
 import { openCrop } from "./crop.js";
 import { openCoverAI } from "./cover-ai.js";
 import { imageURL, clearMediaCache } from "./media-cache.js";
+import { privacyPanel, bindPrivacy, libraryPage, imageSettings } from "./privacy.js";
 import {
   productTypes as products,
   downloadPlan,
@@ -100,6 +101,7 @@ function shell(content, active = state.page) {
     `<header class="topbar"><a class="wordmark" href="#home"><b>UP<span>↗</span></b><div>会员案例工作台<small>CASE STUDIO</small></div></a><nav>${[
       ["home", "首页"],
       ["history", "历史记录"],
+      ["stickers", "贴纸库"],
       ["settings", "设置"],
     ]
       .map(
@@ -139,7 +141,7 @@ async function route() {
   try {
     await flush();
     const [page, jid] = location.hash.slice(1).split("/");
-    state.page = ["history", "settings"].includes(page) ? page : "home";
+    state.page = ["history", "settings", "stickers"].includes(page) ? page : "home";
     state.job = null;
     state.review = null;
     state.output = false;
@@ -147,7 +149,8 @@ async function route() {
       await openJob(jid);
       return;
     }
-    if (state.page === "settings") await settings();
+    if (state.page === "stickers") await libraryPage({api,shell});
+    else if (state.page === "settings") await settings();
     else if (state.page === "history") await history();
     else await home();
   } catch (e) {
@@ -271,7 +274,7 @@ async function settings() {
       )
       .join(
         "",
-      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section></form>`,
+      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section>${imageSettings(c.image_model)}</form>`,
   );
   $("#settings").onsubmit = async (e) => {
     e.preventDefault();
@@ -300,6 +303,7 @@ async function settings() {
       back: v.title_back,
     };
     body.model = { base_url: v.base_url, model: v.model, api_key: v.api_key };
+    body.image_model = {base_url:v.image_base_url,model:v.image_model,api_key:v.image_api_key,reuse_model_key:f.has("image_reuse_key")};
     try {
       await send("/settings", body, "PUT");
       if ($("#logo").files[0]) {
@@ -509,7 +513,7 @@ ${section(
   "01",
   "会员基础信息",
   "报告信息优先。会员名与性别会同步更新成品称呼。",
-  `<div class="field-grid three">${field("会员姓名", "profile.name", m.profile.name)}<label>会员性别<select data-field="profile.gender">${[
+  `${privacyPanel(m)}<div class="field-grid three">${field("会员姓名", "profile.name", m.profile.name)}<label>会员性别<select data-field="profile.gender">${[
     ["", "未设置"],
     ["男", "男"],
     ["女", "女"],
@@ -547,6 +551,13 @@ ${section("05", "审核体测对比表", "原始体测数据优先，汇总表�
   renderBoards();
   renderMetrics();
   renderTable();
+  bindPrivacy({member:m,job:j.id,api,send,flush,version:()=>state.review.version,toast,
+    apply:(result,redraw)=>{
+      if(state.job?.id!==j.id||state.member!==m.id)return;
+      if(state.dirty||state.saving)throw new Error("审核内容正在修改，请保存后刷新查看遮挡结果");
+      if(result){state.review=result;state.job.review_version=result.version;}
+      if(redraw)reviewPanel();
+    }});
   $$("[data-field]").forEach(
     (el) =>
       (el.oninput = () => {
@@ -914,6 +925,11 @@ async function loadPreviews() {
     }
     // Only the first ever preview is automatic. Existing images stay visible until explicitly updated.
     for (const section of ["vs", "cover", "table"]) {
+      const privacy = member()?.privacy;
+      if(section!=="table" && privacy?.enabled!==false && privacy?.status!=="ready") {
+        if(!b.results[section]) $(`#${section}-preview`).innerHTML='<div class="empty">请先在会员信息顶部准备面部遮挡。</div>';
+        continue;
+      }
       if (!b.results[section] && !b.local.has(section) && !state.dirty)
         updatePreview(section, true);
     }

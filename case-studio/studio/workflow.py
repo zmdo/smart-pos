@@ -47,6 +47,7 @@ NAMES = {
     "life": "筛选生活照",
     "identity": "补全会员与教练信息",
     "review": "准备人工审核",
+    "privacy": "面部检查与透明头像",
 }
 
 
@@ -636,10 +637,13 @@ def preprocess_member(jid):
             [PYTHON, "-m", "studio.bridge", "prepare", jid, str(out)],
             out / "prepare.log",
         )
-        data = read(out / "review.json")
-        store.save_review(jid, data, store.get(jid)["review_version"])
-
-    node(jid, "review", prepare)
+    prepared = node(jid, "review", prepare)
+    def prepare_privacy(out):
+        out.mkdir()
+        shutil.copy2(prepared / "review.json", out / "review.json")
+        command(jid, [PYTHON, "-m", "studio.bridge", "privacy", out / "review.json", jid], out / "privacy.log")
+    protected = node(jid, "privacy", prepare_privacy)
+    store.save_review(jid, read(protected / "review.json"), store.get(jid)["review_version"])
     members = store.review(jid)["members"]
     store.patch(
         jid,

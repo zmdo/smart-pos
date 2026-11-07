@@ -5,7 +5,7 @@ from pathlib import Path
 import cv2, numpy as np
 from PIL import Image
 from .common import REPO, FONT, read, save, sha, job_dir, clean_name
-from . import store
+from . import store, privacy
 from scripts.body_scan_delivery.render import plan, draw_product
 from scripts.body_scan_delivery.presentation import nickname
 from member_cover.copy import compose
@@ -386,6 +386,7 @@ def prepare(jid, out):
                 store=group["store"],
                 directory=directory,
                 profile=profile,
+                privacy=privacy.defaults(),
                 identity={
                     "version": "member-identity-text-v1",
                     **identity.get("evidence", {}),
@@ -424,6 +425,10 @@ def render(review_path, mid, out, section=None):
     review = read(review_path)
     m = next(m for m in review["members"] if m["id"] == mid)
     eng = m["_engine"]
+    # Geometry and phase inference keep originals; only output pixels use copies.
+    private_photos = {
+        aid: privacy.masked_source(m, path) for aid, path in eng["photos"].items()
+    } if section in (None, "vs") else eng["photos"]
     out.mkdir(parents=True, exist_ok=False)
     rows = []
     public = {p["asset_id"]: p for p in m["photos"]}
@@ -465,7 +470,7 @@ def render(review_path, mid, out, section=None):
         if section is not None and not (section == "vs" and p["kind"] == "vs"):
             continue
         selected = [lookup[a] for a in p["asset_ids"]]
-        im = draw_product(p, selected, eng["photos"], FONT, context)
+        im = draw_product(p, selected, private_photos, FONT, context)
         labels = {"front": "正面", "side": "侧面", "back": "背面", "all": "完整三视图"}
         name = (
             "完整三视图.png"
@@ -498,10 +503,11 @@ def render(review_path, mid, out, section=None):
                 for aid, meta, frame in zip(ids, metas, defaults):
                     ed = eng["editors"][aid]
                     rect = m["cover"]["crops"].get(aid)
+                    masked_meta = dict(meta, source=privacy.masked_source(m, meta["source"]))
                     image = (
-                        manual_frame(meta, ed, rect)
+                        manual_frame(masked_meta, ed, rect)
                         if rect
-                        else render_frame(meta, frame)[0]
+                        else render_frame(masked_meta, frame)[0]
                     )
                     ims.append(Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)))
                     cover_sources.append(
@@ -554,7 +560,12 @@ def render(review_path, mid, out, section=None):
             gaps.append(dict(product="report", reason="没有可输出的表格数据"))
     for e in eng["extras"] if section is None else []:
         file = out / e["name"]
-        shutil.copy2(e["path"], file)
+        source = privacy.masked_source(m, e["path"]) if e["kind"] in ("life", "training") else e["path"]
+        if source == e["path"]:
+            shutil.copy2(source, file)
+        else:
+            with Image.open(source) as image:
+                image.convert("RGB").save(file, **({"quality": 94} if file.suffix.lower() in (".jpg", ".jpeg") else {}))
         product(file, e["kind"], e["name"])
     result = dict(
         member_id=mid,
@@ -565,5 +576,6 @@ def render(review_path, mid, out, section=None):
         cover_sources=cover_sources,
         review_required=[p["asset_id"] for p in m["photos"] if not p["confirmed"]],
         model_calls=0,
+        privacy=copy.deepcopy(m.get("privacy", privacy.defaults())),
     )
     save(out / "result.json", result)

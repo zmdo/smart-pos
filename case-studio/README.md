@@ -1,10 +1,12 @@
 # UP 会员案例工作台
 
-基于六个冻结处理节点、八类成品的全新网站，替代旧上传体检网站。三个页面为首页、历史记录、设置；主工作流为上传 ZIP → 预处理 → 五部分人工审核 → 成品生成与下载。
+基于六个冻结处理节点、八类成品的全新网站，替代旧上传体检网站。导航为首页、历史记录、贴纸库、设置；主工作流为上传 ZIP → 预处理 → 五部分人工审核 → 成品生成与下载。
 
 完整设计见 [重构方案](../docs/design/case-studio-workflow-rebuild/README.md)，部署及实际验收见同目录 `IMPLEMENTATION.md`。此前 `tools/` 实验实现已经删除，历史版本保留在 Git；新网站不导入它们。
 
 审核增强见 [设计与验证](../docs/design/case-studio-review-v2/README.md)：身份自动补全、分区手动更新、封面 AI 文案与提示词模板、浏览器预览缓存。
+
+面部隐私保护见 [设计](../docs/design/member-face-privacy/README.md) 与 [验收记录](../docs/design/member-face-privacy/IMPLEMENTATION.md)：默认启用 Qwen API 透明卡通头像，每位会员固定一张，已有完整卡通遮挡保留。提供 100 张带标签的图库贴纸及手动选择；体测图、封面、训练照、生活照在成品绘制时使用遮挡副本。新任务自动准备；旧任务在审核顶部点击「准备面部遮挡」，再更新预览、生成新版成品。原始照片和旧成品版本保留。
 
 预处理按会员并行，见 [会员并行方案](../docs/design/case-studio-member-parallel/README.md) 与 [验收记录](../docs/design/case-studio-member-parallel/IMPLEMENTATION.md)。页面分别列出正在处理、已完成、排队中的会员。
 

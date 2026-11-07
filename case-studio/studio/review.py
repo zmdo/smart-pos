@@ -127,7 +127,7 @@ def update(jid, mid, payload):
     if not member:
         raise KeyError("会员不存在")
     incoming = payload.get("member", {})
-    if set(incoming) - {"profile", "photos", "vs", "cover", "table"}:
+    if set(incoming) - {"profile", "photos", "vs", "cover", "table", "privacy"}:
         raise ValueError("不支持修改该字段")
     old = copy.deepcopy(member)
     if "profile" in incoming:
@@ -231,6 +231,9 @@ def update(jid, mid, payload):
             fields(r, dict(type=24, key=40, before=40, after=40, delta=40, unit=20))
             for r in t["rows"]
         ]
+    if "privacy" in incoming:
+        from .privacy import validate_update
+        member["privacy"] = validate_update(member, incoming["privacy"])
     sync_profile(member, old)
     return store.save_review(jid, data, expected)
 
@@ -247,11 +250,13 @@ def preview_key(member, section):
         raise ValueError("预览区域无效")
     engine = member["_engine"]
     data = {
-        "renderer": "studio-section-preview-v2",
+        "renderer": "studio-section-preview-v3-privacy",
         "section": section,
         "values": member[section],
     }
     if section in ("vs", "cover"):
+        data["privacy"] = member.get("privacy", {"enabled": True})
+        data["face_evidence"] = engine.get("privacy", {})
         data["photos"] = [
             {
                 k: p.get(k)
@@ -451,11 +456,16 @@ def archive(jid, vid, mid=None, kinds=None):
                             "needs_review": m["review_required"],
                             "gaps": m["gaps"],
                             "review_version": version["review_version"],
+                            "face_privacy": m.get("privacy", {"status": "legacy_version"}),
                         },
                         ensure_ascii=False,
                         indent=2,
                     ),
                 )
+                from .stickers import BUNDLED
+                attribution = BUNDLED / "ATTRIBUTION.txt"
+                if m.get("privacy", {}).get("enabled") and attribution.exists():
+                    z.write(attribution, str((Path() if mid else prefix) / "贴纸素材说明.txt"))
         temp.replace(path)
     name = (
         clean_name(

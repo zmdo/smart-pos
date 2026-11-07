@@ -1,0 +1,1499 @@
+[
+  {
+    "id": "twemoji-1f600",
+    "name": "开心",
+    "file": "twemoji-1f600.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "开心"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f600.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "42651f89949151040fed0fba13d7f67ab50b22b079efb674736042d435fd7385"
+  },
+  {
+    "id": "twemoji-1f601",
+    "name": "笑眼",
+    "file": "twemoji-1f601.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "笑眼"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f601.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "25a1d92e3597d4c89b35de7de0d21f88bb3382fee685c722f7df9e39ad0c0659"
+  },
+  {
+    "id": "twemoji-1f602",
+    "name": "笑哭",
+    "file": "twemoji-1f602.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "笑哭"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f602.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "1cad362254c47ce8839e54fd189b998404a58ad02adcb5f19311c656a15c8548"
+  },
+  {
+    "id": "twemoji-1f603",
+    "name": "大笑",
+    "file": "twemoji-1f603.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "大笑"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f603.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "70996e3b865ae88a4997e14c7cea202f99c87671a84cfc5af0e08eda7894fe63"
+  },
+  {
+    "id": "twemoji-1f604",
+    "name": "笑眯眯",
+    "file": "twemoji-1f604.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "笑眯眯"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f604.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "e41ad8e82233e3cbb37d4244e961ce85094064bfd7cc20fc5dc3434056e908ab"
+  },
+  {
+    "id": "twemoji-1f605",
+    "name": "尴尬笑",
+    "file": "twemoji-1f605.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "尴尬笑"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f605.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "7ee6fec8694eaf6b8dfe1b0880a687b041a488ebb8374925eea273fc814444d3"
+  },
+  {
+    "id": "twemoji-1f606",
+    "name": "笑开花",
+    "file": "twemoji-1f606.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "笑开花"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f606.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "b066ec5ea9b7938a9b8441847fa58913dcdf7571a860fdc1bcb3e7b7212ce8ee"
+  },
+  {
+    "id": "twemoji-1f607",
+    "name": "天使",
+    "file": "twemoji-1f607.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "天使"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f607.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "63bc0b2f0c18b0bb265d0a7e6586673c9617ead50c6d3908e702d5284a1b4e5b"
+  },
+  {
+    "id": "twemoji-1f608",
+    "name": "小恶魔",
+    "file": "twemoji-1f608.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "小恶魔"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f608.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "8fcdabea130786663b553e59c2145097d8aef406b6480b94e72f82255a23b1fa"
+  },
+  {
+    "id": "twemoji-1f609",
+    "name": "眨眼",
+    "file": "twemoji-1f609.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "眨眼"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f609.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "b3d579719fa11c9eb4df0be562842af5d14be2683b69d3ab7eeb306bd07dea42"
+  },
+  {
+    "id": "twemoji-1f60a",
+    "name": "温柔微笑",
+    "file": "twemoji-1f60a.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "温柔微笑"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f60a.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "c32bbb3cdf22226b7ae84ae5f5e7b454ccd4234bedea284beda01b7d748aa033"
+  },
+  {
+    "id": "twemoji-1f60b",
+    "name": "馋嘴",
+    "file": "twemoji-1f60b.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "馋嘴"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f60b.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "10b2a79963177f52be14b83e97c9002c7f37ae84d26ad659e0e6cb8ff665e46e"
+  },
+  {
+    "id": "twemoji-1f60c",
+    "name": "释然",
+    "file": "twemoji-1f60c.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "释然"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f60c.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "ad71362986723a08c1d12830e72292b17c2c12e5a92e2f475b88d53b5afdac49"
+  },
+  {
+    "id": "twemoji-1f60d",
+    "name": "爱心眼",
+    "file": "twemoji-1f60d.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "爱心眼"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f60d.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "da6694075c833c8b73a65caff94bbb3b206ccc5b94b9a6fafa5b78f71f72d0cf"
+  },
+  {
+    "id": "twemoji-1f60e",
+    "name": "墨镜",
+    "file": "twemoji-1f60e.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "墨镜"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f60e.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "ce5621c2776d194c9e4efaa68e791a4f1a1a75ac3c1382e015dd80d397dea0d6"
+  },
+  {
+    "id": "twemoji-1f60f",
+    "name": "得意",
+    "file": "twemoji-1f60f.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "得意"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f60f.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "835cb620c1fc6599cb86f227d04693ce08f1de4dab28c866ecceb7d4ce144dad"
+  },
+  {
+    "id": "twemoji-1f610",
+    "name": "平静",
+    "file": "twemoji-1f610.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "平静"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f610.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "d2649bd1cebf023b5ad39a10b52547d6556394e6f1b27a58c488d25dea16b384"
+  },
+  {
+    "id": "twemoji-1f611",
+    "name": "无语",
+    "file": "twemoji-1f611.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "无语"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f611.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "94bef5dead15c5d1e6b0d761c19d38fc1e6a8fc00e9d812172e9b6e6648949bf"
+  },
+  {
+    "id": "twemoji-1f612",
+    "name": "不悦",
+    "file": "twemoji-1f612.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "不悦"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f612.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "2606bbe9c62f2adf0c746ea76b8e857128596515a0fc15a19ec34d1c251405d3"
+  },
+  {
+    "id": "twemoji-1f613",
+    "name": "汗颜",
+    "file": "twemoji-1f613.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "汗颜"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f613.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "d355a5e8c38e4cf308f3d98caa406f8ef0bc81c15a17042d927d129f44704026"
+  },
+  {
+    "id": "twemoji-1f614",
+    "name": "沉思",
+    "file": "twemoji-1f614.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "沉思"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f614.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "35d8752ec1278544eb202f927dea2ad2001aea5a35875d1893fb90a3b4437c9c"
+  },
+  {
+    "id": "twemoji-1f615",
+    "name": "疑惑",
+    "file": "twemoji-1f615.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "疑惑"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f615.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "c98a41504078218b2deeccbef89fbfb8e6d8a625fe6b9d4595ea9a22b202b8e9"
+  },
+  {
+    "id": "twemoji-1f616",
+    "name": "困扰",
+    "file": "twemoji-1f616.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "困扰"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f616.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "4735d91fe078324669b0efaab52cf1271dda8e6da5fd6a00e75cef729adbc127"
+  },
+  {
+    "id": "twemoji-1f617",
+    "name": "亲亲",
+    "file": "twemoji-1f617.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "亲亲"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f617.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "a3253898a18f7cc423e26ba43c48f1935d44b321014541247047e1298ce19569"
+  },
+  {
+    "id": "twemoji-1f618",
+    "name": "飞吻",
+    "file": "twemoji-1f618.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "飞吻"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f618.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "b9e92301dd80f5f19158718080f17fa28b6cbfd88e86053254b92bf9ba7c97df"
+  },
+  {
+    "id": "twemoji-1f619",
+    "name": "甜蜜亲吻",
+    "file": "twemoji-1f619.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "甜蜜亲吻"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f619.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "9cb8f4198443b884e9ad461a8baddd99ae1fd51cd1bc4567d3aea562a4be88d4"
+  },
+  {
+    "id": "twemoji-1f61a",
+    "name": "闭眼亲吻",
+    "file": "twemoji-1f61a.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "闭眼亲吻"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f61a.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "b7d43785eee15d923435caeb6d8241c65e8576b01e0da80cfb68452a07b885c7"
+  },
+  {
+    "id": "twemoji-1f61b",
+    "name": "吐舌",
+    "file": "twemoji-1f61b.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "吐舌"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f61b.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "cf9530376cc2062f4ae46f4a2a0d0ed1c0ddb13d6b29c626a118a62470de1eb2"
+  },
+  {
+    "id": "twemoji-1f61c",
+    "name": "眨眼吐舌",
+    "file": "twemoji-1f61c.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "眨眼吐舌"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f61c.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "8dad9d2b2a7c31607ff169d8e17bced30aeccbfc1c555b817e49fba2deef11ce"
+  },
+  {
+    "id": "twemoji-1f61d",
+    "name": "眯眼吐舌",
+    "file": "twemoji-1f61d.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "眯眼吐舌"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f61d.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "934e6e883cb29e4eb1155ab020bd5838dbe2dde96878b2778f9b5b0b8e696da0"
+  },
+  {
+    "id": "twemoji-1f61e",
+    "name": "失落",
+    "file": "twemoji-1f61e.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "失落"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f61e.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "d7e20f67c8fca3344d7a3933ae3bca675d038451e8f6bf50b71f42e01fb1c02d"
+  },
+  {
+    "id": "twemoji-1f61f",
+    "name": "担忧",
+    "file": "twemoji-1f61f.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "担忧"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f61f.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "a2ce7873cbaab5d2580520f6eb03abf4c97b05b3a489688a384178160f3dfcb5"
+  },
+  {
+    "id": "twemoji-1f620",
+    "name": "生气",
+    "file": "twemoji-1f620.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "生气"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f620.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "1bc73f6bc38c0a7ba564a98cead8b48fa3a15e3a25af84d19f63c9068117fc77"
+  },
+  {
+    "id": "twemoji-1f621",
+    "name": "气鼓鼓",
+    "file": "twemoji-1f621.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "气鼓鼓"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f621.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "45a9c7e4ee7d38b2a0f3ce9f0021ed59189c1d10f32754df4abb2d270d50d2ff"
+  },
+  {
+    "id": "twemoji-1f622",
+    "name": "流泪",
+    "file": "twemoji-1f622.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "流泪"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f622.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "0815497ba5e260acb38fbb133e47a890dbb435b643ec5d3737f485ae3e8ceed8"
+  },
+  {
+    "id": "twemoji-1f623",
+    "name": "忍耐",
+    "file": "twemoji-1f623.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "忍耐"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f623.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "d116b9f75541c58188e1398dcc2db29b204d275d7806ac4aeeac2a0e6111062e"
+  },
+  {
+    "id": "twemoji-1f624",
+    "name": "哼哼",
+    "file": "twemoji-1f624.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "哼哼"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f624.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "de5816ed0287764b55aeaaeb978d9d3309bbe8fd7a1df115ce3b3422958e7154"
+  },
+  {
+    "id": "twemoji-1f625",
+    "name": "如释重负",
+    "file": "twemoji-1f625.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "如释重负"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f625.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "42d71d12b12d9b55a1cc07e70f1c3a31a5d29696abb712e78a3b1f1c94be9049"
+  },
+  {
+    "id": "twemoji-1f626",
+    "name": "难过",
+    "file": "twemoji-1f626.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "难过"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f626.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "f4679b65207a8258ada128ab48847fc84abdc8d6181dbdc14fa16778c397d471"
+  },
+  {
+    "id": "twemoji-1f627",
+    "name": "惊慌",
+    "file": "twemoji-1f627.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "惊慌"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f627.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "39bea03f77929b1e8de71b71b9d663722471821c641e1dc80c0b37c0d59f5d06"
+  },
+  {
+    "id": "twemoji-1f628",
+    "name": "害怕",
+    "file": "twemoji-1f628.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "害怕"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f628.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "a2a9e90dc921121b6d44ad6f3f0b6d8dd8b92286f1f1199b7dd70cd5d572112e"
+  },
+  {
+    "id": "twemoji-1f629",
+    "name": "疲惫",
+    "file": "twemoji-1f629.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "疲惫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f629.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "55facc61bd6cebe5caaff77ec94e598ca73118eab67975f9a991088a8191e709"
+  },
+  {
+    "id": "twemoji-1f62a",
+    "name": "困倦",
+    "file": "twemoji-1f62a.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "困倦"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f62a.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "0046f71dfe9019faa63da93efdd412df9971b4637fdae428f0de0a7a6aa22235"
+  },
+  {
+    "id": "twemoji-1f62b",
+    "name": "累坏",
+    "file": "twemoji-1f62b.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "累坏"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f62b.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "ce4f22d75fb210294fc3ef2093bdca9bdafc447ecb4c4e926866865397b4d575"
+  },
+  {
+    "id": "twemoji-1f62c",
+    "name": "龇牙",
+    "file": "twemoji-1f62c.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "龇牙"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f62c.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "87c7cdff79b9f6905e5a52ebdd249601e6ceb2fd788689413164b38e5dc478c3"
+  },
+  {
+    "id": "twemoji-1f62d",
+    "name": "大哭",
+    "file": "twemoji-1f62d.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "大哭"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f62d.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "835c20be7717b28a3be493d6e73037805a57233ffdbc34c5db5e21479df59ec4"
+  },
+  {
+    "id": "twemoji-1f62e",
+    "name": "张嘴",
+    "file": "twemoji-1f62e.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "张嘴"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f62e.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "a265605a0f49e78fc2f4c5e353df7730d840116a5b0d119043e3ffab72c5a3ea"
+  },
+  {
+    "id": "twemoji-1f62f",
+    "name": "吃惊",
+    "file": "twemoji-1f62f.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "吃惊"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f62f.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "45f8c13a2e5e254fe18fa6e2924cf9fea1ac40c27c0dbdc89eedcfe6e360792a"
+  },
+  {
+    "id": "twemoji-1f630",
+    "name": "紧张",
+    "file": "twemoji-1f630.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "紧张"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f630.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "b0475baf3c6f4388d947593f80fa9370f2b5124c28c7be1f50c087eb05131e98"
+  },
+  {
+    "id": "twemoji-1f631",
+    "name": "惊叫",
+    "file": "twemoji-1f631.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "惊叫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f631.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "bf95e2de0e6890c90534887814bed48e76ed1a9c3da75eec50c7be669dff69bf"
+  },
+  {
+    "id": "twemoji-1f632",
+    "name": "惊讶",
+    "file": "twemoji-1f632.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "惊讶"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f632.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "8d39b327c465d644521a9458f916e64154ce2616f4191e1b0203a7b3d2ac9491"
+  },
+  {
+    "id": "twemoji-1f633",
+    "name": "害羞",
+    "file": "twemoji-1f633.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "害羞"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f633.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "e82f52747909e1d16e13c9ae7b12817d77322247b5675d51c95bada8adc2ca66"
+  },
+  {
+    "id": "twemoji-1f634",
+    "name": "睡觉",
+    "file": "twemoji-1f634.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "睡觉"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f634.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "edbebf46f877617a1b6fca29b316d4ae49cb1bcc834fe1e422b2ab8563337993"
+  },
+  {
+    "id": "twemoji-1f635",
+    "name": "晕乎",
+    "file": "twemoji-1f635.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "晕乎"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f635.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "2bc71b22990cac1d86e6e81378dd6b0c973b5d8d8eb5e32243d23afde666ff1e"
+  },
+  {
+    "id": "twemoji-1f636",
+    "name": "沉默",
+    "file": "twemoji-1f636.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "沉默"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f636.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "c32ed1f7525d533220f9bc340f7b2482d7954ec59e26f2d872da62ce6e173ddb"
+  },
+  {
+    "id": "twemoji-1f637",
+    "name": "口罩",
+    "file": "twemoji-1f637.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "口罩"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f637.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "7217f4489e10dd16f5e4f333bda499e1321c421e59b9afef5f43a134cb0d1b9a"
+  },
+  {
+    "id": "twemoji-1f638",
+    "name": "开心猫",
+    "file": "twemoji-1f638.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "开心猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f638.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "7da873ad915ea28728173d6746124e8dbb918f36632484aa45c5184dc1d4ac6e"
+  },
+  {
+    "id": "twemoji-1f639",
+    "name": "笑哭猫",
+    "file": "twemoji-1f639.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "笑哭猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f639.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "892c4a0aafa58be6ead18a4ff6f543003f345237611fe7b61ba57d362b4e4e8f"
+  },
+  {
+    "id": "twemoji-1f63a",
+    "name": "微笑猫",
+    "file": "twemoji-1f63a.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "微笑猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f63a.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "15d2f26c18ab169a8c32337d81853fd57e2c2f7a7436be170d0735cb60d31e9a"
+  },
+  {
+    "id": "twemoji-1f63b",
+    "name": "心动猫",
+    "file": "twemoji-1f63b.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "心动猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f63b.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "86ddae409f18b07fd27f1d7cae6b8b1825c7bea6e871285b763db171dbe770f0"
+  },
+  {
+    "id": "twemoji-1f63c",
+    "name": "得意猫",
+    "file": "twemoji-1f63c.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "得意猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f63c.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "c46f0d1927b9ebc4bd1e118f62dbc774b89a8be7d6f6d81c6cda2ace5bba25e1"
+  },
+  {
+    "id": "twemoji-1f63d",
+    "name": "亲亲猫",
+    "file": "twemoji-1f63d.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "亲亲猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f63d.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "e41eed0d85652d85a99cde5a74b80ae82ab599b90729f1783bcc8bfe30a45a59"
+  },
+  {
+    "id": "twemoji-1f63e",
+    "name": "生气猫",
+    "file": "twemoji-1f63e.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "生气猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f63e.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "46cb4db41cd5368877d80b6705b6c736d1e0cb593383d185ee8313df6987d72f"
+  },
+  {
+    "id": "twemoji-1f63f",
+    "name": "流泪猫",
+    "file": "twemoji-1f63f.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "流泪猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f63f.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "63957568317708c2fbc81fa64293dfa1b77d3ab1a5f03f0d4e3b8420d02a732e"
+  },
+  {
+    "id": "twemoji-1f640",
+    "name": "惊讶猫",
+    "file": "twemoji-1f640.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "惊讶猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f640.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "5012053d48e6956478414b0e7fdd84a82fd7fb9acb1a63d14ef8bbeecc84992d"
+  },
+  {
+    "id": "twemoji-1f910",
+    "name": "保密",
+    "file": "twemoji-1f910.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "保密"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f910.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "ccc4a3a7e8857d0c1e35a99e8b7e27a02fb5b0cda0fd442c1515e46bc7ed9bcc"
+  },
+  {
+    "id": "twemoji-1f911",
+    "name": "发财",
+    "file": "twemoji-1f911.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "发财"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f911.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "50b7a35e8c98cae8fd87d861f630062bd44a991cc203d2b308c6d47712138023"
+  },
+  {
+    "id": "twemoji-1f912",
+    "name": "休息",
+    "file": "twemoji-1f912.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "休息"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f912.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "b4b2a4f2b9d52db4e6fb39eeb2a1a510762716ae55ae5d4ff14055dfad5fdd0c"
+  },
+  {
+    "id": "twemoji-1f913",
+    "name": "眼镜",
+    "file": "twemoji-1f913.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "眼镜"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f913.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "e994c8bb1637efa6a2acb94ed41785d0d604838d48e64b6d90835e7a6557a1fc"
+  },
+  {
+    "id": "twemoji-1f914",
+    "name": "思考",
+    "file": "twemoji-1f914.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "思考"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f914.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "0027c39919267ce88f212265e808f96c5280654acbadecc75d22ef26ce890e7e"
+  },
+  {
+    "id": "twemoji-1f915",
+    "name": "加油康复",
+    "file": "twemoji-1f915.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "加油康复"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f915.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "504a38a64beb694515a40a92bb89bd98361decb60517951ec8d9c6ebacc6a6a7"
+  },
+  {
+    "id": "twemoji-1f916",
+    "name": "机器人",
+    "file": "twemoji-1f916.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "机器人"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f916.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "83a056fc14c90eac70e4fc749cf4d4dc39a3dedb0cf0b9dd165467a211d26eb1"
+  },
+  {
+    "id": "twemoji-1f917",
+    "name": "拥抱",
+    "file": "twemoji-1f917.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "拥抱"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f917.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "724382d61a1de6130a1493df22450d1d6aa7b6dfa3e52e41ca0d977f4c9d98a7"
+  },
+  {
+    "id": "twemoji-1f920",
+    "name": "牛仔",
+    "file": "twemoji-1f920.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "牛仔"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f920.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "6dcc598575d67b84f2b73815cc97ca353b832444dacc9e9a5b9faaedbb81e0c0"
+  },
+  {
+    "id": "twemoji-1f921",
+    "name": "小丑",
+    "file": "twemoji-1f921.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "小丑"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f921.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "72dc5598ffefec27480b9946a65c0602345c46fe06a5304d6c3aca201b4cbd35"
+  },
+  {
+    "id": "twemoji-1f922",
+    "name": "晕车",
+    "file": "twemoji-1f922.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "晕车"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f922.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "464579cda61723faada40855f4a070caca07045b442d81888f4e0e2c15e58f3e"
+  },
+  {
+    "id": "twemoji-1f923",
+    "name": "笑翻",
+    "file": "twemoji-1f923.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "笑翻"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f923.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "77c8b1ed84d048783deecba686466b19d7287b8a107491854f6b41a6a816a1a0"
+  },
+  {
+    "id": "twemoji-1f924",
+    "name": "馋嘴",
+    "file": "twemoji-1f924.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "馋嘴"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f924.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "82698346923a075d949a85fab4e7b1c0bb6532349c81eb40be50a774d90f8d85"
+  },
+  {
+    "id": "twemoji-1f925",
+    "name": "长鼻子",
+    "file": "twemoji-1f925.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "长鼻子"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f925.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "106b85c9f4999ac874205655f446fdf21eee48a8c25ad567e9d0067deba9c8c8"
+  },
+  {
+    "id": "twemoji-1f92a",
+    "name": "鬼马",
+    "file": "twemoji-1f92a.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "鬼马"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f92a.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "c7106e1a69615354137302ebfa44b60714b8de792d120e1f47f8463ac50498aa"
+  },
+  {
+    "id": "twemoji-1f92b",
+    "name": "嘘",
+    "file": "twemoji-1f92b.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "嘘"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f92b.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "3b9948dd25ebe15ba82ce0def60bd76ca847203407b0f1bf0c675d1aa927e918"
+  },
+  {
+    "id": "twemoji-1f92c",
+    "name": "炸毛",
+    "file": "twemoji-1f92c.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "炸毛"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f92c.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "5f6ac0401571e9acae0dadb14e331ad20520d9fb22081b3f0ae3e13f081764c2"
+  },
+  {
+    "id": "twemoji-1f92d",
+    "name": "捂嘴笑",
+    "file": "twemoji-1f92d.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "捂嘴笑"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f92d.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "dd8b0e95ed87fd5b9018ea0d3e26e3debb9f57bf881890fb5a03446a87e20d21"
+  },
+  {
+    "id": "twemoji-1f92e",
+    "name": "晕乎乎",
+    "file": "twemoji-1f92e.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "晕乎乎"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f92e.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "755394a85081ae35a17c903ac9cba1faa09b8d2f30dff1432d2a936a21b3a9f1"
+  },
+  {
+    "id": "twemoji-1f92f",
+    "name": "大吃一惊",
+    "file": "twemoji-1f92f.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "大吃一惊"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f92f.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "8caf667d3aae20a8a811c2ba0fe44ab81166acddc386fb71ddca64db07201a51"
+  },
+  {
+    "id": "twemoji-1f9d0",
+    "name": "单片眼镜",
+    "file": "twemoji-1f9d0.png",
+    "gender": "neutral",
+    "tags": [
+      "表情",
+      "通用",
+      "单片眼镜"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f9d0.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "4252123db304bf8d33d9dd9af66558bec456130c1aef64df91559d071d50a78f"
+  },
+  {
+    "id": "twemoji-1f436",
+    "name": "小狗",
+    "file": "twemoji-1f436.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "小狗"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f436.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "4d41fde873f94fbd61d3b8cdb168b72434efb59aced7cba5c48ef701ee122b58"
+  },
+  {
+    "id": "twemoji-1f431",
+    "name": "小猫",
+    "file": "twemoji-1f431.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "小猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f431.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "e967c1d816994660a52910792b128f180d1aa1a3d70f33ac80b4690a1cfe7cdb"
+  },
+  {
+    "id": "twemoji-1f42d",
+    "name": "小鼠",
+    "file": "twemoji-1f42d.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "小鼠"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f42d.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "fbdbfea0d902e5eed757dc874b3a3285176779ca40e7eb373915b47319ac6e11"
+  },
+  {
+    "id": "twemoji-1f439",
+    "name": "仓鼠",
+    "file": "twemoji-1f439.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "仓鼠"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f439.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "deab01eafdb34c0aaf74b9d71631a80046e06613d8278247bed07d3b36289692"
+  },
+  {
+    "id": "twemoji-1f430",
+    "name": "兔子",
+    "file": "twemoji-1f430.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "兔子"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f430.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "b9242c42cbc73ab6c1ed964471949b87bd8c8bcf227b9d5ca69961fb0b8a8d75"
+  },
+  {
+    "id": "twemoji-1f43b",
+    "name": "小熊",
+    "file": "twemoji-1f43b.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "小熊"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f43b.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "cc9b0a6cfedeaf53bc2629207016c9ed8eda9fbeaf0aaead734cb43d11b5abe3"
+  },
+  {
+    "id": "twemoji-1f43c",
+    "name": "熊猫",
+    "file": "twemoji-1f43c.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "熊猫"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f43c.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "af0e8b6ad4c4d2b6f8bc92a983ac8db2ee60bc549a1696510422f192bff55020"
+  },
+  {
+    "id": "twemoji-1f428",
+    "name": "考拉",
+    "file": "twemoji-1f428.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "考拉"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f428.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "fe296c38f84d8d72b188d6651953b63ef95a9f8a3d665b2243984067f3a4133f"
+  },
+  {
+    "id": "twemoji-1f42f",
+    "name": "老虎",
+    "file": "twemoji-1f42f.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "老虎"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f42f.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "7588bfe0ab9f435ebfbc0542eea38e8d80c277916647da423ad99983997e000a"
+  },
+  {
+    "id": "twemoji-1f981",
+    "name": "狮子",
+    "file": "twemoji-1f981.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "狮子"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f981.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "8ee79954a67698ba50fc440cfd2bd35f4bd1926042a177ea136857c939db3562"
+  },
+  {
+    "id": "twemoji-1f98a",
+    "name": "狐狸",
+    "file": "twemoji-1f98a.png",
+    "gender": "neutral",
+    "tags": [
+      "动物",
+      "通用",
+      "狐狸"
+    ],
+    "source": "https://github.com/jdecked/twemoji/blob/b6b55fef1e8636b540a6d016a4729ca8cdf2e60b/assets/svg/1f98a.svg",
+    "license": "CC BY 4.0",
+    "attribution": "Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.",
+    "sha256": "9d1eadc085da718b803a8f61b4caf16bc6b55002b5bbe262e33b5f4af6821ad2"
+  },
+  {
+    "id": "ai-standard-male",
+    "name": "标准男头像",
+    "file": "ai-standard-male.png",
+    "gender": "male",
+    "tags": [
+      "AI头像",
+      "3D卡通",
+      "透明"
+    ],
+    "source": "Qwen Image API",
+    "license": "API generated",
+    "sha256": "005c0d889a5eab1643530a9456784aeeda7cabd84cbee37164169bcccc0497e0"
+  },
+  {
+    "id": "ai-standard-female",
+    "name": "标准女头像",
+    "file": "ai-standard-female.png",
+    "gender": "female",
+    "tags": [
+      "AI头像",
+      "3D卡通",
+      "透明"
+    ],
+    "source": "Qwen Image API",
+    "license": "API generated",
+    "sha256": "b633d8a0fefe77d7ce03f8fa8afb717a9348b85d5046febf66d27f211ffa0e19"
+  },
+  {
+    "id": "ai-standard-neutral",
+    "name": "标准通用头像",
+    "file": "ai-standard-neutral.png",
+    "gender": "neutral",
+    "tags": [
+      "AI头像",
+      "3D卡通",
+      "透明"
+    ],
+    "source": "Qwen Image API",
+    "license": "API generated",
+    "sha256": "4bca6cef36bbf23078b583c050ee17e532726404e35444842e8dd3f1c9965f3f"
+  }
+]

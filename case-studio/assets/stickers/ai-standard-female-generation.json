@@ -1,0 +1,5 @@
+{
+  "prompt": "This is an RGBA image with transparency. 一枚成年人的正面3D卡通头部头像，\n类似苹果Memoji的圆润简洁风格。头部略大，五官简化，友好的闭嘴微笑，光滑哑光软胶材质，\n不画真实皮肤、毛孔、皱纹、胡茬纹理，不画二维黑色描边。头发是圆润大块发束。\n只画完整头部和耳朵，不要脖子、肩膀、身体、衣服、文字、商标、阴影、白底或棋盘格。\n头像居中，占画面高度80%，头发和下巴完整，四周留白。头像本身完全不透明，轮廓外完全透明。\nThe image has an alpha channel and the background is transparent. Clean antialiased edges. 成年女性，深棕色中短发，友好自然，生成标准通用头像，不参考任何真实人物。",
+  "model": "qwen-image-2.1-pro",
+  "key": "688eb84240b38b6f9ca1fab555b64c90fe6fa4599a9da6e6c71c3f5dc85e80fa"
+}
