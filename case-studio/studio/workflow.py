@@ -229,6 +229,14 @@ def preprocess(jid):
     run(jid)
 
 
+def has_phase_images(displayed):
+    """A successful display node may contain only quality-review exclusions."""
+    return bool(displayed) and any(
+        row.get("status") == "displayed"
+        for row in read(Path(displayed) / "display/summary.json")
+    )
+
+
 def combine_sources(jobfile, pairs, pair_ids, combined):
     original = read(jobfile)
     combined.mkdir(exist_ok=True)
@@ -592,7 +600,7 @@ def preprocess_member(jid):
                     "qwen",
                 ],
             ),
-            not displayed,
+            not has_phase_images(displayed),
         )
         products = extras_task.result()
 

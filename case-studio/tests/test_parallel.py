@@ -61,6 +61,27 @@ class ModelRoutingTests(unittest.TestCase):
 
 
 class ParallelTests(unittest.TestCase):
+    def test_phase_waits_for_actual_displayed_images_not_just_output_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            save(
+                path / "display/summary.json",
+                [
+                    {
+                        "asset_id": "a1",
+                        "status": "needs_review",
+                        "reason": "common_frame_would_cut_confirmed_head_feet_or_torso",
+                    }
+                ],
+            )
+            self.assertFalse(workflow.has_phase_images(path))
+            self.assertFalse(workflow.has_phase_images(None))
+            save(
+                path / "display/summary.json",
+                [{"asset_id": "a1", "status": "displayed"}],
+            )
+            self.assertTrue(workflow.has_phase_images(path))
+
     def setUp(self):
         store.initialize()
         workflow.STOPPING.clear()

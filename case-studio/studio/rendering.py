@@ -160,8 +160,14 @@ def prepare(jid, out):
     }
     exclusions = {}
     for n in store.get(jid)["nodes"]:
-        if n["key"] in ("split", "standardize") and n["status"] == "complete":
-            for row in read(Path(n["path"]) / "summary.json", []):
+        if (
+            n["key"] in ("split", "standardize", "display")
+            and n["status"] == "complete"
+        ):
+            summary = Path(n["path"]) / (
+                "display/summary.json" if n["key"] == "display" else "summary.json"
+            )
+            for row in read(summary, []):
                 if row.get("reason") and row.get("reason") != "not_body_scan":
                     exclusions[row["asset_id"]] = str(row["reason"])
     product_groups = {
