@@ -39,8 +39,6 @@ def render(case,images,width,font_path,out):
     margin=round(width*.025);inner=width-2*margin
     draw.rectangle((0,0,width,round(width*.009)),fill=RED)
     draw.text((margin,width*.025),'体测数据 · 前后对比',font=font(.029),fill=INK)
-    member=f'{case.get("display_store",case["store"])} / {case.get("display_member",case["member"])}'
-    label(member,(width*.57,width*.023,width*.405,width*.045),size=.017,fill=MUTED)
     geometry=[]
     if images:
         half=inner//2; y=round(width*.111); ih=round(half*4/3)
@@ -73,8 +71,6 @@ def render(case,images,width,font_path,out):
             label(str(row.get(key) or '—'),(xs[col],y,xs[col+1]-xs[col],row_h),size=min(.019,row_h/width*.52),
                   fill=RED if key=='delta' else INK)
         draw.line((margin,round(y+row_h),width-margin,round(y+row_h)),fill=LINE,width=max(1,round(width*.0006)))
-    mode='原表内容复刻' if case['table_origin']=='transcribed' else '体测数据计算 · 变化量 = 后 − 前；百分比指标差值为百分点'
-    label(mode,(margin,width*1.214,inner,width*.023),size=.012,fill=MUTED)
     canvas.save(out)
     return {'version':VERSION,'width':width,'height':height,'row_count':len(case['rows']),
             'images':geometry,'width_rule':'2 * max(original before width, original after width)',

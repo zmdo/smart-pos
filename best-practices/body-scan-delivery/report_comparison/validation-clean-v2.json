@@ -1,0 +1,15 @@
+{
+  "version": "report-comparison-product-v2",
+  "date": "2026-11-07",
+  "products": 18,
+  "both_requested_text_regions_blank": true,
+  "all_other_pixels_identical": true,
+  "table_data_and_review_json_byte_identical": true,
+  "all_dimensions_and_photo_geometry_unchanged": true,
+  "input_hashes_unchanged": true,
+  "model_calls": 0,
+  "html_links_checked": 72,
+  "previous_output": "/root/autodl-fs/case-studio/experiments/report-comparison-product-v1-20261107/validated-v2",
+  "remote_output": "/root/autodl-fs/case-studio/experiments/report-comparison-product-v2-20261107/validated",
+  "bundle_sha256": "eda36577c371bc4b959a268688af4db54eebab1682041641323d80b79fc0022c"
+}
