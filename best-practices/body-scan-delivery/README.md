@@ -2,7 +2,7 @@
 
 ## 网站呈现扩展（2026-11-08）
 
-网站通过可选字体映射及画布参数调用本包。对比图接收 `context.canvas_height`、`background`、`fonts`，将两张照片等比组成连续照片对，留白只加在组合之外；报告接收 `case.canvas_height`、`background`、`fonts`，无报告原图时表格填满固定画布。封面、单图与感言支持逐项字体。省略这些可选参数时保留独立脚本的既有版式。
+网站通过可选字体映射及画布参数调用本包。对比图接收 `context.canvas_height`、`background`、`fonts`，将两张照片等比组成连续照片对，留白只加在组合之外；报告接收 `case.canvas_height`、`background`、`fonts`，无报告原图时表格填满固定画布。封面与感言支持逐项字体；朝向单图仅保留照片和留白。省略这些可选参数时保留独立脚本的既有版式。
 
 网站统一输出由 `case-studio/studio/presentation.py` 编排：默认 1080×1440，单图、六图、训练照等比补背景；生活照默认保留原文件，不参与尺寸统一与头像遮挡。设置在开始绘制时冻结，写入结果，旧成品不覆盖。字体上传、许可、选择优先级及验证见 [字体与画布方案](../../docs/design/typography-and-canvas/README.md)。下文记录独立脚本的历史默认版式。
 

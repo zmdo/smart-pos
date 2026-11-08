@@ -513,11 +513,9 @@ def render(review_path, mid, out, section=None, editor=False):
     products = []
     editor_groups = [] if editor else None
     default_font, vs_fonts = presentation.font_context(m, preferences, 'vs')
-    _, single_fonts = presentation.font_context(m, preferences, 'single')
     context = dict(m["vs"], width=preferences['output_width'], logo_path=eng.get("logo"),
                    canvas_height=preferences['output_width']*4//3,
-                   background=preferences['output_background'], fonts=vs_fonts,
-                   single_font=single_fonts.get('caption',default_font))
+                   background=preferences['output_background'], fonts=vs_fonts)
 
     def product(path, kind, name, **extra):
         with Image.open(path) as im:

@@ -556,7 +556,7 @@ ${section(
     )
     .join(
       "",
-    )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>${identitySummary(m)}<details class="extra-fonts"><summary>其他成品字体</summary><div class="field-grid three">${[['single.caption','单张体测图说明'],['testimonial.title','会员感言标题'],['testimonial.brand','感言品牌文字']].map(([key,label])=>`<label>${label}${fontSelect(key,m.fonts?.[key])}</label>`).join('')}</div><p class="muted">更改后在下一次成品生成时生效。</p></details>`,
+    )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>${identitySummary(m)}<details class="extra-fonts"><summary>其他成品字体</summary><div class="field-grid">${[['testimonial.title','会员感言标题'],['testimonial.brand','感言品牌文字']].map(([key,label])=>`<label>${label}${fontSelect(key,m.fonts?.[key])}</label>`).join('')}</div><p class="muted">更改后在下一次成品生成时生效。</p></details>`,
 )}
 ${section("02", "体测图训练阶段", "拖动照片调整前后顺序；同朝向多张时，可选择首选图用于对比与封面。", `<div class="phase-boards" id="boards"></div><div class="row-actions"><button id="confirm-photos">确认本会员所有阶段标记</button><span class="muted">推断与待审结果会保留在下载包的审核说明中。</span></div>`)}
 ${section("02B", "审核完整六图", "训练前后各一组正面、侧面、背面；六个头像可分别调整。", `${updateAction("three_views")}<div class="six-preview" id="three_views-preview"><div class="empty">点击更新展示效果查看六图拼图，或直接调整面部遮罩。</div></div>`)}

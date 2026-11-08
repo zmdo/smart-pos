@@ -360,7 +360,8 @@ def preview(jid, mid, version, section=None):
         review = presentation.freeze(store.review(jid, version))
         if mid not in {m["id"] for m in review["members"]}:
             raise KeyError("会员不存在")
-        style_key = signature({'settings': review['_render_settings'], 'renderer':presentation.VERSION})
+        style_key = signature({'settings': review['_render_settings'], 'renderer':presentation.VERSION,
+                               'single_layout':'body-single-photo-v2'})
         base = cache_dir(jid) / "previews" / str(version) / RENDER_VERSION / style_key / mid
         base.mkdir(parents=True, exist_ok=True)
         save(base / "review.json", review, True)

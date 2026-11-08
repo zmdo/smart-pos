@@ -6,7 +6,7 @@
   "components": {
     "three_views": "body-three-views-seamless-v2",
     "view_comparison": "body-same-view-reference-v5",
-    "single_view": "body-delivery-v1",
+    "single_view": "body-single-photo-v2",
     "member_cover": "body-member-cover-v3",
     "report_comparison": "report-comparison-product-v5",
     "testimonial_album": "testimonial-album-approved-v5",
@@ -18,7 +18,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "4f01444b4db46967b6e1b0be7316ebf88e729abe8c7a688f3420a337d4b0ae00"
+      "sha256": "4bf871e1bc6e4ddb46ffc329b1ae0a3a784f3d0906f44085716511a986bccbdb"
     },
     {
       "path": "category.py",
@@ -431,7 +431,7 @@
     },
     {
       "path": "scripts/body_scan_delivery/render.py",
-      "sha256": "48052aa05fc3311f82d473ade6f96de531b302d1807d4f3a74c3e39c73d69c5d",
+      "sha256": "c59f58dc54d887dda1f380b2586589d14b96c7be27d1dab65013c1401dfb3390",
       "source": "scripts/body_scan_delivery/render.py",
       "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
       "source_sha256": "82189612af7e481baf92553937cf7c176073ebe90f7fa98c2ce6da594d74d47e",
@@ -506,7 +506,7 @@
     },
     {
       "path": "single_view/README.md",
-      "sha256": "e84db2936c62b30540daf6a5d98d379067b16be79c9ad6eaef40244fe3445970"
+      "sha256": "fa951b9ba3b62795cadea372c1cad3d9665565ee245932da643d3df5fee14338"
     },
     {
       "path": "single_view/__init__.py",
@@ -514,7 +514,7 @@
     },
     {
       "path": "single_view/render.py",
-      "sha256": "7e8a1f282ccbb3b974f560d1ea20188755b379d1c4964338bdff1813b388630d",
+      "sha256": "1dcc1b35a4668f92845a9a363ef2d69a6d60335ab2acb136e29c97e76094eac1",
       "source": "scripts/body_scan_delivery/render.py",
       "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
       "source_sha256": "82189612af7e481baf92553937cf7c176073ebe90f7fa98c2ce6da594d74d47e",

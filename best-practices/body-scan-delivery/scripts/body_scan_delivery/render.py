@@ -12,7 +12,7 @@ from scripts.body_scan_contracts.labels import family
 from .presentation import resolve, public_presentation
 from view_comparison.render import draw_vs, VERSION as VS_RENDERER
 from three_views.render import seamless_grid, VERSION as GRID_RENDERER
-from single_view.render import draw_single, text, place
+from single_view.render import draw_single, text, place, VERSION as SINGLE_RENDERER
 
 RED='#E70012';BG='#F3F0EA';INK='#25382F'
 VIEWS={'front':'正视','side':'侧视','back':'后视'}
@@ -94,7 +94,7 @@ def render(plans,rows,photos,dest,font,previous=None,presentation=None,reports=N
             # Labels remain in metadata, but no longer affect image pixels.
             identity={'renderer':GRID_RENDERER,'product':product,'photo_hashes':photo_hashes}
         else:
-            identity={'renderer':'body-delivery-v1','product':product,'labels':dependencies,
+            identity={'renderer':SINGLE_RENDERER if product['kind']=='single' else 'body-delivery-v1','product':product,'labels':dependencies,
                       'photo_hashes':photo_hashes,'font_sha256':sha(font)}
         if context:
             identity.update(renderer=VS_RENDERER,presentation=public_presentation(context))
@@ -112,6 +112,8 @@ def render(plans,rows,photos,dest,font,previous=None,presentation=None,reports=N
         with Image.open(path) as image:width,height=image.size
         layout=({'renderer_version':GRID_RENDERER,'layout':'seamless-3x2','image_annotations':False}
                 if product['kind']=='three_views' else {})
+        if product['kind']=='single':
+            layout.update(renderer_version=SINGLE_RENDERER,layout='photo-only',image_annotations=False)
         if context:
             layout.update(renderer_version=VS_RENDERER,layout='reference-vs',stage_annotations=False,
                           presentation=public_presentation(context))
