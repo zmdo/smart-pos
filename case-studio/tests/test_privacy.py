@@ -282,6 +282,37 @@ class SharedPanelTests(unittest.TestCase):
             self.assertAlmostEqual(face['sticker_rect'][3],face['head_anchor'][1],delta=.5)
         self.assertGreaterEqual(first['sticker_rect'][1],0)
 
+    def test_top_edge_head_clips_artwork_without_moving_jaw_or_resizing_photo(self):
+        for box in ([268,0,652,165], [268,12,638,152]):
+            with self.subTest(box=box):
+                self.face['box']=box
+                panels=[self.panel(),self.panel(dy=100)]
+                before=self.source.read_bytes()
+                images,layout=self.mask(panels)
+                faces=[p['faces'][0] for p in layout['panels']]
+                self.assertEqual(faces[0]['sticker_size'],faces[1]['sticker_size'])
+                self.assertLess(faces[0]['default_rect'][1],0)
+                self.assertGreater(faces[1]['default_rect'][1],0)
+                for original,im,f in zip(panels,images,faces):
+                    self.assertEqual(im.size,original['image'].size)
+                    self.assertAlmostEqual(f['sticker_rect'][3],f['head_anchor'][1],delta=.5)
+                    bottom=f['sticker_rect'][3]
+                    self.assertEqual(im.crop((0,bottom,im.width,im.height)).tobytes(),
+                                     original['image'].crop((0,bottom,im.width,im.height)).tobytes())
+                self.assertNotEqual(images[0].getpixel((110,0)),panels[0]['image'].getpixel((110,0)))
+                self.assertEqual(self.source.read_bytes(),before)
+
+    def test_top_clipping_does_not_relax_horizontal_or_invalid_jaw_bounds(self):
+        self.face['box']=[268,0,652,165]
+        for panel in (self.panel(size=(120,600)),self.panel(dy=590)):
+            with self.assertRaisesRegex(ValueError,'取景框过紧'):
+                self.mask([panel])
+
+    def test_head_with_clear_top_margin_still_requires_avatar_to_fit(self):
+        self.face['box']=[268,60,652,165]
+        with self.assertRaisesRegex(ValueError,'取景框过紧'):
+            self.mask([self.panel()])
+
     def test_preserved_faces_and_offscreen_faces_do_not_change_the_pair_size(self):
         panels=[self.panel(1),self.panel(3),self.panel(10,dx=-10000)]
         with patch.object(privacy,'checked_evidence',side_effect=[self.evidence,dict(self.evidence,faces=[dict(self.face,state='sticker')]),self.evidence]):

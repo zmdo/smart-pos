@@ -125,7 +125,9 @@ def update(jid, mid, payload):
                 raise ValueError("遮罩位置无效")
             w, h = panel["size"]
             sw, sh = face["sticker_size"]
-            if not (0 <= pos[0] <= 1-sw/w+1e-6 and 0 <= pos[1] <= 1-sh/h+1e-6):
+            from .privacy_panels import vertical_bounds
+            min_y, max_y = vertical_bounds(face, h)
+            if not (0 <= pos[0] <= 1-sw/w+1e-6 and min_y/h-1e-6 <= pos[1] <= max_y/h+1e-6):
                 raise ValueError("头像不能移出照片边界")
         if pos is not None or edit["deleted"]:
             record = updates.setdefault(edit["scope"], {}).setdefault(edit["asset_id"],

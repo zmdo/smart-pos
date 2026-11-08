@@ -69,13 +69,25 @@ def head_anchor(face, points=None):
     return [cx, b+.04*(b-t)], method
 
 
+def head_at_top_edge(face):
+    """Detection tolerates a small border around an already cropped head."""
+    _, top, _, bottom = face["box"]
+    return top <= max(2, .1*(bottom-top))
+
+
+def vertical_bounds(face, height):
+    """Only a default top-clipped avatar may be dragged above the photo."""
+    return min(0, face.get("default_rect", [0, 0])[1]), height-face["sticker_size"][1]
+
+
 def fit_shared_size(size, subjects):
     """Fit the group avatar above each jaw without pushing a chin downward."""
     scale = 1.0
     for panel, face in subjects:
         (cx, bottom), _ = head_anchor(face, panel.get("head_points"))
         w,h = panel["image"].size
-        scale = min(scale, 2*cx/size[0], 2*(w-cx)/size[0], bottom/size[1])
+        top_limit = h if head_at_top_edge(face) else bottom
+        scale = min(scale, 2*cx/size[0], 2*(w-cx)/size[0], top_limit/size[1])
         if not 0 < bottom <= h:
             raise ValueError("取景框过紧，无法完整放下统一头像，请扩大取景范围")
     if scale < .85:
@@ -92,7 +104,8 @@ def apply_manual_layout(member, scope, panel, face):
     x, y = face['default_rect'][:2]
     if edit.get('position') is not None:
         x = min(max(0, round(edit['position'][0]*w)), w-sw)
-        y = min(max(0, round(edit['position'][1]*h)), h-sh)
+        min_y, max_y = vertical_bounds(face, h)
+        y = min(max(min_y, round(edit['position'][1]*h)), max_y)
     rear_enabled = privacy.back_enabled(member, {'state': face['head_state']}, panel.get('back', False))
     face.update(sticker_rect=[x,y,x+sw,y+sh], deleted=edit.get('deleted', False),
                 manual_position=edit.get('position'), back_disabled=not rear_enabled)
@@ -156,7 +169,10 @@ def mask_panels(member, panels, scope=""):
             anchor, method = head_anchor(face, panel.get("head_points") if index == main else None)
             ax, bottom = anchor
             x = min(max(0, round(ax-sw/2)), image.width-sw)
-            y = min(max(0, round(bottom-sh)), image.height-sh)
+            y = round(bottom-sh)
+            if not head_at_top_edge(face):
+                y = max(0, y)
+            y = min(y, image.height-sh)
             default_rect = [x, y, x+sw, y+sh]
             placement = apply_manual_layout(member, scope, identity, {"source_face": face["source_face"], "shared": index == main,
                                "sticker_size": list(size), "sticker_rect": [x,y,x+sw,y+sh],

@@ -48,6 +48,21 @@ class ManualMaskTests(unittest.TestCase):
         self.member['mask_edits']={}
         restored,_=self.render();self.assertEqual(old[0].tobytes(),restored[0].tobytes())
 
+    def test_top_clipped_default_can_move_and_restore_without_jumping(self):
+        self.face['box']=[268,0,652,165]
+        old,layout=self.render()
+        default=layout['panels'][0]['faces'][0]['default_rect']
+        self.assertLess(default[1],0)
+        self.edits(position=[default[0]/480,(default[1]+5)/600])
+        _,changed=self.render()
+        self.assertEqual(changed['panels'][0]['faces'][0]['sticker_rect'][1],default[1]+5)
+        self.edits(position=[default[0]/480,-1])
+        _,clamped=self.render()
+        self.assertEqual(clamped['panels'][0]['faces'][0]['sticker_rect'],default)
+        self.member['mask_edits']={}
+        restored,_=self.render()
+        self.assertEqual(old[0].tobytes(),restored[0].tobytes())
+
     def test_changed_crop_or_detection_cannot_apply_stale_position(self):
         self.edits(position=[.5,.3])
         self.panels[0]['transform'][0][2]=20
@@ -118,6 +133,19 @@ class MaskEditorPersistenceTests(unittest.TestCase):
     def test_stale_version_or_fingerprint_rejected(self):
         for values in ({'version':self.version-1},{'fingerprint':'old'}):
             with self.assertRaises(store.Conflict):mask_editor.update(self.jid,self.mid,dict(self.payload,**values))
+
+    def test_negative_position_requires_existing_top_clipped_geometry(self):
+        edit=dict(self.payload['edits'][0],position=[.2,-.05])
+        with self.assertRaisesRegex(ValueError,'不能移出'):
+            mask_editor.update(self.jid,self.mid,dict(self.payload,edits=[edit]))
+        face=self.manifest['groups'][0]['panels'][0]['faces'][0]
+        face['default_rect']=[80,-60,180,60]
+        _,_,_,base=mask_editor.context(self.jid,self.mid,self.version,'vs')
+        save(base/'output/editor.json',self.manifest)
+        with self.assertRaisesRegex(ValueError,'不能移出'):
+            mask_editor.update(self.jid,self.mid,dict(self.payload,edits=[dict(edit,position=[.2,-.11])]))
+        result=mask_editor.update(self.jid,self.mid,dict(self.payload,edits=[edit]))
+        self.assertEqual(result['members'][0]['mask_edits']['vs:front']['a0001']['faces']['0']['position'],[.2,-.05])
 
     def test_restore_clears_override_and_keeps_other_product(self):
         current=store.review(self.jid)

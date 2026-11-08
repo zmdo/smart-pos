@@ -1,7 +1,8 @@
 export function movedPosition(panel, face, dx, dy) {
   const [w,h] = panel.size, [sw,sh] = face.sticker_size;
   const origin = face.manual_position || [face.default_rect[0]/w, face.default_rect[1]/h];
-  return [Math.max(0,Math.min(1-sw/w,origin[0]+dx)), Math.max(0,Math.min(1-sh/h,origin[1]+dy))];
+  const minY = Math.min(0,face.default_rect[1]/h);
+  return [Math.max(0,Math.min(1-sw/w,origin[0]+dx)), Math.max(minY,Math.min(1-sh/h,origin[1]+dy))];
 }
 export function stickerRect(panel, face) {
   const [w,h] = panel.size, [sw,sh] = face.sticker_size;

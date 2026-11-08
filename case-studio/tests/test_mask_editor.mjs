@@ -19,3 +19,10 @@ test('restoring automatic position recovers default geometry',()=>{
  assert.deepEqual(stickerRect(panel,face),[100,60,100,120]);
  assert.deepEqual(movedPosition(panel,face,.005,-.005),[.255,.095]);
 });
+test('top-clipped avatar drags smoothly within its original clipping limit',()=>{
+ const clipped={...face,default_rect:[100,-60,200,60]};
+ assert.deepEqual(stickerRect(panel,clipped),[100,-60,100,120]);
+ assert.deepEqual(movedPosition(panel,clipped,0,0),[.25,-.1]);
+ assert.deepEqual(movedPosition(panel,clipped,0,-1),[.25,-.1]);
+ assert.deepEqual(movedPosition(panel,clipped,0,.05),[.25,-.05]);
+});
