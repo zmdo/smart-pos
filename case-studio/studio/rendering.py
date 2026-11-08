@@ -521,7 +521,7 @@ def render(review_path, mid, out, section=None):
             continue
         selected = [lookup[a] for a in p["asset_ids"]]
         privacy_layout = None
-        if p["kind"] in ("vs", "three_views") and m.get("privacy", {}).get("enabled") is not False:
+        if p["kind"] in ("vs", "three_views", "single") and m.get("privacy", {}).get("enabled") is not False:
             private_photos, privacy_layout = grouped_private_photos(m, p, context, out)
         else:
             private_photos = {a: privacy.masked_source(m, eng["photos"][a]) for a in p["asset_ids"]}

@@ -1466,7 +1466,8 @@
     ],
     "source": "Qwen Image API",
     "license": "API generated",
-    "sha256": "005c0d889a5eab1643530a9456784aeeda7cabd84cbee37164169bcccc0497e0"
+    "sha256": "005c0d889a5eab1643530a9456784aeeda7cabd84cbee37164169bcccc0497e0",
+    "retired": true
   },
   {
     "id": "ai-standard-female",
@@ -1480,7 +1481,8 @@
     ],
     "source": "Qwen Image API",
     "license": "API generated",
-    "sha256": "b633d8a0fefe77d7ce03f8fa8afb717a9348b85d5046febf66d27f211ffa0e19"
+    "sha256": "b633d8a0fefe77d7ce03f8fa8afb717a9348b85d5046febf66d27f211ffa0e19",
+    "retired": true
   },
   {
     "id": "ai-standard-neutral",
@@ -1494,6 +1496,58 @@
     ],
     "source": "Qwen Image API",
     "license": "API generated",
-    "sha256": "4bca6cef36bbf23078b583c050ee17e532726404e35444842e8dd3f1c9965f3f"
+    "sha256": "4bca6cef36bbf23078b583c050ee17e532726404e35444842e8dd3f1c9965f3f",
+    "retired": true
+  },
+  {
+    "id": "ai-standard-male-expressive-v2",
+    "name": "帅气帽饰男头像",
+    "file": "ai-standard-male-expressive-v2.png",
+    "gender": "male",
+    "tags": [
+      "AI头像",
+      "3D卡通",
+      "透明",
+      "装饰",
+      "生动表情"
+    ],
+    "style_version": "memoji-accessories-expression-v2",
+    "source": "Qwen Image API",
+    "license": "API generated",
+    "sha256": "9fd9643fc5378ff3232018416da1bc421ae114f42cdb7c8605b4fc42cd8da394"
+  },
+  {
+    "id": "ai-standard-female-expressive-v2",
+    "name": "温柔蝴蝶结女头像",
+    "file": "ai-standard-female-expressive-v2.png",
+    "gender": "female",
+    "tags": [
+      "AI头像",
+      "3D卡通",
+      "透明",
+      "装饰",
+      "生动表情"
+    ],
+    "style_version": "memoji-accessories-expression-v2",
+    "source": "Qwen Image API",
+    "license": "API generated",
+    "sha256": "a94c77f1ba777d1558dd8287b13a979b3d360447124f69bac11b4b5f093435d8"
+  },
+  {
+    "id": "ai-standard-neutral-expressive-v2",
+    "name": "活泼通用头像",
+    "file": "ai-standard-neutral-expressive-v2.png",
+    "gender": "neutral",
+    "tags": [
+      "AI头像",
+      "3D卡通",
+      "透明",
+      "装饰",
+      "生动表情"
+    ],
+    "style_version": "memoji-accessories-expression-v2",
+    "source": "Qwen Image API",
+    "license": "API generated",
+    "sha256": "a87b289906ee83ad4b9d31ffd12c61cfd88a68f3716be7312453f87dad28bb55"
   }
 ]

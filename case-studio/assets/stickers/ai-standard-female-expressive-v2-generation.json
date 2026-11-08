@@ -1,0 +1,7 @@
+{
+  "prompt": "Edit the supplied cartoon sticker. Remove the ENTIRE neck below the curved jawline. Preserve the face, purple bow, earrings, hairstyle and cute wink. Rebuild a clean rounded chin contour. Everything below the chin must be fully transparent. Do not draw any neck stump. Hair tips must end above the chin. This is a floating head emoji, not a portrait or bust. Output transparent RGBA PNG, no background, no shadow. The chin must be the lowest point of the silhouette.",
+  "model": "qwen-image-2.1-pro",
+  "key": "514b8823d084da0441b7ce53c59ce94e5886f5c7fd0b5e4e9008fa044da6bd52",
+  "style_version": "memoji-accessories-expression-v2",
+  "reference_kind": "generated_standard_avatar"
+}

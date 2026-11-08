@@ -7,14 +7,15 @@ from .common import APP_ROOT, WEB_DATA, read, save, sha
 BUNDLED = APP_ROOT / "assets/stickers"
 
 
-def catalog():
-    return read(BUNDLED / "catalog.json", [])
+def catalog(include_retired=False):
+    items = read(BUNDLED / "catalog.json", [])
+    return items if include_retired else [s for s in items if not s.get("retired")]
 
 
 def get(sid):
     if not isinstance(sid, str) or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,90}", sid):
         raise ValueError("贴纸编号无效")
-    item = next((s for s in catalog() if s["id"] == sid), None)
+    item = next((s for s in catalog(include_retired=True) if s["id"] == sid), None)
     if item:
         return dict(item, path=str(BUNDLED / item["file"]))
     item = read(WEB_DATA / "stickers" / sid / "metadata.json", {})
@@ -28,7 +29,8 @@ def public(item):
 
 
 def default(gender):
-    return get({"男": "ai-standard-male", "女": "ai-standard-female"}.get(gender, "ai-standard-neutral"))
+    tag = {"男":"male", "女":"female"}.get(gender,"neutral")
+    return get("ai-standard-"+tag+"-expressive-v2")
 
 
 def random_sticker(gender):
@@ -48,5 +50,8 @@ def register(path, trace, gender=""):
     item = {"id": sid, "name": "会员专属 AI 头像", "tags": ["AI头像", "3D卡通", "透明"],
             "gender": {"男": "male", "女": "female"}.get(gender, "neutral"),
             "source": "Qwen Image API", "license": "API generated", "trace": trace}
+    if trace.get("style_version"):
+        item.update(style_version=trace["style_version"])
+        item["tags"] += ["装饰", "生动表情"]
     save(folder / "metadata.json", item, True)
     return get(sid)

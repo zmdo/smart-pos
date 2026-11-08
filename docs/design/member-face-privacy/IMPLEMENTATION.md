@@ -49,3 +49,15 @@
 验收文件：服务器 `experiments/body-anchor-v5/m002/`、`face-privacy-qa/body-anchor-v5/m009-full/`；日志 `experiments/face-privacy-body-anchor-tests.log`。本机示例为 `artifacts/member-face-privacy/body-anchor-v5/`。
 
 本次部署与备份路径记录在 `website/shared-avatar-deployment.json`。恢复旧代码时使用该备份，保留审核、原图与成品历史。
+
+## 装饰表情头像与背向遮挡（2026-11-08）
+
+- `avatar_api.build_prompt` 根据会员性别配置帽饰或蝴蝶结/耳饰，加入自然的眉眼与笑容；按生成标识稳定选择风格，重试不会随机更换提示词。参考图限制到下巴附近，额外保留头发区域；仅生成透明悬浮头像，装饰不应延伸成大帽檐或长挂饰。
+- 新标准头像使用独立 `*-expressive-v2` ID。旧标准文件与 ID 保留，但从当前图库列表和随机候选中退役；当前可选贴纸仍为 100 张。`build_sticker_library.py --avatars-only` 可单独维护标准头像，不重新下载表情素材。
+- 面部检查结果的 `hidden`（有可定位头部但五官不可见，包括后脑）纳入遮挡。独立 `SCAN_VERSION` 升级检查缓存，新提示词明确背向头部不得因没有五官而漏报。已绑定 SHA 的单人体测/封面头部证据可复用；训练和生活照的旧检查在准备时升级。
+- 六图拼图的后脑参与同组头像尺寸统一，后脑横向定位优先双耳中点；对比图、单图、训练/生活照也覆盖已定位后脑。旧背向图若没有头部范围，绘图会要求重新检查；已完成新版检查且头部完全出画的素材可正常跳过。
+- 审核入口改为“头部隐私保护”，明确包含背向，并分别显示面部与后脑/隐藏面部计数。预览缓存使用 `head-overlay-expressive-v6`；已有卡通遮挡、训练阶段和原始文件保留。
+
+验证：108 项后端测试和 13 项前端行为检查通过。通过真实 Qwen API 生成三张新标准头像，以及唐怡婷、周俊仿的带装饰专属头像；检查真实透明通道与头颈衔接，拒用带脖子的候选。两名会员完整生成 25 张成品，唐怡婷的六图中六个头部均已遮挡，背面对比图两侧也已遮挡；周俊仿的背向单图已遮挡。原图与审核阶段数据不变，缺少后期背面配对时仍如实记录缺项。
+
+验收产物位于服务器 `face-privacy-qa/expressive-v6/`，本机 `artifacts/member-face-privacy/expressive-v6/`；测试日志为 `experiments/face-privacy-expressive-tests.log`。部署记录与备份路径为 `website/expressive-heads-deployment.json`。恢复旧代码时保留新增头像与贴纸目录数据，避免后续审核引用失效。

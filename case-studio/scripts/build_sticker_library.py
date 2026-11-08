@@ -4,7 +4,7 @@ from pathlib import Path
 import httpx, cairosvg
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from studio import avatar_api
-from studio.common import save, sha
+from studio.common import read, save, sha
 
 FACE_NAMES = "开心 笑眼 笑哭 大笑 笑眯眯 尴尬笑 笑开花 天使 小恶魔 眨眼 温柔微笑 馋嘴 释然 爱心眼 墨镜 得意 平静 无语 不悦 汗颜 沉思 疑惑 困扰 亲亲 飞吻 甜蜜亲吻 闭眼亲吻 吐舌 眨眼吐舌 眯眼吐舌 失落 担忧 生气 气鼓鼓 流泪 忍耐 哼哼 如释重负 难过 惊慌 害怕 疲惫 困倦 累坏 龇牙 大哭 张嘴 吃惊 紧张 惊叫 惊讶 害羞 睡觉 晕乎 沉默 口罩".split()
 # Stable names below use Unicode codepoints as a fallback; tags remain searchable.
@@ -18,7 +18,8 @@ OTHER = [
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--out',type=Path,required=True)
-    parser.add_argument('--revision',required=True,help='Pinned jdecked/twemoji commit')
+    parser.add_argument('--revision',default='b6b55fef1e8636b540a6d016a4729ca8cdf2e60b',help='Pinned jdecked/twemoji commit')
+    parser.add_argument('--avatars-only',action='store_true',help='Refresh standard avatars; preserve existing emoji assets')
     args=parser.parse_args(); args.out.mkdir(parents=True,exist_ok=True)
     upstream=f'https://raw.githubusercontent.com/jdecked/twemoji/{args.revision}'
     items=[(code,FACE_NAMES[i] if i<len(FACE_NAMES) else f'表情 {code:x}') for i,code in enumerate(range(0x1f600,0x1f638))]+OTHER
@@ -35,16 +36,25 @@ def main():
         return {'id':sid,'name':name,'file':png.name,'gender':'neutral','tags':[category,'通用',name],
                 'source':f'https://github.com/jdecked/twemoji/blob/{args.revision}/assets/svg/{code:x}.svg',
                 'license':'CC BY 4.0','attribution':'Twemoji graphics by Twitter, Inc and other contributors; SVG rasterized to PNG.', 'sha256':sha(png)}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool: catalog=list(pool.map(fetch,items))
-    for gender,word,name in [('male','成年男性，黑色短发','标准男头像'),('female','成年女性，深棕色中短发，友好自然','标准女头像'),('neutral','性别中性的成年卡通人物，简洁黑色短发','标准通用头像')]:
-        sid='ai-standard-'+gender; target=args.out/(sid+'.png')
-        prompt=avatar_api.STYLE+' '+word+'，生成标准通用头像，不参考任何真实人物。'
+    previous=read(args.out/'catalog.json',[])
+    if args.avatars_only:
+        catalog=[s for s in previous if not s['id'].startswith('ai-standard-')]
+    else:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool: catalog=list(pool.map(fetch,items))
+    # Retain old IDs/files so historical reviews still resolve their exact avatar.
+    catalog += [dict(s,retired=True) for s in previous if s['id'].startswith('ai-standard-') and not s['id'].endswith('-expressive-v2')]
+    def standard(spec):
+        gender,word,name=spec
+        sid='ai-standard-'+gender+'-expressive-v2'; target=args.out/(sid+'.png')
+        prompt=avatar_api.build_prompt(word,'standard-'+gender)
         if not target.exists():
-            image,trace=avatar_api.generate(prompt,nonce='standard-memoji-transparent-v1-'+gender)
+            image,trace=avatar_api.generate(prompt,nonce=avatar_api.STYLE_VERSION+'-standard-'+gender)
             target.write_bytes(image.read_bytes())
-            save(args.out/(sid+'-generation.json'),{'prompt':prompt,'model':trace['model'],'key':trace['key']})
-        catalog.append({'id':sid,'name':name,'file':target.name,'gender':gender,'tags':['AI头像','3D卡通','透明'],
-                        'source':'Qwen Image API','license':'API generated','sha256':sha(target)})
+            save(args.out/(sid+'-generation.json'),{'prompt':prompt,'model':trace['model'],'key':trace['key'],'style_version':avatar_api.STYLE_VERSION})
+        return {'id':sid,'name':name,'file':target.name,'gender':gender,'tags':['AI头像','3D卡通','透明','装饰','生动表情'],
+                'style_version':avatar_api.STYLE_VERSION,'source':'Qwen Image API','license':'API generated','sha256':sha(target)}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        catalog += list(pool.map(standard,[('male','男','帅气帽饰男头像'),('female','女','温柔蝴蝶结女头像'),('neutral','','活泼通用头像')]))
     if not (args.out/'LICENSE-TWEMOJI.txt').exists():
         with httpx.Client(timeout=30,trust_env=False) as client:
             response=client.get(upstream+'/LICENSE-GRAPHICS');response.raise_for_status()

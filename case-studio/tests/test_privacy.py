@@ -1,4 +1,4 @@
-import copy, io, json, tempfile, unittest
+import base64, copy, io, json, tempfile, unittest
 import httpx
 from pathlib import Path
 from unittest.mock import patch
@@ -80,11 +80,33 @@ class FacePrivacyTests(unittest.TestCase):
             self.assertLess(layer.height,avatar.height*old_scale*.80)
             self.assertAlmostEqual(layer.width/layer.height,avatar.width/avatar.height,delta=.01)
 
-    def test_sticker_and_hidden_never_overwritten(self):
-        for state in ('sticker','hidden'):
-            self.evidence['faces'][0]['state']=state
-            with patch.object(stickers,'get',side_effect=AssertionError('not needed')):
-                self.assertEqual(privacy.masked_source(self.m,str(self.source)),str(self.source))
+    def test_existing_sticker_never_overwritten(self):
+        self.evidence['faces'][0]['state']='sticker'
+        with patch.object(stickers,'get',side_effect=AssertionError('not needed')):
+            self.assertEqual(privacy.masked_source(self.m,str(self.source)),str(self.source))
+
+    def test_rear_head_is_masked_without_changing_source(self):
+        self.evidence['faces'][0].update(state='hidden',front=False)
+        before=self.source.read_bytes()
+        with patch.object(stickers,'get',return_value={'path':str(self.sticker)}):
+            output=privacy.masked_source(self.m,str(self.source))
+        self.assertNotEqual(output,str(self.source))
+        with Image.open(output) as im:self.assertNotEqual(im.getpixel((100,100)),(240,32,32))
+        self.assertEqual(self.source.read_bytes(),before)
+
+    def test_legacy_back_without_head_box_requires_check(self):
+        self.m['photos'][0]['view']='back';self.evidence['faces']=[]
+        with self.assertRaisesRegex(ValueError,'背向图'):
+            privacy.checked_evidence(self.m,str(self.source))
+        self.evidence['scan_version']=privacy.SCAN_VERSION
+        self.assertEqual(privacy.checked_evidence(self.m,str(self.source))['faces'],[])
+
+    def test_known_body_evidence_reused_and_rear_count_reported(self):
+        self.evidence['faces'][0].update(state='hidden',front=False)
+        with patch.object(privacy,'scan',side_effect=AssertionError('reuse bound head box')), patch.object(stickers,'get',return_value={}):
+            result=privacy.prepare(self.m,'test')
+        self.assertEqual(result['privacy']['masked_back_heads'],1)
+        self.assertEqual(result['privacy']['masked_faces'],0)
 
     def test_missing_and_changed_evidence_cannot_leak_source(self):
         self.m['_engine']['privacy']['sources']={}
@@ -105,7 +127,7 @@ class FacePrivacyTests(unittest.TestCase):
     def test_no_front_uses_standard_gender_and_scan_failure_flags_review(self):
         self.m['privacy']['sticker_id']=None
         with patch.object(privacy,'scan',side_effect=RuntimeError('scan failed')), patch.object(stickers,'default',return_value={'id':'standard'}) as standard, patch.object(stickers,'get',return_value={}):
-            result=privacy.prepare(self.m,'test')
+            result=privacy.prepare(self.m,'test',rescan=True)
         standard.assert_called_once_with('男')
         self.assertEqual(result['privacy']['status'],'needs_review')
         self.assertEqual(len(result['privacy']['issues']),1)
@@ -308,9 +330,60 @@ class SharedPanelTests(unittest.TestCase):
         self.assertFalse(layout['enabled'])
         self.assertEqual([i.tobytes() for i in result],[p['image'].tobytes() for p in panels])
 
+    def test_all_six_views_including_rear_heads_receive_same_avatar(self):
+        panels=[self.panel(1.5)]*6
+        rear=dict(self.evidence,faces=[dict(self.face,state='hidden',front=False)])
+        with patch.object(privacy,'checked_evidence',side_effect=[self.evidence,self.evidence,rear]*2):
+            outputs,layout=self.mask(panels)
+        faces=[p['faces'][0] for p in layout['panels']]
+        self.assertEqual(len(faces),6)
+        self.assertEqual(sum(f['head_state']=='hidden' for f in faces),2)
+        self.assertEqual(len({tuple(f['sticker_size']) for f in faces}),1)
+        for original,protected in zip(panels,outputs):self.assertNotEqual(original['image'].tobytes(),protected.tobytes())
+
+    def test_rear_head_uses_both_ears_without_a_visible_nose(self):
+        face=dict(self.face,box=[100,80,220,230],state='hidden',front=False)
+        points=[[110,110,.1]]*7;points[3]=[110,150,.9];points[4]=[210,150,.9]
+        anchor,method=privacy_panels.head_anchor(face,points)
+        self.assertEqual(anchor,[160,236]);self.assertEqual(method,'bilateral_ears')
+        points[4]=[210,150,.1]
+        self.assertEqual(privacy_panels.head_anchor(face,points)[1],'face_box')
+
     def test_missing_evidence_blocks_transformed_output(self):
         self.member['_engine']['privacy']['sources']={}
         with self.assertRaisesRegex(ValueError,'尚未完成检查'):self.mask([self.panel()])
+
+
+class ExpressiveStyleTests(unittest.TestCase):
+    def test_reference_crop_includes_hair_but_excludes_neck(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p=Path(tmp)/'reference.png';im=Image.new('RGB',(200,300),'white')
+            ImageDraw.Draw(im).rectangle((0,200,199,299),fill='red');im.save(p)
+            encoded=avatar_api.data_url(p,[250,200,750,600]).split(',',1)[1]
+            with Image.open(io.BytesIO(base64.b64decode(encoded))) as crop:
+                self.assertLess(crop.height,200)
+                r,g,b=crop.getpixel((crop.width//2,crop.height-1))
+                self.assertGreater(g,240);self.assertGreater(b,240)
+
+    def test_gender_styles_and_retry_determinism(self):
+        female=avatar_api.build_prompt('女','member-one',reference=True)
+        male=avatar_api.build_prompt('男','member-one',reference=True)
+        self.assertIn('蝴蝶结',female);self.assertIn('可爱',female)
+        self.assertIn('帽',male);self.assertIn('帅气',male)
+        self.assertIn('chin is the lowest opaque point',female)
+        self.assertIn('参考图仅用于',female)
+        self.assertEqual(female,avatar_api.build_prompt('女','member-one',reference=True))
+        self.assertNotEqual(female,male)
+        self.assertIn('不参考任何真实人物',avatar_api.build_prompt(''))
+
+    def test_current_defaults_and_legacy_ids_both_resolve(self):
+        for gender in ('男','女',''):
+            item=stickers.default(gender)
+            self.assertEqual(item['style_version'],avatar_api.STYLE_VERSION)
+            self.assertIn('装饰',item['tags'])
+        self.assertEqual(len(stickers.catalog()),100)
+        self.assertEqual(stickers.get('ai-standard-male')['id'],'ai-standard-male')
+        self.assertNotIn('ai-standard-male',{s['id'] for s in stickers.catalog()})
 
 
 class AvatarAlphaTests(unittest.TestCase):

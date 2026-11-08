@@ -1,6 +1,6 @@
 """Durable Qwen image API calls. No diffusion model or GPU allocation here."""
 
-import base64, io, time, threading, fcntl
+import base64, hashlib, io, time, threading, fcntl
 from pathlib import Path
 from urllib.parse import urlsplit
 import httpx
@@ -9,12 +9,31 @@ from .common import WEB_DATA, read, save, sha, signature
 from . import config
 
 CAPACITY = threading.BoundedSemaphore(2)
+STYLE_VERSION = "memoji-accessories-expression-v2"
 STYLE = """This is an RGBA image with transparency. 一枚成年人的正面3D卡通头部头像，
-类似苹果Memoji的圆润简洁风格。头部略大，五官简化，友好的闭嘴微笑，光滑哑光软胶材质，
+类似苹果Memoji的圆润简洁风格。五官简化但有神，眉眼和嘴角一起表达情绪，自然灵动而非呆板证件照，光滑哑光软胶材质，
 不画真实皮肤、毛孔、皱纹、胡茬纹理，不画二维黑色描边。头发是圆润大块发束。
-只画完整头部和耳朵，不要脖子、肩膀、身体、衣服、文字、商标、阴影、白底或棋盘格。
-头像居中，占画面高度80%，头发和下巴完整，四周留白。头像本身完全不透明，轮廓外完全透明。
+头部保持端正正面，加入下文指定的小巧帽子或发饰、耳饰；装饰贴合头部，额外高度不超过头部高度的12%，不遮住眉眼，不要夸张高帽、宽帽檐、长耳坠或漂浮装饰。
+只画完整头部和耳朵，不要脖子、肩膀、身体、衣服、文字、商标、阴影、白底或棋盘格。发尾不得低于下巴。
+头像居中，占画面高度80%，头发、装饰和下巴完整，四周留白。头像本身完全不透明，轮廓外完全透明。
 The image has an alpha channel and the background is transparent. Clean antialiased edges."""
+
+
+def build_prompt(gender, variant_key="", reference=False):
+    """Stable choices keep retries identical while varying members' accessories."""
+    choices = {
+        "女": ["成年女性，小巧的奶油粉蝴蝶结发饰和珍珠耳钉，温柔甜美的笑眼、轻扬眉毛，嘴角自然上扬，可爱而成熟。",
+               "成年女性，贴合发型的浅紫色蝴蝶结和小圆耳钉，俏皮可爱的轻眨眼，柔和开朗的微笑，保留成年人的气质。"],
+        "男": ["成年男性，低帽冠的休闲棒球帽向后戴，帽子简洁且无商标，眉眼有神，嘴角微扬，阳光帅气、自信轻松。",
+               "成年男性，一顶小巧的深蓝色休闲贝雷帽，眉毛轻扬，带一点俏皮的自然笑容，清爽帅气，避免严肃僵硬。"],
+        "": ["成年中性人物，一顶贴合头部的奶油色小针织帽，明亮的笑眼和自然上扬的嘴角，温暖活泼。"]}
+    options = choices.get(gender, choices[""])
+    option = int(hashlib.sha256(variant_key.encode()).hexdigest()[:8],16) % len(options)
+    reference_rule = ("参考图仅用于发型、眼镜、脸型等可见特征，保留这些特征并按上述要求增加装饰和表情，不照搬真人质感。"
+                      if reference else "生成标准通用卡通头像，不参考任何真实人物。")
+    return (STYLE + "\n" + options[option] + "\n" + reference_rule +
+            "\n最重要的构图约束：这是悬浮的头部表情贴纸，下巴必须是贴纸最下端；下巴轮廓下方直接是透明区域，绝对不能出现一截脖子。"
+            " Only a floating emoji head. The chin is the lowest opaque point. No neck, no bust. Hair ends above the chin.")
 
 
 def settings():
@@ -35,9 +54,11 @@ def data_url(path, box=None):
         if box:
             w, h = im.size
             x1, y1, x2, y2 = box
-            dx, dy = (x2-x1)*.35, (y2-y1)*.4
-            im = im.crop((max(0,(x1-dx)*w/1000), max(0,(y1-dy)*h/1000),
-                          min(w,(x2+dx)*w/1000), min(h,(y2+dy)*h/1000)))
+            dx, height = (x2-x1)*.35, y2-y1
+            # Include hair above the forehead; exclude the neck below the chin.
+            # A neck in the reference encourages a bust instead of a head sticker.
+            im = im.crop((max(0,(x1-dx)*w/1000), max(0,(y1-height*.6)*h/1000),
+                          min(w,(x2+dx)*w/1000), min(h,(y2+height*.03)*h/1000)))
         im.thumbnail((1400, 1400))
         buf = io.BytesIO()
         im.save(buf, "JPEG", quality=92)

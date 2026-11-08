@@ -52,8 +52,10 @@ def head_anchor(face, points=None):
         x, y, confidence = points[index]
         return (all(math.isfinite(v) for v in (x,y,confidence)) and confidence >= threshold
                 and l-.3*(r-l) <= x <= r+.3*(r-l) and t-.2*(b-t) <= y <= b)
-    if face.get("front"):
+    if face.get("front") or face["state"] == "hidden":
         for pair, threshold, label in [((3,4),.6,"bilateral_ears"), ((1,2),.7,"bilateral_eyes")]:
+            if face["state"] == "hidden" and pair == (1,2):
+                continue
             if all(valid(i,threshold) for i in pair):
                 cx = sum(points[i][0] for i in pair)/2
                 method = label
@@ -85,8 +87,8 @@ def mask_panels(member, panels):
 
     The largest face in each panel is the subject. Subject avatars share one
     final pixel size and attach separately to each head/jaw; background faces
-    retain their own smaller sizing. Existing
-    stickers and hidden faces are preserved and do not enlarge the shared size.
+    retain their own smaller sizing. Existing stickers are preserved; rear heads
+    participate in the same sizing.
     """
     if member.get("privacy", {}).get("enabled") is False:
         return [p["image"].copy() for p in panels], {"enabled": False}
@@ -101,7 +103,7 @@ def mask_panels(member, panels):
                            (faces[i]["box"][2]-faces[i]["box"][0])*
                            (faces[i]["box"][3]-faces[i]["box"][1])) if faces else None)
     layout = {"renderer": privacy.RENDER_VERSION, "shared_sticker_size": None, "panels": []}
-    if not any(f["state"] == "uncovered" for faces in projected for f in faces):
+    if not any(privacy.needs_mask(f) for faces in projected for f in faces):
         return [p["image"].copy() for p in panels], layout
     sid = member.get("privacy", {}).get("sticker_id")
     if not sid:
@@ -110,7 +112,7 @@ def mask_panels(member, panels):
         avatar = image.convert("RGBA")
         avatar = avatar.crop(avatar.getchannel("A").getbbox())
     subjects = [(panel, faces[i]) for panel, faces, i in zip(panels, projected, primary)
-                if i is not None and faces[i]["state"] == "uncovered"]
+                if i is not None and privacy.needs_mask(faces[i])]
     sizes = [artwork_size(avatar, face["box"]) for _, face in subjects]
     shared = max(sizes) if sizes else None
     if shared:
@@ -122,7 +124,7 @@ def mask_panels(member, panels):
         image = panel["image"].convert("RGBA")
         placements = []
         for index, face in enumerate(faces):
-            if face["state"] != "uncovered":
+            if not privacy.needs_mask(face):
                 continue
             l, t, r, b = face["box"]
             cx, cy = (l+r)/2, (t+b)/2
@@ -140,7 +142,7 @@ def mask_panels(member, panels):
             image.alpha_composite(avatar.resize(size, Image.Resampling.LANCZOS), (x, y))
             placements.append({"source_face": face["source_face"], "shared": index == main,
                                "sticker_size": list(size), "sticker_rect": [x,y,x+sw,y+sh],
-                               "face_box": face["box"], "head_anchor": anchor,
+                               "face_box": face["box"], "head_state": face["state"], "head_anchor": anchor,
                                "anchor_method": method})
         outputs.append(image.convert("RGB"))
         layout["panels"].append({"size": list(image.size), "faces": placements})

@@ -4,9 +4,9 @@ const fallback = {enabled:true, mode:"ai", sticker_id:null, status:"unprepared",
 
 export function privacyPanel(member) {
   const p = {...fallback, ...member.privacy};
-  return `<div class="privacy-panel"><div class="privacy-heading"><div><strong>面部隐私保护</strong><p>同一会员统一使用一张贴纸，原图已有的完整卡通遮挡保留。</p></div><label class="check"><input id="privacy-enabled" type="checkbox" ${p.enabled?"checked":""}>遮挡面部</label></div>
-    <div class="privacy-controls"><div class="sticker-preview">${p.sticker_id?`<img src="${image(p.sticker_id)}" alt="本会员固定贴纸">`:'<span>待准备头像</span>'}</div><div class="privacy-options"><label>贴纸来源<select id="privacy-mode"><option value="ai" ${p.mode==="ai"?"selected":""}>AI 卡通头像</option><option value="library" ${p.mode==="library"?"selected":""}>贴纸库随机</option></select></label><div class="row-actions"><button type="button" id="privacy-prepare" class="outline-red">${p.status==="ready"?"重新检查面部":"准备面部遮挡"}</button><button type="button" id="privacy-regenerate">${p.mode==="ai"?"重新生成头像":"随机换一张"}</button>${p.mode==="library"?'<button type="button" id="privacy-pick">从图库选择</button>':''}</div><small>${E(p.avatar_source||"优先参考无遮挡正面照；无可靠正面照时使用标准头像。")}</small></div></div>
-    <p id="privacy-status" role="status" class="${p.status==="needs_review"?"error-text":"muted"}">${!p.enabled?"已关闭：新生成的成品将使用原照片。":p.status==="ready"?`已准备 · ${p.masked_faces||0} 处可见面部需要遮挡 · ${p.preserved_faces||0} 处已有贴纸保留`:p.status==="needs_review"?"部分面部检查需要重试，未检查照片不会直接输出。":"尚未准备。先检查面部并固定本会员的贴纸。"}</p>${p.avatar_issue?`<p class="muted">${E(p.avatar_issue)}</p>`:""}${(p.issues||[]).map(x=>`<p class="error-text">${E(x.asset_id)}：${E(x.reason)}</p>`).join("")}</div>`;
+  return `<div class="privacy-panel"><div class="privacy-heading"><div><strong>头部隐私保护</strong><p>正面、侧面、背向统一使用同一张贴纸，保留原图已有的完整卡通遮挡。</p></div><label class="check"><input id="privacy-enabled" type="checkbox" ${p.enabled?"checked":""}>遮挡头部（含背向）</label></div>
+    <div class="privacy-controls"><div class="sticker-preview">${p.sticker_id?`<img src="${image(p.sticker_id)}" alt="本会员固定贴纸">`:'<span>待准备头像</span>'}</div><div class="privacy-options"><label>贴纸来源<select id="privacy-mode"><option value="ai" ${p.mode==="ai"?"selected":""}>AI 卡通头像</option><option value="library" ${p.mode==="library"?"selected":""}>贴纸库随机</option></select></label><div class="row-actions"><button type="button" id="privacy-prepare" class="outline-red">${p.status==="ready"?"重新检查头部":"准备头部遮挡"}</button><button type="button" id="privacy-regenerate">${p.mode==="ai"?"重新生成头像":"随机换一张"}</button>${p.mode==="library"?'<button type="button" id="privacy-pick">从图库选择</button>':''}</div><small>${E(p.avatar_source||"AI 头像带小巧装饰与自然表情；优先参考正面照，无参考时使用标准头像。")}</small></div></div>
+    <p id="privacy-status" role="status" class="${p.status==="needs_review"?"error-text":"muted"}">${!p.enabled?"已关闭：新生成的成品将使用原照片。":p.status==="ready"?`已准备 · ${p.masked_faces||0} 处面部 · ${p.masked_back_heads||0} 处后脑/隐藏面部 · ${p.preserved_faces||0} 处已有贴纸保留`:p.status==="needs_review"?"部分头部检查需要重试，未检查照片不会直接输出。":"尚未准备。先检查头部并固定本会员的贴纸。"}</p>${p.avatar_issue?`<p class="muted">${E(p.avatar_issue)}</p>`:""}${(p.issues||[]).map(x=>`<p class="error-text">${E(x.asset_id)}：${E(x.reason)}</p>`).join("")}</div>`;
 }
 
 export function bindPrivacy({member, job, api, send, flush, version, apply, toast}) {
@@ -24,7 +24,7 @@ export function bindPrivacy({member, job, api, send, flush, version, apply, toas
     apply(result,false);
   }
   async function run(regenerate=false,rescan=false,resume=false) {
-    busy(true,"正在检查面部、准备透明头像，可离开页面，后台会继续处理…");
+    busy(true,"正在检查头部、准备带装饰的透明头像，可离开页面，后台会继续处理…");
     try {
       if(!resume) {
         await flush();
@@ -35,7 +35,7 @@ export function bindPrivacy({member, job, api, send, flush, version, apply, toas
         const task=await api(url+"/privacy");
         if(task.status==="complete") {
           const review=await api(`/jobs/${job}/review`);
-          apply(review,true); toast("面部遮挡准备完成，可更新预览或生成成品"); break;
+          apply(review,true); toast("头部遮挡准备完成，可更新预览或生成成品"); break;
         }
         if(task.status!=="running") throw new Error(task.error||"准备任务已中断，请重试；已生成的头像会复用");
         if(!root.isConnected) return;
