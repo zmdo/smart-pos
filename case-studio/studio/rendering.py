@@ -145,7 +145,7 @@ def panel_head_points(member, aid, source, transform):
         return None
 
 
-def grouped_private_photos(member, product, context, out):
+def grouped_private_photos(member, product, context, out, editor_groups=None):
     """Resize to final photo panels first, then apply identical subject avatars."""
     paths = member["_engine"]["photos"]
     images = []
@@ -160,11 +160,17 @@ def grouped_private_photos(member, product, context, out):
     panels = []
     for aid, image, size in zip(product["asset_ids"], images, sizes):
         transform = [[size[0]/image.width,0,0], [0,size[1]/image.height,0], [0,0,1]]
-        panels.append({"source": paths[aid],
+        panels.append({"source": paths[aid], "asset_id": aid, "back": product["view"] == "back" or
+                       next(p["view"] for p in member["photos"] if p["asset_id"] == aid) == "back",
                        "image": image.resize(size, Image.Resampling.LANCZOS),
                        "transform": transform,
                        "head_points": panel_head_points(member,aid,paths[aid],transform)})
-    protected, privacy_layout = mask_panels(member, panels)
+    scope = product["kind"] + ":" + product["view"]
+    protected, privacy_layout = mask_panels(member, panels, scope)
+    if editor_groups is not None:
+        from .mask_editor import capture
+        editor_groups.append(capture(member, scope, panels, privacy_layout, out))
+        return {}, privacy_layout
     folder = out / "privacy-panels" / clean_name(product["product_id"])
     folder.mkdir(parents=True)
     result = {}
@@ -473,8 +479,8 @@ def prepare(jid, out):
     )
 
 
-def render(review_path, mid, out, section=None):
-    if section not in (None, "vs", "cover", "table"):
+def render(review_path, mid, out, section=None, editor=False):
+    if section not in (None, "vs", "cover", "table", "three_views"):
         raise ValueError("预览区域无效")
     review = read(review_path)
     m = next(m for m in review["members"] if m["id"] == mid)
@@ -500,6 +506,7 @@ def render(review_path, mid, out, section=None):
     plans, gaps, selections = plan(rows)
     lookup = {r["asset_id"]: r for r in rows}
     products = []
+    editor_groups = [] if editor else None
     context = dict(m["vs"], width=eng["width"], logo_path=eng.get("logo"))
 
     def product(path, kind, name, **extra):
@@ -517,14 +524,16 @@ def render(review_path, mid, out, section=None):
         )
 
     for p in plans:
-        if section is not None and not (section == "vs" and p["kind"] == "vs"):
+        if section is not None and not (section in ("vs", "three_views") and p["kind"] == section):
             continue
         selected = [lookup[a] for a in p["asset_ids"]]
         privacy_layout = None
         if p["kind"] in ("vs", "three_views", "single") and m.get("privacy", {}).get("enabled") is not False:
-            private_photos, privacy_layout = grouped_private_photos(m, p, context, out)
+            private_photos, privacy_layout = grouped_private_photos(m, p, context, out, editor_groups)
         else:
             private_photos = {a: privacy.masked_source(m, eng["photos"][a]) for a in p["asset_ids"]}
+        if editor:
+            continue
         im = draw_product(p, selected, private_photos, FONT, context)
         labels = {"front": "正面", "side": "侧面", "back": "背面", "all": "完整三视图"}
         name = (
@@ -561,7 +570,7 @@ def render(review_path, mid, out, section=None):
                     rect = m["cover"]["crops"].get(aid)
                     current_plan = manual_plan(ed, rect) if rect else frame
                     image = render_frame(meta, current_plan)[0]
-                    panels.append({"source": meta["source"],
+                    panels.append({"source": meta["source"], "asset_id": aid,
                                    "image": Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)),
                                    "transform": current_plan["H_source_to_cover"],
                                    "head_points": panel_head_points(m,aid,meta["source"],current_plan["H_source_to_cover"])})
@@ -571,19 +580,23 @@ def render(review_path, mid, out, section=None):
                             crop=rect or crop_from_plan(frame, ed["H"], ed["size"]),
                         )
                     )
-                ims, privacy_layout = mask_panels(m, panels)
-                c = m["cover"]
-                c = dict(c, segments=[{"text": c["story"], "emphasis": False}])
-                im, _ = draw_cover(
-                    ims,
-                    c,
-                    dict(brand_name=c["brand_name"], logo_path=eng.get("logo")),
-                    FONT,
-                    m["store"],
-                )
-                file = out / "会员案例封面.jpg"
-                im.save(file, quality=94)
-                product(file, "cover", file.name, asset_ids=ids, privacy_layout=privacy_layout)
+                ims, privacy_layout = mask_panels(m, panels, "cover:front")
+                if editor_groups is not None:
+                    from .mask_editor import capture
+                    editor_groups.append(capture(m, "cover:front", panels, privacy_layout, out))
+                if not editor:
+                    c = m["cover"]
+                    c = dict(c, segments=[{"text": c["story"], "emphasis": False}])
+                    im, _ = draw_cover(
+                        ims,
+                        c,
+                        dict(brand_name=c["brand_name"], logo_path=eng.get("logo")),
+                        FONT,
+                        m["store"],
+                    )
+                    file = out / "会员案例封面.jpg"
+                    im.save(file, quality=94)
+                    product(file, "cover", file.name, asset_ids=ids, privacy_layout=privacy_layout)
             except ValueError as e:
                 if m["cover"]["crops"]:
                     raise ValueError(
@@ -633,5 +646,9 @@ def render(review_path, mid, out, section=None):
         review_required=[p["asset_id"] for p in m["photos"] if not p["confirmed"]],
         model_calls=0,
         privacy=copy.deepcopy(m.get("privacy", privacy.defaults())),
+        mask_edits=copy.deepcopy(m.get("mask_edits", {})),
     )
     save(out / "result.json", result)
+    if editor:
+        from .mask_editor import capture_sticker
+        save(out / "editor.json", dict(groups=editor_groups, sticker_file=capture_sticker(m, out)))

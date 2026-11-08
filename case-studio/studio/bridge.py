@@ -28,7 +28,8 @@ def main():
         from .rendering import render
 
         render(
-            Path(args[0]), args[1], Path(args[2]), args[3] if len(args) > 3 else None
+            Path(args[0]), args[1], Path(args[2]), args[3] if len(args) > 3 else None,
+            editor=len(args) > 4 and args[4] == "edit",
         )
     else:
         raise ValueError("Unknown bridge action")

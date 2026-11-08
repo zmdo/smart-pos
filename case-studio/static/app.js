@@ -1,3 +1,4 @@
+import { openMaskEditor } from "./mask-editor.js";
 import { openCrop } from "./crop.js";
 import { openCoverAI } from "./cover-ai.js";
 import { imageURL, clearMediaCache } from "./media-cache.js";
@@ -482,7 +483,7 @@ function section(n, title, hint, body) {
   return `<section class="card review-section"><div class="section-title"><span class="number">${n}</span><div><h2>${title}</h2><p>${hint}</p></div></div>${body}</section>`;
 }
 function updateAction(section) {
-  return `<div class="preview-actions"><button type="button" class="outline-red" data-refresh="${section}">更新展示效果 ↗</button><span class="muted" data-preview-status="${section}"></span></div>`;
+  return `<div class="preview-actions"><button type="button" class="outline-red" data-refresh="${section}">更新展示效果 ↗</button><span class="muted" data-preview-status="${section}"></span>${section!=="table"?`<button type="button" data-mask-editor="${section}">调整面部遮罩</button>`:""}</div>`;
 }
 function identitySummary(m) {
   return `<div class="identity-summary">${["gender", "coach"]
@@ -527,6 +528,7 @@ ${section(
     )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>${identitySummary(m)}`,
 )}
 ${section("02", "体测图训练阶段", "拖动照片调整前后顺序；同朝向多张时，可选择首选图用于对比与封面。", `<div class="phase-boards" id="boards"></div><div class="row-actions"><button id="confirm-photos">确认本会员所有阶段标记</button><span class="muted">推断与待审结果会保留在下载包的审核说明中。</span></div>`)}
+${section("02B", "审核完整六图", "训练前后各一组正面、侧面、背面；六个头像可分别调整。", `${updateAction("three_views")}<div class="six-preview" id="three_views-preview"><div class="empty">点击更新展示效果查看六图拼图，或直接调整面部遮罩。</div></div>`)}
 ${section(
   "03",
   "审核同朝向对比图",
@@ -593,6 +595,7 @@ ${section("05", "审核体测对比表", "原始体测数据优先，汇总表�
     renderMetrics();
     dirty("vs");
   };
+  $$("[data-mask-editor]").forEach(b=>b.onclick=()=>editMasks(b.dataset.maskEditor));
   $("#crop").onclick = crop;
   $("#cover-ai").onclick = aiCover;
   $$("[data-refresh]").forEach(
@@ -750,7 +753,7 @@ let saveTimer;
 function dirty(part) {
   const sections =
     part === "profile" || part === "photos"
-      ? ["vs", "cover"]
+      ? ["vs", "cover", "three_views"]
       : [part || "cover"];
   sections.forEach((s) => previewBook().local.add(s));
   previewButtons();
@@ -822,7 +825,7 @@ function previewButtons() {
   if (!member() || state.output) return;
   const b = previewBook(),
     m = member();
-  for (const section of ["vs", "cover", "table"]) {
+  for (const section of ["vs", "cover", "table", "three_views"]) {
     const button = $(`[data-refresh="${section}"]`),
       label = $(`[data-preview-status="${section}"]`);
     if (!button) continue;
@@ -885,6 +888,10 @@ function showPreview(section, result, jid, mid) {
       );
       items.forEach((p) => imageURL(media(jid, p.media)).catch(() => {}));
     }
+  } else if (section === "three_views") {
+    const product=result.products.find(p=>p.kind==="three_views");
+    target.innerHTML=product?'<img alt="完整六图预览">':'<div class="empty">缺少完整的训练前后正面、侧面、背面配对，暂不能生成六图。</div>';
+    if(product)showImage(target.querySelector('img'),product);
   } else {
     const product = result.products.find(
       (p) => p.kind === (section === "table" ? "report" : "cover"),
@@ -912,7 +919,7 @@ async function loadPreviews() {
   try {
     const summary = await api(`/jobs/${jid}/previews/${mid}`);
     if (state.job?.id !== jid || state.member !== mid || state.output) return;
-    for (const section of ["vs", "cover", "table"]) {
+    for (const section of ["vs", "cover", "table", "three_views"]) {
       const result = summary.sections[section];
       if (
         result &&
@@ -924,7 +931,8 @@ async function loadPreviews() {
       }
     }
     // Only the first ever preview is automatic. Existing images stay visible until explicitly updated.
-    for (const section of ["vs", "cover", "table"]) {
+    for (const section of ["vs", "cover", "table", "three_views"]) {
+      if(section==="three_views")continue;
       const privacy = member()?.privacy;
       if(section!=="table" && privacy?.enabled!==false && privacy?.status!=="ready") {
         if(!b.results[section]) $(`#${section}-preview`).innerHTML='<div class="empty">请先在会员信息顶部准备面部遮挡。</div>';
@@ -972,6 +980,21 @@ async function updatePreview(section, initial = false) {
     if (state.member === mid && state.job?.id === jid) previewButtons();
   }
 }
+async function editMasks(section) {
+  try {
+    await flush();
+    const jid=state.job.id, mid=state.member;
+    await openMaskEditor({job:jid,member:member(),section,version:state.review.version,send,
+      onSave:async result=>{
+        if(state.job?.id!==jid||state.member!==mid)return;
+        state.review=result;state.job.review_version=result.version;
+        reviewPanel();
+        await updatePreview(section);
+        toast("面部遮罩调整已保存");
+      }});
+  }catch(e){toast(e.message,true);}
+}
+
 async function aiCover() {
   try {
     await flush();

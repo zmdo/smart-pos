@@ -1,10 +1,10 @@
 const E = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const image = id => `/api/stickers/${encodeURIComponent(id)}/image`;
-const fallback = {enabled:true, mode:"ai", sticker_id:null, status:"unprepared", issues:[]};
+const fallback = {enabled:true, mask_back:true, mode:"ai", sticker_id:null, status:"unprepared", issues:[]};
 
 export function privacyPanel(member) {
   const p = {...fallback, ...member.privacy};
-  return `<div class="privacy-panel"><div class="privacy-heading"><div><strong>头部隐私保护</strong><p>正面、侧面、背向统一使用同一张贴纸，保留原图已有的完整卡通遮挡。</p></div><label class="check"><input id="privacy-enabled" type="checkbox" ${p.enabled?"checked":""}>遮挡头部（含背向）</label></div>
+  return `<div class="privacy-panel"><div class="privacy-heading"><div><strong>头部隐私保护</strong><p>同一会员使用同一张贴纸，背向头像可单独开关；保留原图已有的完整卡通遮挡。</p></div><label class="check"><input id="privacy-enabled" type="checkbox" ${p.enabled?"checked":""}>遮挡头部</label></div><label class="check"><input id="privacy-mask-back" type="checkbox" ${p.mask_back?"checked":""}>背向照片显示头像</label>
     <div class="privacy-controls"><div class="sticker-preview">${p.sticker_id?`<img src="${image(p.sticker_id)}" alt="本会员固定贴纸">`:'<span>待准备头像</span>'}</div><div class="privacy-options"><label>贴纸来源<select id="privacy-mode"><option value="ai" ${p.mode==="ai"?"selected":""}>AI 卡通头像</option><option value="library" ${p.mode==="library"?"selected":""}>贴纸库随机</option></select></label><div class="row-actions"><button type="button" id="privacy-prepare" class="outline-red">${p.status==="ready"?"重新检查头部":"准备头部遮挡"}</button><button type="button" id="privacy-regenerate">${p.mode==="ai"?"重新生成头像":"随机换一张"}</button>${p.mode==="library"?'<button type="button" id="privacy-pick">从图库选择</button>':''}</div><small>${E(p.avatar_source||"AI 头像带小巧装饰与自然表情；优先参考正面照，无参考时使用标准头像。")}</small></div></div>
     <p id="privacy-status" role="status" class="${p.status==="needs_review"?"error-text":"muted"}">${!p.enabled?"已关闭：新生成的成品将使用原照片。":p.status==="ready"?`已准备 · ${p.masked_faces||0} 处面部 · ${p.masked_back_heads||0} 处后脑/隐藏面部 · ${p.preserved_faces||0} 处已有贴纸保留`:p.status==="needs_review"?"部分头部检查需要重试，未检查照片不会直接输出。":"尚未准备。先检查头部并固定本会员的贴纸。"}</p>${p.avatar_issue?`<p class="muted">${E(p.avatar_issue)}</p>`:""}${(p.issues||[]).map(x=>`<p class="error-text">${E(x.asset_id)}：${E(x.reason)}</p>`).join("")}</div>`;
 }
@@ -19,7 +19,7 @@ export function bindPrivacy({member, job, api, send, flush, version, apply, toas
   }
   async function save(values) {
     await flush();
-    const result=await send(url,{version:version(),member:{privacy:{enabled:p.enabled,mode:p.mode,sticker_id:p.sticker_id,...values}}},"PATCH");
+    const result=await send(url,{version:version(),member:{privacy:{enabled:p.enabled,mask_back:p.mask_back,mode:p.mode,sticker_id:p.sticker_id,...values}}},"PATCH");
     p={...fallback,...result.members.find(x=>x.id===member.id).privacy};
     apply(result,false);
   }
@@ -45,6 +45,10 @@ export function bindPrivacy({member, job, api, send, flush, version, apply, toas
   root.querySelector("#privacy-enabled").onchange=async e=>{
     busy(true);
     try {await save({enabled:e.target.checked});apply(null,true);} catch(error){busy(false);toast(error.message,true);}
+  };
+  root.querySelector("#privacy-mask-back").onchange=async e=>{
+    busy(true);
+    try {await save({mask_back:e.target.checked});apply(null,true);} catch(error){busy(false);toast(error.message,true);}
   };
   root.querySelector("#privacy-mode").onchange=async e=>{
     busy(true);

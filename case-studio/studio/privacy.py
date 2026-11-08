@@ -10,7 +10,7 @@ from .common import WEB_DATA, DATA, read, save, sha, signature, contained, job_d
 
 VERSION = "face-privacy-v1"
 SCAN_VERSION = "face-and-back-head-v2"
-RENDER_VERSION = "head-overlay-sticker-only-v7"
+RENDER_VERSION = "head-overlay-manual-v8"
 STICKER_SCALE = 1.16
 POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="face-privacy")
 LOCK = threading.RLock()
@@ -27,12 +27,16 @@ front=true仅用于清晰正脸（不是侧面、不是背面、不是卡通）�
 
 
 def defaults():
-    return {"enabled": True, "mode": "ai", "sticker_id": None,
+    return {"enabled": True, "mask_back": True, "mode": "ai", "sticker_id": None,
             "status": "unprepared", "issues": [], "masked_faces": 0, "masked_back_heads": 0, "preserved_faces": 0}
 
 
 def needs_mask(face):
     return face["state"] in ("uncovered", "hidden")
+
+
+def back_enabled(member, face, back=False):
+    return member.get("privacy", {}).get("mask_back", True) or not (back or face["state"] == "hidden")
 
 
 def source_specs(member):
@@ -151,10 +155,14 @@ def prepare(member, owner, regenerate=False, rescan=False):
 
 
 def validate_update(member, incoming):
-    if not isinstance(incoming, dict) or set(incoming) != {"enabled", "mode", "sticker_id"}:
+    if (not isinstance(incoming, dict) or
+            set(incoming) - {"enabled", "mask_back", "mode", "sticker_id"} or
+            not {"enabled", "mode", "sticker_id"} <= set(incoming)):
         raise ValueError("遮挡设置字段无效")
     if type(incoming["enabled"]) is not bool or incoming["mode"] not in ("ai", "library"):
         raise ValueError("遮挡设置无效")
+    if "mask_back" in incoming and type(incoming["mask_back"]) is not bool:
+        raise ValueError("背向遮挡设置无效")
     old = dict(defaults(), **member.get("privacy", {}))
     sid = incoming["sticker_id"]
     if sid:
@@ -214,7 +222,7 @@ def checked_evidence(member, source):
         raise ValueError("面部遮挡尚未完成检查，请在会员信息顶部准备或重新检查")
     if not evidence["faces"] and evidence.get("scan_version") != SCAN_VERSION:
         spec = source_specs(member).get(str(source), {})
-        if spec.get("back"):
+        if spec.get("back") and member.get("privacy", {}).get("mask_back", True):
             raise ValueError("背向图尚无可靠头部位置，请在会员信息顶部重新检查头部")
     return evidence
 
@@ -224,6 +232,8 @@ def masked_source(member, source):
     if not p["enabled"]:
         return str(source)
     evidence = checked_evidence(member, source)
+    back = source_specs(member).get(str(source), {}).get("back", False)
+    evidence = dict(evidence, faces=[f for f in evidence["faces"] if back_enabled(member, f, back)])
     if not any(needs_mask(f) for f in evidence["faces"]):
         return str(source)
     if not p.get("sticker_id"):

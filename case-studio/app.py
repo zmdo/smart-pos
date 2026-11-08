@@ -268,6 +268,24 @@ def latest_previews(jid: str, mid: str):
     return review.preview_latest(jid, mid)
 
 
+@app.post("/api/jobs/{jid}/members/{mid}/mask-editor")
+async def open_mask_editor(jid: str, mid: str, request: Request):
+    from studio import mask_editor
+    body = await request.json()
+    if not isinstance(body, dict) or set(body) != {"version", "section"}:
+        raise ValueError("遮罩面板参数无效")
+    try:
+        return await asyncio.to_thread(mask_editor.load, jid, mid, body["version"], body["section"])
+    except RuntimeError:
+        raise HTTPException(422, "遮罩面板生成失败，请检查取景与头部准备状态后重试")
+
+
+@app.patch("/api/jobs/{jid}/members/{mid}/mask-editor")
+async def save_mask_editor(jid: str, mid: str, request: Request):
+    from studio import mask_editor
+    return review.public(await asyncio.to_thread(mask_editor.update, jid, mid, await request.json()))
+
+
 @app.get("/api/cover-ai/templates")
 def copy_templates():
     return copywriter.templates()

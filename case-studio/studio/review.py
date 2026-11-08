@@ -46,7 +46,7 @@ def public(data):
         if "_engine" in data and "photos" in data:
             result["preview_keys"] = {
                 section: preview_key(data, section)
-                for section in ("vs", "cover", "table")
+                for section in ("vs", "cover", "table", "three_views")
             }
         return result
     if isinstance(data, list):
@@ -246,18 +246,19 @@ def output_public(jid, result):
 
 
 def preview_key(member, section):
-    if section not in ("vs", "cover", "table"):
+    if section not in ("vs", "cover", "table", "three_views"):
         raise ValueError("预览区域无效")
     engine = member["_engine"]
     data = {
         "renderer": "studio-section-preview-v3-privacy",
         "section": section,
-        "values": member[section],
+        "values": member.get(section, {}),
     }
-    if section in ("vs", "cover"):
+    if section in ("vs", "cover", "three_views"):
         from .privacy import RENDER_VERSION
         data["privacy_renderer"] = RENDER_VERSION
         data["privacy"] = member.get("privacy", {"enabled": True})
+        data["mask_edits"] = {k: v for k, v in member.get("mask_edits", {}).items() if k.split(":")[0] == section}
         data["face_evidence"] = engine.get("privacy", {})
         data["photos"] = [
             {
@@ -267,7 +268,7 @@ def preview_key(member, section):
             for p in member["photos"]
         ]
         data["sources"] = {k: engine.get(k) for k in ("rows", "photos", "logo")}
-        if section == "vs":
+        if section in ("vs", "three_views"):
             data["width"] = engine.get("width")
         else:
             data["geometry"] = {k: engine.get(k) for k in ("metadata", "editors")}
@@ -287,7 +288,7 @@ def preview_latest(jid, mid):
     latest = read(job_dir(jid) / "previews-v2" / mid / "latest.json", {})
     return {
         "review_version": data["version"],
-        "keys": {s: preview_key(member, s) for s in ("vs", "cover", "table")},
+        "keys": {s: preview_key(member, s) for s in ("vs", "cover", "table", "three_views")},
         "sections": latest,
     }
 
@@ -460,6 +461,7 @@ def archive(jid, vid, mid=None, kinds=None):
                             "gaps": m["gaps"],
                             "review_version": version["review_version"],
                             "face_privacy": m.get("privacy", {"status": "legacy_version"}),
+                            "mask_edits": m.get("mask_edits", {}),
                         },
                         ensure_ascii=False,
                         indent=2,

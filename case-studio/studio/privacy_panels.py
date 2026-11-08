@@ -3,6 +3,7 @@
 import math
 from PIL import Image, ImageOps
 from . import privacy, stickers
+from .common import signature
 
 
 def project_faces(evidence, source_size, transform, panel_size):
@@ -82,7 +83,7 @@ def fit_shared_size(size, subjects):
     return tuple(max(1,math.floor(n*scale)) for n in size)
 
 
-def mask_panels(member, panels):
+def mask_panels(member, panels, scope=""):
     """Panels contain image, source and a source-to-panel 3x3 transform.
 
     The largest face in each panel is the subject. Subject avatars share one
@@ -92,17 +93,23 @@ def mask_panels(member, panels):
     """
     if member.get("privacy", {}).get("enabled") is False:
         return [p["image"].copy() for p in panels], {"enabled": False}
-    projected, primary = [], []
+    projected, primary, identities = [], [], []
     for panel in panels:
         evidence = privacy.checked_evidence(member, panel["source"])
         with Image.open(panel["source"]) as source:
             size = ImageOps.exif_transpose(source).size
         faces = project_faces(evidence, size, panel["transform"], panel["image"].size)
+        identities.append({"asset_id": panel.get("asset_id", ""), "size": list(panel["image"].size),
+                           "signature": signature({"source": evidence["source_sha256"],
+                                                   "faces": evidence["faces"], "transform": panel["transform"],
+                                                   "size": panel["image"].size, "back": panel.get("back", False)}),
+                           "faces": []})
         projected.append(faces)
         primary.append(max(range(len(faces)), key=lambda i:
                            (faces[i]["box"][2]-faces[i]["box"][0])*
                            (faces[i]["box"][3]-faces[i]["box"][1])) if faces else None)
-    layout = {"renderer": privacy.RENDER_VERSION, "shared_sticker_size": None, "panels": []}
+    layout = {"renderer": privacy.RENDER_VERSION, "scope": scope,
+              "shared_sticker_size": None, "panels": identities}
     if not any(privacy.needs_mask(f) for faces in projected for f in faces):
         return [p["image"].copy() for p in panels], layout
     sid = member.get("privacy", {}).get("sticker_id")
@@ -120,9 +127,12 @@ def mask_panels(member, panels):
     layout["shared_sticker_size"] = list(shared) if shared else None
     layout["alignment"] = "individual_head_and_jaw"
     outputs = []
-    for panel, faces, main in zip(panels, projected, primary):
+    for panel, faces, main, identity in zip(panels, projected, primary, identities):
         image = panel["image"].convert("RGBA")
         placements = []
+        edits = member.get("mask_edits", {}).get(scope, {}).get(identity["asset_id"], {})
+        if edits.get("signature") != identity["signature"]:
+            edits = {}
         for index, face in enumerate(faces):
             if not privacy.needs_mask(face):
                 continue
@@ -134,11 +144,21 @@ def mask_panels(member, panels):
             ax, bottom = anchor
             x = min(max(0, round(ax-sw/2)), image.width-sw)
             y = min(max(0, round(bottom-sh)), image.height-sh)
-            image.alpha_composite(avatar.resize(size, Image.Resampling.LANCZOS), (x, y))
+            default_rect = [x, y, x+sw, y+sh]
+            edit = edits.get("faces", {}).get(str(face["source_face"]), {})
+            if edit.get("position") is not None:
+                x = min(max(0, round(edit["position"][0]*image.width)), image.width-sw)
+                y = min(max(0, round(edit["position"][1]*image.height)), image.height-sh)
+            rear_enabled = privacy.back_enabled(member, face, panel.get("back", False))
+            deleted = edit.get("deleted", False)
+            if rear_enabled and not deleted:
+                image.alpha_composite(avatar.resize(size, Image.Resampling.LANCZOS), (x, y))
             placements.append({"source_face": face["source_face"], "shared": index == main,
                                "sticker_size": list(size), "sticker_rect": [x,y,x+sw,y+sh],
+                               "default_rect": default_rect, "deleted": deleted, "back_disabled": not rear_enabled,
+                               "manual_position": edit.get("position"),
                                "face_box": face["box"], "head_state": face["state"], "head_anchor": anchor,
                                "anchor_method": method})
         outputs.append(image.convert("RGB"))
-        layout["panels"].append({"size": list(image.size), "faces": placements})
+        identity["faces"] = placements
     return outputs, layout
