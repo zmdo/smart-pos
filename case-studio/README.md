@@ -8,7 +8,7 @@
 
 面部隐私保护见 [设计](../docs/design/member-face-privacy/README.md) 与 [验收记录](../docs/design/member-face-privacy/IMPLEMENTATION.md)：默认启用 Qwen API 透明卡通头像，每位会员固定一张，已有完整卡通遮挡保留。提供 100 张带标签的图库贴纸及手动选择；体测图与封面在成品绘制时使用遮挡副本；生活照、训练照由设置页分别控制，默认不加遮挡；新会员后视图默认不贴头像，可单独开启。新任务自动准备；旧任务在审核顶部点击「准备面部遮挡」，再更新预览、生成新版成品。原始照片和旧成品版本保留。
 
-字体与画布见 [设计与验证](../docs/design/typography-and-canvas/README.md)：预置四种字体、支持上传 TTF/OTF，审核文字可逐项选择字体。除生活照外默认统一输出 1080×1440，可配置宽度与背景色。部署后运行 `python install_fonts.py` 安装带摘要校验的字体及许可文件；字体存放在数据盘，上传字体与停用状态持久化于 `website/fonts/`。
+字体与画布见 [设计与验证](../docs/design/typography-and-canvas/README.md)：预置四种字体、支持上传 TTF/OTF，封面等审核文字可逐项选择字体，报告与表格统一配置一次字体。除生活照外默认统一输出 1080×1440，可配置宽度与背景色。部署后运行 `python install_fonts.py` 安装带摘要校验的字体及许可文件；字体存放在数据盘，上传字体与停用状态持久化于 `website/fonts/`。
 
 预处理按会员并行，见 [会员并行方案](../docs/design/case-studio-member-parallel/README.md) 与 [验收记录](../docs/design/case-studio-member-parallel/IMPLEMENTATION.md)。页面分别列出正在处理、已完成、排队中的会员。
 
