@@ -10,7 +10,7 @@ from .common import WEB_DATA, DATA, read, save, sha, signature, contained, job_d
 
 VERSION = "face-privacy-v1"
 SCAN_VERSION = "face-and-back-head-v2"
-RENDER_VERSION = "head-overlay-top-edge-v9"
+RENDER_VERSION = "head-overlay-top-edge-fallback-v10"
 STICKER_SCALE = 1.16
 POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="face-privacy")
 LOCK = threading.RLock()

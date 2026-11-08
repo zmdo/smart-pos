@@ -308,6 +308,15 @@ class SharedPanelTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'取景框过紧'):
                 self.mask([panel])
 
+    def test_previously_fitting_edge_head_keeps_existing_group_scale(self):
+        panel={'image':Image.new('RGB',(300,400))}
+        edge={'box':[110,5,190,100],'state':'uncovered'}
+        other={'box':[110,100,190,200],'state':'uncovered'}
+        # A real top-edge head that already fits with the accepted 15% reduction
+        # must not enlarge this panel or any other avatar in the same product.
+        size=privacy_panels.fit_shared_size((100,110),[(panel,edge),(panel,other)])
+        self.assertEqual(size,(94,103))
+
     def test_head_with_clear_top_margin_still_requires_avatar_to_fit(self):
         self.face['box']=[268,60,652,165]
         with self.assertRaisesRegex(ValueError,'取景框过紧'):

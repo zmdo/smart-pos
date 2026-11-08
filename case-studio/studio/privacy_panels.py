@@ -82,14 +82,20 @@ def vertical_bounds(face, height):
 
 def fit_shared_size(size, subjects):
     """Fit the group avatar above each jaw without pushing a chin downward."""
-    scale = 1.0
+    scale = fallback = 1.0
     for panel, face in subjects:
         (cx, bottom), _ = head_anchor(face, panel.get("head_points"))
         w,h = panel["image"].size
+        width_limit = min(2*cx/size[0], 2*(w-cx)/size[0])
+        scale = min(scale, width_limit, bottom/size[1])
         top_limit = h if head_at_top_edge(face) else bottom
-        scale = min(scale, 2*cx/size[0], 2*(w-cx)/size[0], top_limit/size[1])
+        fallback = min(fallback, width_limit, top_limit/size[1])
         if not 0 < bottom <= h:
             raise ValueError("取景框过紧，无法完整放下统一头像，请扩大取景范围")
+    # Keep every previously successful layout unchanged. Only a failed fit may
+    # use top clipping for a head already at the edge of the photo.
+    if scale < .85:
+        scale = fallback
     if scale < .85:
         raise ValueError("取景框过紧，无法完整放下统一头像，请扩大取景范围")
     return tuple(max(1,math.floor(n*scale)) for n in size)
