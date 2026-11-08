@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from studio import store, config, review, workflow, copywriter, parallel, privacy, stickers
+from studio import store, config, review, workflow, copywriter, parallel, privacy, stickers, storage_backup
 from studio.common import APP_ROOT, DATA, WEB_DATA, PUBLIC_URL, job_dir, read, save
 
 
@@ -16,8 +16,10 @@ from studio.common import APP_ROOT, DATA, WEB_DATA, PUBLIC_URL, job_dir, read, s
 async def lifespan(app):
     workflow.start()
     config.load()
+    storage_backup.start()
     yield
     await asyncio.to_thread(workflow.stop)
+    await asyncio.to_thread(storage_backup.stop)
 
 
 app = FastAPI(title="会员案例工作台", lifespan=lifespan, docs_url=None, redoc_url=None)
@@ -44,8 +46,8 @@ async def access(request, call_next):
                 return JSONResponse(
                     {"detail": "请求来源不匹配，请从网站地址重新打开页面"}, 403
                 )
-        if path not in ("/api/session", "/api/health") and not store.session_valid(
-            request.cookies.get("studio_session")
+        if path not in ("/api/session", "/api/health") and not await asyncio.to_thread(
+            store.session_valid, request.cookies.get("studio_session")
         ):
             return JSONResponse({"detail": "请先输入访问码"}, 401)
     try:
@@ -96,14 +98,14 @@ async def login(request: Request):
         raise HTTPException(429, "尝试次数过多，请五分钟后重试")
     q.append(now)
     if not hmac.compare_digest(
-        str(body.get("code", "")), config.load()["access_token"]
+        str(body.get("code", "")), (await asyncio.to_thread(config.load))["access_token"]
     ):
         raise HTTPException(401, "访问码不正确")
     q.clear()
     response = JSONResponse({"authenticated": True})
     response.set_cookie(
         "studio_session",
-        store.issue_session(),
+        await asyncio.to_thread(store.issue_session),
         httponly=True,
         samesite="strict",
         secure=request.url.scheme == "https"
@@ -245,8 +247,14 @@ def get_review(jid: str):
 
 
 @app.patch("/api/jobs/{jid}/members/{mid}")
-async def save_member(jid: str, mid: str, request: Request):
-    return review.public(review.update(jid, mid, await request.json()))
+async def save_member(jid: str, mid: str, request: Request, compact: bool = False):
+    body = await request.json()
+    def update():
+        result = review.update(jid, mid, body)
+        if compact:
+            return dict(version=result["version"], member=review.public(next(m for m in result["members"] if m["id"] == mid)))
+        return review.public(result)
+    return await asyncio.to_thread(update)
 
 
 @app.post("/api/jobs/{jid}/preview/{mid}")

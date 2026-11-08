@@ -10,6 +10,9 @@ DATA = Path(os.environ.get("CASE_DATA", "/root/autodl-fs/case-studio")).resolve(
 WEB_DATA = Path(os.environ.get("STUDIO_WEB_DATA", str(DATA / "website"))).resolve()
 if not WEB_DATA.is_relative_to(DATA):
     raise ValueError("网站数据目录必须位于 CASE_DATA 内")
+RUNTIME = Path(os.environ.get("STUDIO_RUNTIME_DIR", str(WEB_DATA / "runtime"))).resolve()
+DB_PATH = Path(os.environ.get("STUDIO_DB_PATH", str(WEB_DATA / "studio.sqlite3"))).resolve()
+DB_BACKUP = WEB_DATA / "runtime-backups" / "studio-latest.sqlite3"
 PYTHON = os.environ.get(
     "CASE_PYTHON", "/root/apps/non-grid-calibration/.venv/bin/python"
 )
@@ -71,6 +74,18 @@ def job_dir(jid):
     if not re.fullmatch(r"[a-f0-9]{24}", jid):
         raise ValueError("任务不存在")
     return WEB_DATA / "jobs" / jid
+
+
+def cache_dir(jid):
+    job_dir(jid)
+    return RUNTIME / "cache" / jid
+
+
+def media_path(path):
+    path = Path(path).resolve()
+    if not (path.is_relative_to(DATA) or path.is_relative_to(RUNTIME / "cache")):
+        raise ValueError("文件不属于当前数据目录")
+    return path
 
 
 def contained(path, root):

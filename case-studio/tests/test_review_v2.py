@@ -134,7 +134,8 @@ class ReviewV2Tests(unittest.TestCase):
             dest = args[-2]
             dest.mkdir(parents=True)
             f = dest / "test.png"
-            f.write_bytes(b"test-product")
+            from PIL import Image
+            Image.new('RGB', (10, 10), 'white').save(f)
             save(
                 dest / "result.json",
                 dict(products=[dict(file=str(f), kind=args[-1])], cover_sources=[]),

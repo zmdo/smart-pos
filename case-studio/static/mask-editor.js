@@ -44,7 +44,7 @@ export async function openMaskEditor({job,member,section,version,send,onSave}) {
     host.querySelector('#mask-save').disabled=!panels.some(p=>p.faces.length);
     host.querySelector('#mask-save').onclick=async()=>{
       saving=true;dialog.querySelectorAll('button,select').forEach(b=>b.disabled=true);
-      host.querySelector('#mask-save').textContent='正在保存并更新预览…';
+      host.querySelector('#mask-save').textContent='正在保存…';
       try{
         const result=await send(`/jobs/${job}/members/${member.id}/mask-editor`,{version:manifest.version,section,fingerprint:manifest.fingerprint,edits:editorEdits(manifest.groups)},'PATCH');
         await onSave(result);saving=false;close();
@@ -69,7 +69,8 @@ export async function openMaskEditor({job,member,section,version,send,onSave}) {
     select.value=chosen;
     const current=()=>p.faces[chosen];
     function draw(){
-      c.clearRect(0,0,canvas.width,canvas.height);c.drawImage(p.image,0,top,p.size[0],viewHeight,0,0,canvas.width,canvas.height);
+      const sampleScale=p.image.height/p.size[1];
+      c.clearRect(0,0,canvas.width,canvas.height);c.drawImage(p.image,0,top*sampleScale,p.image.width,viewHeight*sampleScale,0,0,canvas.width,canvas.height);
       p.faces.forEach((f,k)=>{
         const [x,y,w,h]=stickerRect(p,f);
         if(!f.deleted&&!f.back_disabled)c.drawImage(sticker,x*scale,(y-top)*scale,w*scale,h*scale);

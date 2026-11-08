@@ -1,12 +1,12 @@
 """Authenticated per-product sticker editing, bound to exact render geometry."""
 
-import copy, math, shutil, threading
+import copy, math, shutil
 from PIL import Image
 from . import store, review, stickers
-from .common import job_dir, read, save, signature, PYTHON, clean_name
+from .common import cache_dir, read, save, signature, PYTHON, clean_name
+from .work_cache import lock_for, EDITOR_SLOTS
 
 SECTIONS = ("three_views", "vs", "cover")
-EDITOR_LOCK = threading.Lock()
 
 
 def capture(member, scope, panels, layout, out):
@@ -15,8 +15,10 @@ def capture(member, scope, panels, layout, out):
     photos = {p["asset_id"]: p for p in member["photos"]}
     records = []
     for index, (panel, info) in enumerate(zip(panels, layout["panels"])):
-        file = folder / f"{index}.png"
-        panel["image"].convert("RGB").save(file)
+        file = folder / f"{index}.jpg"
+        thumbnail = panel["image"].convert("RGB")
+        thumbnail.thumbnail((640, 900), Image.Resampling.LANCZOS)
+        thumbnail.save(file, quality=86)
         photo = photos[panel["asset_id"]]
         records.append(dict(info, file=str(file), phase=photo["phase"], view=photo["view"]))
     return dict(scope=scope, panels=records)
@@ -26,9 +28,24 @@ def capture_sticker(member, out):
     with Image.open(stickers.get(member["privacy"]["sticker_id"])["path"]) as im:
         im = im.convert("RGBA")
         im = im.crop(im.getchannel("A").getbbox())
+        im.thumbnail((512, 512), Image.Resampling.LANCZOS)
         file = out / "mask-editor-sticker.png"
         im.save(file)
     return str(file)
+
+
+def geometry_key(member, section):
+    from .privacy import RENDER_VERSION
+    engine = member['_engine']
+    return signature({
+        'editor': 'mask-editor-v2-thumbnails', 'renderer': RENDER_VERSION, 'section': section,
+        'sticker': member['privacy']['sticker_id'],
+        'photos': [{k:p.get(k) for k in ('asset_id','phase','view','confirmed','preferred')} for p in member['photos']],
+        'sources': {k:engine.get(k) for k in ('rows','photos','privacy','metadata')},
+        'width': engine.get('width') if section == 'vs' else None,
+        'metrics': len(member['vs']['metrics']) if section == 'vs' else None,
+        'cover': {'editors': engine.get('editors'), 'crops': member['cover']['crops']} if section == 'cover' else None,
+    })
 
 
 def context(jid, mid, version, section):
@@ -43,8 +60,8 @@ def context(jid, mid, version, section):
     p = member.get("privacy", {})
     if p.get("enabled") is False or not p.get("sticker_id") or p.get("status") != "ready":
         raise ValueError("请先开启并准备本会员的头部遮挡")
-    key = signature({"editor": "mask-editor-v1", "preview": review.preview_key(member, section)})
-    base = job_dir(jid) / "mask-editors" / mid / section / key
+    key = geometry_key(member, section)
+    base = cache_dir(jid) / "mask-editors" / mid / section / key
     return data, member, key, base
 
 
@@ -52,18 +69,26 @@ def load(jid, mid, version, section):
     from .workflow import command
     data, member, key, base = context(jid, mid, version, section)
     dest = base / "output"
-    with EDITOR_LOCK:
+    with lock_for(str(base)):
         if not (dest / "editor.json").exists():
             if dest.exists():
                 shutil.rmtree(dest)
-            save(base / "review.json", data, True)
-            command(jid, [PYTHON, "-m", "studio.bridge", "render", base / "review.json", mid,
-                          dest, section, "edit"], base / "render.log")
+            neutral = copy.deepcopy(data)
+            selected = next(m for m in neutral['members'] if m['id'] == mid)
+            selected['mask_edits'] = {}
+            selected['privacy']['mask_back'] = True
+            save(base / "review.json", neutral, True)
+            with EDITOR_SLOTS:
+                command(jid, [PYTHON, "-m", "studio.bridge", "render", base / "review.json", mid,
+                              dest, section, "edit"], base / "render.log")
         result = copy.deepcopy(read(dest / "editor.json"))
     # A render finishing after another reviewer saved cannot edit that old revision.
     context(jid, mid, version, section)
     for group in result["groups"]:
         for panel in group["panels"]:
+            from .privacy_panels import apply_manual_layout
+            for face in panel['faces']:
+                apply_manual_layout(member, group['scope'], panel, face)
             panel["media"] = store.media(jid, panel.pop("file"))
     result["sticker_media"] = store.media(jid, result.pop("sticker_file"))
     return dict(result, version=version, section=section, fingerprint=key)

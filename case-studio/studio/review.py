@@ -1,11 +1,11 @@
 """Validated review revisions and immutable product versions."""
 
-import copy, math, threading, uuid, zipfile
+import copy, math, uuid, zipfile
 from pathlib import Path
-from .common import read, save, job_dir, clean_name, now, PYTHON, signature
+from .common import read, save, job_dir, cache_dir, clean_name, now, PYTHON, signature
 from . import store
+from .work_cache import lock_for, RENDER_SLOTS
 
-PREVIEW_LOCK = threading.Lock()
 PRODUCT_KINDS = frozenset(
     {
         "three_views",
@@ -238,10 +238,20 @@ def update(jid, mid, payload):
     return store.save_review(jid, data, expected)
 
 
-def output_public(jid, result):
+def output_public(jid, result, preview=False):
     result = copy.deepcopy(result)
     for p in result["products"]:
-        p["media"] = store.media(jid, p.pop("file"))
+        path = Path(p.pop("file"))
+        if preview:
+            from PIL import Image
+            thumb = path.with_name(path.name + '.preview.jpg')
+            if not thumb.exists():
+                with Image.open(path) as image:
+                    image = image.convert('RGB')
+                    image.thumbnail((1440, 1920), Image.Resampling.LANCZOS)
+                    image.save(thumb, quality=88)
+            path = thumb
+        p["media"] = store.media(jid, path)
     return result
 
 
@@ -285,7 +295,7 @@ def preview_latest(jid, mid):
     member = next((m for m in data["members"] if m["id"] == mid), None)
     if not member:
         raise KeyError("会员不存在")
-    latest = read(job_dir(jid) / "previews-v2" / mid / "latest.json", {})
+    latest = store.latest_previews(jid, mid)
     return {
         "review_version": data["version"],
         "keys": {s: preview_key(member, s) for s in ("vs", "cover", "table", "three_views")},
@@ -301,9 +311,9 @@ def section_preview(jid, mid, version, section):
     if not member:
         raise KeyError("会员不存在")
     key = preview_key(member, section)
-    root = job_dir(jid) / "previews-v2" / mid
+    root = cache_dir(jid) / "previews-v3" / mid
     base = root / section / key
-    with PREVIEW_LOCK:
+    with lock_for(str(base)):
         base.mkdir(parents=True, exist_ok=True)
         dest = base / "output"
         cached = (dest / "result.json").exists()
@@ -313,32 +323,21 @@ def section_preview(jid, mid, version, section):
 
                 shutil.rmtree(dest)
             save(base / "review.json", data, True)
-            command(
-                jid,
-                [
-                    PYTHON,
-                    "-m",
-                    "studio.bridge",
-                    "render",
-                    base / "review.json",
-                    mid,
-                    dest,
-                    section,
-                ],
-                base / "render.log",
-            )
+            with RENDER_SLOTS:
+                command(
+                    jid,
+                    [PYTHON, "-m", "studio.bridge", "render", base / "review.json", mid, dest, section],
+                    base / "render.log",
+                )
         result = dict(
-            output_public(jid, read(dest / "result.json")),
+            output_public(jid, read(dest / "result.json"), preview=True),
             section=section,
             fingerprint=key,
             review_version=version,
             cached=cached,
         )
         # A slow render from an older tab must not replace the latest pointer.
-        if store.get(jid)["review_version"] == version:
-            latest = read(root / "latest.json", {})
-            latest[section] = result
-            save(root / "latest.json", latest, True)
+        store.set_latest_preview(jid, mid, section, result, version)
         return result
 
 
@@ -348,11 +347,11 @@ def preview(jid, mid, version, section=None):
     from .workflow import command
     from .privacy import RENDER_VERSION
 
-    with PREVIEW_LOCK:
+    with lock_for((jid, mid, version, 'full-preview')), RENDER_SLOTS:
         review = store.review(jid, version)
         if mid not in {m["id"] for m in review["members"]}:
             raise KeyError("会员不存在")
-        base = job_dir(jid) / "previews" / str(version) / RENDER_VERSION
+        base = cache_dir(jid) / "previews" / str(version) / RENDER_VERSION / mid
         base.mkdir(parents=True, exist_ok=True)
         save(base / "review.json", review, True)
         dest = base / mid
@@ -375,7 +374,7 @@ def preview(jid, mid, version, section=None):
                 base / (mid + ".log"),
             )
         return dict(
-            output_public(jid, read(dest / "result.json")), review_version=version
+            output_public(jid, read(dest / "result.json"), preview=True), review_version=version
         )
 
 

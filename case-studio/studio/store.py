@@ -2,7 +2,7 @@
 
 import json, secrets, sqlite3, time
 from contextlib import contextmanager
-from .common import WEB_DATA, DATA, now, job_dir, sha, contained
+from .common import WEB_DATA, DATA, DB_PATH, now, job_dir, sha, contained, media_path
 
 
 class Conflict(ValueError):
@@ -11,8 +11,8 @@ class Conflict(ValueError):
 
 @contextmanager
 def db(write=False):
-    WEB_DATA.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(WEB_DATA / "studio.sqlite3", timeout=30)
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
     conn.row_factory = sqlite3.Row
     try:
         if write:
@@ -29,6 +29,8 @@ def db(write=False):
 
 
 def initialize():
+    if DB_PATH != WEB_DATA / "studio.sqlite3" and not DB_PATH.exists() and (WEB_DATA / "studio.sqlite3").exists():
+        raise RuntimeError("本地审核数据库尚未迁移，请先执行 migrate_runtime.py")
     with db() as c:
         c.execute("PRAGMA journal_mode=WAL")
         c.executescript(
@@ -36,7 +38,9 @@ def initialize():
 CREATE TABLE IF NOT EXISTS reviews(job TEXT,version INTEGER,data TEXT NOT NULL,PRIMARY KEY(job,version));
 CREATE TABLE IF NOT EXISTS media(job TEXT,id TEXT,path TEXT NOT NULL,sha TEXT NOT NULL,PRIMARY KEY(job,id));
 CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,expires REAL NOT NULL);
-CREATE TABLE IF NOT EXISTS versions(job TEXT,id TEXT,data TEXT NOT NULL,PRIMARY KEY(job,id));"""
+CREATE TABLE IF NOT EXISTS versions(job TEXT,id TEXT,data TEXT NOT NULL,PRIMARY KEY(job,id));
+CREATE TABLE IF NOT EXISTS preview_latest(job TEXT,member TEXT,section TEXT,data TEXT NOT NULL,PRIMARY KEY(job,member,section));
+CREATE TABLE IF NOT EXISTS preview_imported(job TEXT,member TEXT,PRIMARY KEY(job,member));"""
         )
 
 
@@ -188,7 +192,7 @@ def save_review(jid, data, expected):
 
 
 def media(jid, path):
-    path = contained(path, DATA)
+    path = media_path(path)
     if not path.is_file():
         raise ValueError("图片文件不存在")
     import hashlib
@@ -205,6 +209,39 @@ def media(jid, path):
     return mid
 
 
+def latest_previews(jid, mid):
+    # Import old persistent pointers once; legacy product/media files stay valid.
+    with db() as c:
+        imported = c.execute("SELECT 1 FROM preview_imported WHERE job=? AND member=?", (jid, mid)).fetchone()
+    if not imported:
+        from .common import read
+        legacy = read(job_dir(jid) / "previews-v2" / mid / "latest.json", {})
+        with db(True) as c:
+            for section, result in legacy.items():
+                c.execute("INSERT OR IGNORE INTO preview_latest VALUES(?,?,?,?)", (jid, mid, section, json.dumps(result)))
+            c.execute("INSERT OR IGNORE INTO preview_imported VALUES(?,?)", (jid, mid))
+    with db() as c:
+        rows = c.execute("SELECT section,data FROM preview_latest WHERE job=? AND member=?", (jid, mid)).fetchall()
+    result = {}
+    for row in rows:
+        value = json.loads(row['data'])
+        try:
+            for p in value['products']:
+                media_file(jid, p['media'])
+        except KeyError:
+            continue  # A lost temporary disk can regenerate previews from durable sources.
+        result[row['section']] = value
+    return result
+
+
+def set_latest_preview(jid, mid, section, result, version):
+    latest_previews(jid, mid)
+    with db(True) as c:
+        row = c.execute("SELECT data FROM jobs WHERE id=?", (jid,)).fetchone()
+        if json.loads(row['data'])['review_version'] == version:
+            c.execute("INSERT OR REPLACE INTO preview_latest VALUES(?,?,?,?)", (jid, mid, section, json.dumps(result)))
+
+
 def media_file(jid, mid):
     with db() as c:
         row = c.execute(
@@ -212,7 +249,7 @@ def media_file(jid, mid):
         ).fetchone()
     if not row:
         raise KeyError("文件不存在")
-    path = contained(row["path"], DATA)
+    path = media_path(row["path"])
     if not path.is_file():
         raise KeyError("文件不存在")
     return path

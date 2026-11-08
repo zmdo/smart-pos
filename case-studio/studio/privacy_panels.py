@@ -83,6 +83,22 @@ def fit_shared_size(size, subjects):
     return tuple(max(1,math.floor(n*scale)) for n in size)
 
 
+def apply_manual_layout(member, scope, panel, face):
+    """Apply live review state to immutable geometry (also used by cached editors)."""
+    edits = member.get('mask_edits', {}).get(scope, {}).get(panel['asset_id'], {})
+    edit = edits.get('faces', {}).get(str(face['source_face']), {}) if edits.get('signature') == panel['signature'] else {}
+    w, h = panel['size']
+    sw, sh = face['sticker_size']
+    x, y = face['default_rect'][:2]
+    if edit.get('position') is not None:
+        x = min(max(0, round(edit['position'][0]*w)), w-sw)
+        y = min(max(0, round(edit['position'][1]*h)), h-sh)
+    rear_enabled = privacy.back_enabled(member, {'state': face['head_state']}, panel.get('back', False))
+    face.update(sticker_rect=[x,y,x+sw,y+sh], deleted=edit.get('deleted', False),
+                manual_position=edit.get('position'), back_disabled=not rear_enabled)
+    return face
+
+
 def mask_panels(member, panels, scope=""):
     """Panels contain image, source and a source-to-panel 3x3 transform.
 
@@ -99,7 +115,7 @@ def mask_panels(member, panels, scope=""):
         with Image.open(panel["source"]) as source:
             size = ImageOps.exif_transpose(source).size
         faces = project_faces(evidence, size, panel["transform"], panel["image"].size)
-        identities.append({"asset_id": panel.get("asset_id", ""), "size": list(panel["image"].size),
+        identities.append({"asset_id": panel.get("asset_id", ""), "size": list(panel["image"].size), "back": panel.get("back", False),
                            "signature": signature({"source": evidence["source_sha256"],
                                                    "faces": evidence["faces"], "transform": panel["transform"],
                                                    "size": panel["image"].size, "back": panel.get("back", False)}),
@@ -130,9 +146,6 @@ def mask_panels(member, panels, scope=""):
     for panel, faces, main, identity in zip(panels, projected, primary, identities):
         image = panel["image"].convert("RGBA")
         placements = []
-        edits = member.get("mask_edits", {}).get(scope, {}).get(identity["asset_id"], {})
-        if edits.get("signature") != identity["signature"]:
-            edits = {}
         for index, face in enumerate(faces):
             if not privacy.needs_mask(face):
                 continue
@@ -145,20 +158,14 @@ def mask_panels(member, panels, scope=""):
             x = min(max(0, round(ax-sw/2)), image.width-sw)
             y = min(max(0, round(bottom-sh)), image.height-sh)
             default_rect = [x, y, x+sw, y+sh]
-            edit = edits.get("faces", {}).get(str(face["source_face"]), {})
-            if edit.get("position") is not None:
-                x = min(max(0, round(edit["position"][0]*image.width)), image.width-sw)
-                y = min(max(0, round(edit["position"][1]*image.height)), image.height-sh)
-            rear_enabled = privacy.back_enabled(member, face, panel.get("back", False))
-            deleted = edit.get("deleted", False)
-            if rear_enabled and not deleted:
-                image.alpha_composite(avatar.resize(size, Image.Resampling.LANCZOS), (x, y))
-            placements.append({"source_face": face["source_face"], "shared": index == main,
+            placement = apply_manual_layout(member, scope, identity, {"source_face": face["source_face"], "shared": index == main,
                                "sticker_size": list(size), "sticker_rect": [x,y,x+sw,y+sh],
-                               "default_rect": default_rect, "deleted": deleted, "back_disabled": not rear_enabled,
-                               "manual_position": edit.get("position"),
+                               "default_rect": default_rect,
                                "face_box": face["box"], "head_state": face["state"], "head_anchor": anchor,
                                "anchor_method": method})
+            if not placement['back_disabled'] and not placement['deleted']:
+                image.alpha_composite(avatar.resize(size, Image.Resampling.LANCZOS), tuple(placement['sticker_rect'][:2]))
+            placements.append(placement)
         outputs.append(image.convert("RGB"))
         identity["faces"] = placements
     return outputs, layout

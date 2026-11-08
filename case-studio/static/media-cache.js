@@ -9,10 +9,20 @@ function db() {
   if (!globalThis.indexedDB) return Promise.resolve(null);
   if (!database)
     database = new Promise((resolve) => {
-      const request = indexedDB.open(DB_NAME, 1);
-      request.onupgradeneeded = () =>
-        request.result.createObjectStore("images", { keyPath: "url" });
-      request.onsuccess = () => resolve(request.result);
+      let blocked = false;
+      const request = indexedDB.open(DB_NAME, 2);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains("images"))
+          request.result.createObjectStore("images", { keyPath: "url" });
+        else request.transaction.objectStore("images").clear(); // disposable v1 cache
+        request.result.createObjectStore("metadata", { keyPath: "url" });
+      };
+      request.onblocked = () => { blocked = true; resolve(null); };
+      request.onsuccess = () => {
+        if (blocked) { request.result.close(); return; }
+        request.result.onversionchange = () => { request.result.close(); database = null; };
+        resolve(request.result);
+      };
       request.onerror = () => resolve(null);
     });
   return database;
@@ -35,10 +45,12 @@ async function persist(url, blob, generation) {
   const connection = await db();
   if (!connection || epoch !== generation || blob.size > LIMIT) return;
   await new Promise((resolve) => {
-    const tx = connection.transaction("images", "readwrite");
+    const tx = connection.transaction(["images", "metadata"], "readwrite");
     const store = tx.objectStore("images");
-    store.put({ url, blob, size: blob.size, used: Date.now() });
-    const request = store.getAll();
+    const metadata = tx.objectStore("metadata");
+    store.put({ url, blob });
+    metadata.put({ url, size: blob.size, used: Date.now() });
+    const request = metadata.getAll();
     request.onsuccess = () => {
       const rows = request.result.sort((a, b) => a.used - b.used);
       let total = rows.reduce((n, row) => n + row.size, 0);
@@ -46,6 +58,7 @@ async function persist(url, blob, generation) {
         if (total <= LIMIT) break;
         if (row.url !== url) {
           store.delete(row.url);
+          metadata.delete(row.url);
           total -= row.size;
         }
       }
@@ -91,7 +104,8 @@ export function imageURL(url) {
       URL.revokeObjectURL(entry.objectURL);
       throw new Error("登录状态已改变");
     }
-    await persist(url, blob, generation);
+    // The image is ready; IndexedDB writes/eviction must not delay its display.
+    void persist(url, blob, generation).catch(() => {});
     let bytes = [...memory.values()].reduce(
       (n, value) => n + (value.size || 0),
       0,
@@ -121,8 +135,9 @@ export async function clearMediaCache() {
   const connection = await db();
   if (connection)
     await new Promise((resolve) => {
-      const tx = connection.transaction("images", "readwrite");
+      const tx = connection.transaction(["images", "metadata"], "readwrite");
       tx.objectStore("images").clear();
+      tx.objectStore("metadata").clear();
       tx.oncomplete = tx.onerror = tx.onabort = () => resolve();
     });
 }

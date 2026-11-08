@@ -1,4 +1,5 @@
 import { openMaskEditor } from "./mask-editor.js";
+import { mergeSaved } from "./review-state.js";
 import { openCrop } from "./crop.js";
 import { openCoverAI } from "./cover-ai.js";
 import { imageURL, clearMediaCache } from "./media-cache.js";
@@ -29,6 +30,7 @@ const state = {
   selectedVersion: null,
   output: false,
   dirty: false,
+  dirtyParts: new Set(),
   saving: null,
 };
 let timer,
@@ -43,6 +45,7 @@ function previewBook(jid = state.job.id, mid = state.member) {
       results: {},
       local: new Set(),
       busy: new Set(),
+      queued: new Set(),
       sequence: {},
       selectedView: null,
     });
@@ -751,6 +754,7 @@ function renderTable() {
 }
 let saveTimer;
 function dirty(part) {
+  state.dirtyParts.add(part || "cover");
   const sections =
     part === "profile" || part === "photos"
       ? ["vs", "cover", "three_views"]
@@ -769,9 +773,8 @@ async function flush() {
   clearTimeout(saveTimer);
   if (state.saving) await state.saving;
   if (!state.dirty || !state.review) return;
-  const m = member(),
-    stamp = JSON.stringify(m);
-  const payload = {
+  const m = member(), before = structuredClone(m), parts = [...state.dirtyParts];
+  const available = {
     profile: m.profile,
     photos: m.photos.map((p) =>
       Object.fromEntries(
@@ -785,8 +788,9 @@ async function flush() {
     cover: m.cover,
     table: m.table,
   };
+  const payload = Object.fromEntries(parts.map(part => [part, available[part]]));
   state.saving = send(
-    `/jobs/${state.job.id}/members/${m.id}`,
+    `/jobs/${state.job.id}/members/${m.id}?compact=true`,
     { version: state.review.version, member: payload },
     "PATCH",
   );
@@ -794,10 +798,12 @@ async function flush() {
     const r = await state.saving;
     state.review.version = r.version;
     state.job.review_version = r.version;
-    if (JSON.stringify(m) === stamp) {
-      state.dirty = false;
-      const updated = r.members.find((x) => x.id === m.id);
-      Object.assign(m, updated);
+    for (const part of parts) {
+      if (JSON.stringify(m[part]) === JSON.stringify(before[part])) state.dirtyParts.delete(part);
+    }
+    mergeSaved(m, r.member, before);
+    state.dirty = state.dirtyParts.size > 0;
+    if (!state.dirty) {
       previewBook().local.clear();
       $("#save-status") && ($("#save-status").textContent = "所有修改已保存");
       for (const path of [
@@ -950,7 +956,10 @@ async function updatePreview(section, initial = false) {
   const jid = state.job.id,
     mid = state.member,
     b = previewBook(jid, mid);
-  if (b.busy.has(section)) return;
+  if (b.busy.has(section)) {
+    if (!initial) b.queued.add(section);
+    return;
+  }
   if (initial && (b.local.has(section) || state.dirty)) return;
   b.busy.add(section);
   previewButtons();
@@ -969,15 +978,23 @@ async function updatePreview(section, initial = false) {
       section,
     });
     if (seq !== b.sequence[section]) return;
-    b.results[section] = result;
-    showPreview(section, result, jid, mid);
-    if (!initial && state.member === mid && state.job?.id === jid)
+    if (!b.queued.has(section)) {
+      b.results[section] = result;
+      showPreview(section, result, jid, mid);
+    }
+    if (!initial && !b.queued.has(section) && !b.local.has(section) &&
+        state.member === mid && state.job?.id === jid &&
+        member()?.preview_keys?.[section] === result.fingerprint)
       toast("展示效果已更新");
   } catch (e) {
     if (state.member === mid && state.job?.id === jid) toast(e.message, true);
   } finally {
     b.busy.delete(section);
-    if (state.member === mid && state.job?.id === jid) previewButtons();
+    const again = b.queued.delete(section);
+    if (state.member === mid && state.job?.id === jid) {
+      previewButtons();
+      if (again) void updatePreview(section);
+    }
   }
 }
 async function editMasks(section) {
@@ -987,10 +1004,12 @@ async function editMasks(section) {
     await openMaskEditor({job:jid,member:member(),section,version:state.review.version,send,
       onSave:async result=>{
         if(state.job?.id!==jid||state.member!==mid)return;
-        state.review=result;state.job.review_version=result.version;
-        reviewPanel();
-        await updatePreview(section);
-        toast("面部遮罩调整已保存");
+        const current=member();
+        mergeSaved(current,result.members.find(m=>m.id===mid),structuredClone(current));
+        state.review.version=result.version;state.job.review_version=result.version;
+        previewButtons();
+        void updatePreview(section);
+        toast("面部遮罩调整已保存，预览正在后台更新");
       }});
   }catch(e){toast(e.message,true);}
 }

@@ -5,6 +5,8 @@ from fastapi.testclient import TestClient
 
 TEMP = tempfile.TemporaryDirectory()
 os.environ["CASE_DATA"] = TEMP.name
+for key in ('STUDIO_WEB_DATA', 'STUDIO_DB_PATH', 'STUDIO_RUNTIME_DIR'):
+    os.environ.pop(key, None)
 os.environ["STUDIO_GATEWAY_PORT"] = "0"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from studio import intake, store, config, review

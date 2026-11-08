@@ -22,11 +22,15 @@
 ```sh
 cd /root/apps/case-studio
 export STUDIO_REPO=/root/apps/case-studio
+export STUDIO_RUNTIME_DIR=/root/autodl-tmp/case-studio-runtime
+export STUDIO_DB_PATH=$STUDIO_RUNTIME_DIR/studio.sqlite3
 bash start.sh
 # 托管时使用 supervisord.conf；仅运行一个 HTTP worker 和一条 GPU 队列。
 ```
 
 本机仅开发代码，图片处理、模型调用和验证均在服务器运行。
+
+生产库已迁到本地盘；手工维护命令也必须使用上述 `STUDIO_DB_PATH`/`STUDIO_RUNTIME_DIR`，不能读取迁移前的数据盘旧库。迁移、持久备份与恢复步骤见 [审核性能优化](../docs/design/review-performance/README.md)。首次部署这些环境变量前必须先迁移数据库。
 
 ## 模块与数据
 
