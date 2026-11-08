@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {mergeSaved} from '../static/review-state.js';
+import {mergeSaved,previewPrerequisite} from '../static/review-state.js';
 
 test('save merges derived identity while preserving typing and bound form references',()=>{
  const target={profile:{name:'张三'},cover:{title:'旧标题',story:'旧内容'},table:{rows:[{type:'体重',after:'50'}]},preview_keys:{cover:'old'}};
@@ -19,4 +19,13 @@ test('mask save preserves existing table/cover handlers and exposes new review f
  mergeSaved(target,{...before,mask_edits:{'vs:front':{a1:{deleted:true}}}},before);
  assert.equal(target.table,table);assert.ok(target.mask_edits['vs:front']);
  target.table.rows.push({type:'身高'});assert.equal(table.rows.length,1);
+});
+
+test('legacy six-view review explains missing head preparation while report remains usable',()=>{
+ const legacy={photos:[{asset_id:'a1'}]};
+ assert.match(previewPrerequisite(legacy,'three_views'),/准备头部遮挡/);
+ assert.equal(previewPrerequisite(legacy,'table'),'');
+ assert.equal(previewPrerequisite({...legacy,privacy:{enabled:false}},'three_views'),'');
+ assert.equal(previewPrerequisite({...legacy,privacy:{status:'ready'}},'three_views'),'');
+ assert.match(previewPrerequisite({...legacy,privacy:{status:'needs_review'}},'vs'),/未通过/);
 });

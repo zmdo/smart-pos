@@ -132,6 +132,10 @@ def worker():
 
 
 def command(jid, args, log):
+    from .render_errors import error_file, read_error
+    render_output = Path(args[6]) if len(args) > 6 and list(args[1:4]) == ['-m', 'studio.bridge', 'render'] else None
+    if render_output is not None:
+        error_file(render_output).unlink(missing_ok=True)
     env = dict(
         os.environ,
         PYTHONPATH=str(APP_ROOT) + os.pathsep + str(REPO),
@@ -173,6 +177,10 @@ def command(jid, args, log):
             with LOCK:
                 PROCESSES.pop(proc.pid, None)
     if code:
+        if render_output is not None:
+            error = read_error(render_output)
+            if error:
+                raise error
         # Logs stay private; model response bodies/credentials are never sent to the browser.
         raise RuntimeError(
             f"处理节点失败（退出码 {code}），请在历史记录重试；详细日志已保留"

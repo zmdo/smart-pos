@@ -1,5 +1,5 @@
 import { openMaskEditor } from "./mask-editor.js";
-import { mergeSaved } from "./review-state.js";
+import { mergeSaved, previewPrerequisite } from "./review-state.js";
 import { openCrop } from "./crop.js";
 import { openCoverAI } from "./cover-ai.js";
 import { imageURL, clearMediaCache } from "./media-cache.js";
@@ -839,14 +839,15 @@ function previewButtons() {
       b.local.has(section) ||
       !b.results[section] ||
       b.results[section].fingerprint !== m.preview_keys?.[section];
-    button.disabled = b.busy.has(section) || !pending;
+    const prerequisite = previewPrerequisite(m, section);
+    button.disabled = b.busy.has(section) || !pending || !!prerequisite;
     button.textContent = b.busy.has(section) ? "正在更新…" : "更新展示效果 ↗";
     if (label)
-      label.textContent = b.busy.has(section)
+      label.textContent = prerequisite || (b.busy.has(section)
         ? "正在生成本区域预览"
         : pending
           ? "展示效果待更新"
-          : "展示效果已更新";
+          : "展示效果已更新");
   }
 }
 function mergePreview() {

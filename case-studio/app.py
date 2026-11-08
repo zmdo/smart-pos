@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from studio import store, config, review, workflow, copywriter, parallel, privacy, stickers, storage_backup
 from studio.common import APP_ROOT, DATA, WEB_DATA, PUBLIC_URL, job_dir, read, save
+from studio.render_errors import RenderInputError
 
 
 @asynccontextmanager
@@ -267,8 +268,11 @@ async def preview(jid: str, mid: str, request: Request):
         return await asyncio.to_thread(
             review.preview, jid, mid, version, body.get("section")
         )
+    except RenderInputError as exc:
+        raise HTTPException(422, str(exc))
     except RuntimeError:
-        raise HTTPException(422, "预览生成失败，请检查封面取景范围与文字长度后重试")
+        label = {'three_views':'完整六图', 'vs':'同朝向对比图', 'cover':'会员案例封面', 'table':'体测对比表'}.get(body.get('section'), '成品')
+        raise HTTPException(422, label + "预览生成失败，详细原因已记录在任务日志中。请稍后重试；若仍失败，请联系维护人员查看日志。")
 
 
 @app.get("/api/jobs/{jid}/previews/{mid}")
@@ -284,6 +288,8 @@ async def open_mask_editor(jid: str, mid: str, request: Request):
         raise ValueError("遮罩面板参数无效")
     try:
         return await asyncio.to_thread(mask_editor.load, jid, mid, body["version"], body["section"])
+    except RenderInputError as exc:
+        raise HTTPException(422, str(exc))
     except RuntimeError:
         raise HTTPException(422, "遮罩面板生成失败，请检查取景与头部准备状态后重试")
 

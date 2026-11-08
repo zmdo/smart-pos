@@ -26,11 +26,16 @@ def main():
         prepare(args[0], Path(args[1]))
     elif action == "render":
         from .rendering import render
+        from .render_errors import record
 
-        render(
-            Path(args[0]), args[1], Path(args[2]), args[3] if len(args) > 3 else None,
-            editor=len(args) > 4 and args[4] == "edit",
-        )
+        try:
+            render(
+                Path(args[0]), args[1], Path(args[2]), args[3] if len(args) > 3 else None,
+                editor=len(args) > 4 and args[4] == "edit",
+            )
+        except ValueError as exc:
+            record(Path(args[2]), exc)
+            raise
     else:
         raise ValueError("Unknown bridge action")
 
