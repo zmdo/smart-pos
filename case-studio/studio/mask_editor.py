@@ -2,7 +2,7 @@
 
 import copy, math, shutil
 from PIL import Image
-from . import store, review, stickers
+from . import store, review, stickers, presentation
 from .common import cache_dir, read, save, signature, PYTHON, clean_name
 from .work_cache import lock_for, EDITOR_SLOTS
 
@@ -39,6 +39,7 @@ def geometry_key(member, section):
     engine = member['_engine']
     return signature({
         'editor': 'mask-editor-v2-thumbnails', 'renderer': RENDER_VERSION, 'section': section,
+        'layout': presentation.VERSION, 'output_width': presentation.settings()['output_width'],
         'sticker': member['privacy']['sticker_id'],
         'photos': [{k:p.get(k) for k in ('asset_id','phase','view','confirmed','preferred')} for p in member['photos']],
         'sources': {k:engine.get(k) for k in ('rows','photos','privacy','metadata')},
@@ -57,6 +58,8 @@ def context(jid, mid, version, section):
     member = next((m for m in data["members"] if m["id"] == mid), None)
     if not member:
         raise KeyError("会员不存在")
+    from .privacy import review_state
+    member['privacy'] = review_state(member, presentation.settings())
     p = member.get("privacy", {})
     if p.get("enabled") is False or not p.get("sticker_id") or p.get("status") != "ready":
         raise ValueError("请先开启并准备本会员的头部遮挡")
@@ -73,7 +76,7 @@ def load(jid, mid, version, section):
         if not (dest / "editor.json").exists():
             if dest.exists():
                 shutil.rmtree(dest)
-            neutral = copy.deepcopy(data)
+            neutral = presentation.freeze(data)
             selected = next(m for m in neutral['members'] if m['id'] == mid)
             selected['mask_edits'] = {}
             selected['privacy']['mask_back'] = True

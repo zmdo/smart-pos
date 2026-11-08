@@ -17,9 +17,10 @@ def place(canvas,path,box):
     canvas.paste(image,(box[0]+(box[2]-box[0]-image.width)//2,box[1]+(box[3]-box[1]-image.height)//2))
 
 
-def draw_single(rows,photos,font):
-    canvas=Image.new("RGB",(1080,1440),BG);draw=ImageDraw.Draw(canvas)
+def draw_single(rows,photos,font,context=None):
+    context=context or {}
+    canvas=Image.new("RGB",(1080,1440),context.get('background',BG));draw=ImageDraw.Draw(canvas)
     row=rows[0];place(canvas,photos[row["asset_id"]],(0,0,1080,1320))
     draw.rectangle((0,1320,1080,1440),fill="white")
-    text(draw,(540,1370),VIEWS[family(row["view"])]+" · "+row["label"],font,40)
+    text(draw,(540,1370),VIEWS[family(row["view"])]+" · "+row["label"],context.get('single_font',font),40)
     return canvas

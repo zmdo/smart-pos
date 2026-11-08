@@ -65,8 +65,8 @@ def draw_brand(canvas,rect,font_path,config,orientation=None):
     title=config.get('title','会员感言');brand=config.get('brand','UP 健身私教馆');elements=[]
     orientation=orientation or ('horizontal' if w>=h*1.6 else 'vertical')
     metrics=brand_metrics(canvas.width,orientation);unit=canvas.width/1080
-    title_font=load_font(font_path,metrics['title_font_px'])
-    brand_font=load_font(font_path,metrics['brand_font_px'],450)
+    title_font=load_font(config.get('fonts',{}).get('title',font_path),metrics['title_font_px'])
+    brand_font=load_font(config.get('fonts',{}).get('brand',font_path),metrics['brand_font_px'],450)
     if draw.textlength(brand,font=brand_font)>w-24*unit:raise ValueError('brand_text_too_long_for_canvas')
     draw.line((x+w*.18,y+16*unit,x+w*.82,y+16*unit),fill=red,width=max(2,round(2*unit)))
 

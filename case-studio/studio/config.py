@@ -1,4 +1,4 @@
-import copy, secrets, threading
+import copy, secrets, threading, re
 from urllib.parse import urlparse
 from .common import DATA, WEB_DATA, read, save
 
@@ -7,6 +7,11 @@ DEFAULTS = {
     "brand_name": "UP 健身私教馆",
     "address": "UP 健身私教馆",
     "width": 1080,
+    "output_width": 1080,
+    "output_background": "#F3F0EA",
+    "default_font": "noto-sans-sc",
+    "font_overrides": {},
+    "mask_lifestyle": False,
     "display_width": 768,
     "consent_text": "*案例真实有效，经会员本人同意使用",
     "before_text": "Before",
@@ -71,6 +76,25 @@ def update(values):
                 if not isinstance(value, str) or len(value) > 120:
                     raise ValueError("设置文字过长")
                 cfg[key] = value
+            elif key == "output_width":
+                if type(value) is not int or not 540 <= value <= 2160 or value % 3:
+                    raise ValueError("成品宽度须为 540–2160 内的 3 的倍数，高度自动按 3:4 计算")
+                cfg[key] = value
+            elif key == "output_background":
+                if not isinstance(value, str) or not re.fullmatch(r'#[0-9a-fA-F]{6}', value):
+                    raise ValueError("背景色必须为 #RRGGBB 格式")
+                cfg[key] = value.upper()
+            elif key == "mask_lifestyle":
+                if type(value) is not bool:
+                    raise ValueError("生活照遮挡设置无效")
+                cfg[key] = value
+            elif key == "default_font":
+                from . import fonts
+                fonts.get(value, active=True)
+                cfg[key] = value
+            elif key == "font_overrides":
+                from . import fonts
+                cfg[key] = fonts.validate_map(value, cfg.get(key))
             elif key in ("width", "display_width", "model_workers"):
                 bounds = {
                     "width": (540, 2160),

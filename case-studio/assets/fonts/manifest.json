@@ -1,0 +1,49 @@
+{
+  "source": "https://github.com/google/fonts",
+  "source_commit": "86aced91de05cd4f96a06838124cca45be337b2b",
+  "license": "SIL Open Font License 1.1",
+  "files": [
+    {
+      "name": "NotoSerifSC.ttf",
+      "title": "思源宋体",
+      "url": "https://raw.githubusercontent.com/google/fonts/86aced91de05cd4f96a06838124cca45be337b2b/ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf",
+      "sha256": "050080d9255a86808f2945bffac582b31ef32bc36411ce29563b4961670c66f9"
+    },
+    {
+      "name": "NotoSerifSC.ttf.OFL.txt",
+      "title": "思源宋体",
+      "url": "https://raw.githubusercontent.com/google/fonts/86aced91de05cd4f96a06838124cca45be337b2b/ofl/notoserifsc/OFL.txt",
+      "sha256": "5e0da210fb04058a8c0087985d2d456b931c2579811a49655721d3cf0c36b6d6"
+    },
+    {
+      "name": "ZCOOLKuaiLe-Regular.ttf",
+      "title": "站酷快乐体",
+      "url": "https://raw.githubusercontent.com/google/fonts/86aced91de05cd4f96a06838124cca45be337b2b/ofl/zcoolkuaile/ZCOOLKuaiLe-Regular.ttf",
+      "sha256": "812a6fc1fe54b6d73a419245c32dfeba8aa33104d5be90d1cf6af082007cb71d"
+    },
+    {
+      "name": "ZCOOLKuaiLe-Regular.ttf.OFL.txt",
+      "title": "站酷快乐体",
+      "url": "https://raw.githubusercontent.com/google/fonts/86aced91de05cd4f96a06838124cca45be337b2b/ofl/zcoolkuaile/OFL.txt",
+      "sha256": "538078469839b4a2e7ad22bef4ebe41681a4e53749bb2a072144024f1d6d703d"
+    },
+    {
+      "name": "MaShanZheng-Regular.ttf",
+      "title": "马善政毛笔体",
+      "url": "https://raw.githubusercontent.com/google/fonts/86aced91de05cd4f96a06838124cca45be337b2b/ofl/mashanzheng/MaShanZheng-Regular.ttf",
+      "sha256": "6d2546bb189c732a8ca29af9e22457b152387d158aa459e4ac2ce1e51788b7fb"
+    },
+    {
+      "name": "MaShanZheng-Regular.ttf.OFL.txt",
+      "title": "马善政毛笔体",
+      "url": "https://raw.githubusercontent.com/google/fonts/86aced91de05cd4f96a06838124cca45be337b2b/ofl/mashanzheng/OFL.txt",
+      "sha256": "d7bdb1cee215b689e23c2f95672a6084c790542170648267a55114103d756a08"
+    },
+    {
+      "name": "NotoSansSC.ttf.OFL.txt",
+      "title": "思源黑体",
+      "url": "https://raw.githubusercontent.com/google/fonts/86aced91de05cd4f96a06838124cca45be337b2b/ofl/notosanssc/OFL.txt",
+      "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+    }
+  ]
+}

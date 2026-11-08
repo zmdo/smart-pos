@@ -5,7 +5,7 @@ from pathlib import Path
 import cv2, numpy as np
 from PIL import Image, ImageOps
 from .common import REPO, FONT, read, save, sha, job_dir, clean_name
-from . import store, privacy
+from . import store, privacy, presentation
 from .privacy_panels import mask_panels
 from scripts.body_scan_delivery.render import plan, draw_product
 from scripts.body_scan_delivery.presentation import nickname
@@ -153,7 +153,7 @@ def grouped_private_photos(member, product, context, out, editor_groups=None):
         with Image.open(paths[aid]) as image:
             images.append(ImageOps.exif_transpose(image).convert("RGB"))
     if product["kind"] == "vs":
-        layout = vs_geometry([im.size for im in images], context["width"], len(context["metrics"]))
+        layout = vs_geometry([im.size for im in images], context["width"], len(context["metrics"]), context.get('canvas_height'))
         sizes = [(r-l, b-t) for l,t,r,b in layout["photo_boxes"]]
     else:
         sizes = [im.size for im in images]
@@ -379,6 +379,7 @@ def prepare(jid, out):
                             path=str(folder / p["file"]),
                             name=f'{dict(training="会员训练日常",testimonial="会员感言",life="会员生活照")[kind]}-{i+1}'
                             + Path(p["file"]).suffix,
+                            **({'layout':p} if kind == 'testimonial' else {}),
                         )
                     )
                 if result.get("reason"):
@@ -447,6 +448,7 @@ def prepare(jid, out):
                 directory=directory,
                 profile=profile,
                 privacy=privacy.defaults(),
+                fonts={},
                 identity={
                     "version": "member-identity-text-v1",
                     **identity.get("evidence", {}),
@@ -484,6 +486,9 @@ def render(review_path, mid, out, section=None, editor=False):
         raise ValueError("预览区域无效")
     review = read(review_path)
     m = next(m for m in review["members"] if m["id"] == mid)
+    preferences = review.get('_render_settings') or presentation.settings()
+    m['_render_settings'] = preferences
+    m['privacy'] = privacy.review_state(m, preferences)
     eng = m["_engine"]
     out.mkdir(parents=True, exist_ok=False)
     rows = []
@@ -507,7 +512,12 @@ def render(review_path, mid, out, section=None, editor=False):
     lookup = {r["asset_id"]: r for r in rows}
     products = []
     editor_groups = [] if editor else None
-    context = dict(m["vs"], width=eng["width"], logo_path=eng.get("logo"))
+    default_font, vs_fonts = presentation.font_context(m, preferences, 'vs')
+    _, single_fonts = presentation.font_context(m, preferences, 'single')
+    context = dict(m["vs"], width=preferences['output_width'], logo_path=eng.get("logo"),
+                   canvas_height=preferences['output_width']*4//3,
+                   background=preferences['output_background'], fonts=vs_fonts,
+                   single_font=single_fonts.get('caption',default_font))
 
     def product(path, kind, name, **extra):
         with Image.open(path) as im:
@@ -534,7 +544,7 @@ def render(review_path, mid, out, section=None, editor=False):
             private_photos = {a: privacy.masked_source(m, eng["photos"][a]) for a in p["asset_ids"]}
         if editor:
             continue
-        im = draw_product(p, selected, private_photos, FONT, context)
+        im = presentation.fit(draw_product(p, selected, private_photos, default_font, context), preferences)
         labels = {"front": "正面", "side": "侧面", "back": "背面", "all": "完整三视图"}
         name = (
             "完整三视图.png"
@@ -586,15 +596,17 @@ def render(review_path, mid, out, section=None, editor=False):
                     editor_groups.append(capture(m, "cover:front", panels, privacy_layout, out))
                 if not editor:
                     c = m["cover"]
-                    c = dict(c, segments=[{"text": c["story"], "emphasis": False}])
+                    _, cover_fonts = presentation.font_context(m, preferences, 'cover')
+                    c = dict(c, segments=[{"text": c["story"], "emphasis": False}], fonts=cover_fonts)
                     im, _ = draw_cover(
                         ims,
                         c,
-                        dict(brand_name=c["brand_name"], logo_path=eng.get("logo")),
-                        FONT,
+                        dict(brand_name=c["brand_name"], logo_path=eng.get("logo"), background=preferences['output_background']),
+                        default_font,
                         m["store"],
                     )
                     file = out / "会员案例封面.jpg"
+                    im = presentation.fit(im, preferences)
                     im.save(file, quality=94)
                     product(file, "cover", file.name, asset_ids=ids, privacy_layout=privacy_layout)
             except ValueError as e:
@@ -611,17 +623,20 @@ def render(review_path, mid, out, section=None, editor=False):
             )
     if section in (None, "table"):
         if m["table"]["rows"]:
+            _, table_fonts = presentation.font_context(m, preferences, 'table')
             case = dict(
                 eng.get("table") or {"rows": [], "pair": {}},
                 **m["table"],
                 reviewed_rows=m["table"]["rows"],
+                fonts=table_fonts, background=preferences['output_background'],
+                canvas_height=preferences['output_width']*4//3,
             )
             file = out / "体测报告对比.png"
             draw_report(
                 case,
                 eng["report_images"],
-                eng.get("report_width", eng["width"]),
-                FONT,
+                preferences['output_width'],
+                default_font,
                 file,
             )
             product(file, "report", file.name)
@@ -629,12 +644,18 @@ def render(review_path, mid, out, section=None, editor=False):
             gaps.append(dict(product="report", reason="没有可输出的表格数据"))
     for e in eng["extras"] if section is None else []:
         file = out / e["name"]
-        source = privacy.masked_source(m, e["path"]) if e["kind"] in ("life", "training") else e["path"]
-        if source == e["path"]:
+        masking = e['kind'] == 'training' or (e['kind'] == 'life' and preferences['mask_lifestyle'])
+        source = privacy.masked_source(m, e["path"]) if masking else e["path"]
+        if e['kind'] == 'life' and source == e["path"]:
             shutil.copy2(source, file)
         else:
             with Image.open(source) as image:
-                image.convert("RGB").save(file, **({"quality": 94} if file.suffix.lower() in (".jpg", ".jpeg") else {}))
+                image = ImageOps.exif_transpose(image).convert('RGB')
+                if e['kind'] == 'testimonial':
+                    image = testimonial_text(image, e, m, preferences)
+                if e['kind'] != 'life':
+                    image = presentation.fit(image, preferences)
+                image.save(file, **({"quality": 94} if file.suffix.lower() in (".jpg", ".jpeg") else {}))
         product(file, e["kind"], e["name"])
     result = dict(
         member_id=mid,
@@ -647,8 +668,29 @@ def render(review_path, mid, out, section=None, editor=False):
         model_calls=0,
         privacy=copy.deepcopy(m.get("privacy", privacy.defaults())),
         mask_edits=copy.deepcopy(m.get("mask_edits", {})),
+        render_settings=preferences, fonts=m.get('fonts', {}), renderer=presentation.VERSION,
     )
     save(out / "result.json", result)
     if editor:
         from .mask_editor import capture_sticker
         save(out / "editor.json", dict(groups=editor_groups, sticker_file=capture_sticker(m, out)))
+
+
+def testimonial_text(image, extra, member, preferences):
+    """Restyle only the known brand rectangle; preserve every chat/privacy pixel."""
+    from testimonial_album.render import draw_brand
+    layout = extra.get('layout')
+    if not layout:
+        source = Path(extra['path']).resolve()
+        root = source.parent.parent
+        for result in read(root/'results.json', []):
+            for page in result.get('pages', []):
+                if (root/page['file']).resolve() == source:
+                    layout = page
+                    break
+    if not layout or 'brand_frame' not in layout:
+        raise ValueError('感言缺少原排版记录，请重新预处理该会员后生成')
+    font, selected = presentation.font_context(member, preferences, 'testimonial')
+    draw_brand(image, layout['brand_frame'], font,
+               {'fonts':selected, 'brand':member['vs']['brand_name']}, layout['brand_orientation'])
+    return image

@@ -42,13 +42,14 @@ def story_lines(segments, path, size, width):
 
 
 def draw_cover(images, copy, presentation, path, store):
-    canvas=Image.new('RGB',SIZE,BG);draw=ImageDraw.Draw(canvas)
+    face=lambda key:copy.get('fonts',{}).get(key,path)
+    canvas=Image.new('RGB',SIZE,presentation.get('background',BG));draw=ImageDraw.Draw(canvas)
     draw.rounded_rectangle((692,26,1050,130),radius=54,outline=RED,width=8)
-    line(draw,copy.get('badge','会员案例'),(716,35,1028,119),path,63,RED,900,center=True)
-    heading=line(draw,copy['title'],(30,81,664,211),path,119,RED,900,minimum=60)
+    line(draw,copy.get('badge','会员案例'),(716,35,1028,119),face('badge'),63,RED,900,center=True)
+    heading=line(draw,copy['title'],(30,81,664,211),face('title'),119,RED,900,minimum=60)
     draw.rectangle((30,214,min(664,30+heading['width']),220),fill=RED)
-    line(draw,copy['subtitle'],(32,244,1048,318),path,67,BROWN,800)
-    line(draw,copy['headline'],(32,339,1048,414),path,71,INK,900)
+    line(draw,copy['subtitle'],(32,244,1048,318),face('subtitle'),67,BROWN,800)
+    line(draw,copy['headline'],(32,339,1048,414),face('headline'),71,INK,900)
     card=Image.new('RGB',(1016,622),RED)
     card.paste(images[0],(8,8));card.paste(images[1],(508,8))
     # Top corners are rounded with the red frame; the bottom is the brand bar.
@@ -62,7 +63,7 @@ def draw_cover(images, copy, presentation, path, store):
         logo=load_logo(presentation['logo_path'],(325,86),presentation.get('logo_sha256'))
         card.paste(logo,(38,516+(86-logo.height)//2),logo)
     else:
-        line(cd,presentation.get('brand_name','UP 健身私教馆'),(36,514,470,597),path,40,'white')
+        line(cd,presentation.get('brand_name','UP 健身私教馆'),(36,514,470,597),face('brand_name'),40,'white')
     # Small location pin drawn as geometry, no external icon asset.
     cd.ellipse((536,521,592,577),fill='white');cd.polygon([(538,555),(564,592),(590,555)],fill='white')
     cd.ellipse((555,540,573,558),fill=RED)
@@ -71,23 +72,23 @@ def draw_cover(images, copy, presentation, path, store):
         address_lines=[address,copy.get('store_text',store)]
     else:
         address_lines=[address[:15],address[15:]] if len(address)>15 else [address,copy.get('store_text',store)]
-    line(cd,address_lines[0],(614,514,982,554),path,32,'white',700)
-    line(cd,address_lines[1],(614,557,982,599),path,32,'white',700)
+    line(cd,address_lines[0],(614,514,982,554),face('address'),32,'white',700)
+    line(cd,address_lines[1],(614,557,982,599),face('address' if len(address)>15 else 'store_text'),32,'white',700)
     mask=Image.new('L',card.size);ImageDraw.Draw(mask).rounded_rectangle((0,0,1015,621),radius=54,fill=255)
     canvas.paste(card,(32,452),mask)
     draw=ImageDraw.Draw(canvas)
     def quote(char, xy):
         mark=Image.new('RGBA',(160,160));md=ImageDraw.Draw(mark)
-        md.text((0,0),char,font=font(path,90,900),fill=BODY)
+        md.text((0,0),char,font=font(face('story'),90,900),fill=BODY)
         mark=ImageOps.contain(mark.crop(mark.getbbox()),(37,32),Image.Resampling.LANCZOS)
         canvas.paste(mark,xy,mark)
     quote('“',(32,1105))
     for fs in range(28,21,-1):
-        lines=story_lines(copy['segments'],path,fs,944)
+        lines=story_lines(copy['segments'],face('story'),fs,944)
         step=round(fs*1.68)
         if len(lines)*step<=285:break
     else:raise ValueError('cover_story_too_long')
-    f=font(path,fs,400)
+    f=font(face('story'),fs,400)
     for i,row in enumerate(lines):
         x=87.;y=1102+i*step+fs
         for ch,emphasis,cw in row:

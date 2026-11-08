@@ -4,6 +4,7 @@ import { openCrop } from "./crop.js";
 import { openCoverAI } from "./cover-ai.js";
 import { imageURL, clearMediaCache } from "./media-cache.js";
 import { privacyPanel, bindPrivacy, libraryPage, imageSettings } from "./privacy.js";
+import { loadFonts, fontLibrary, fontOptions, fontSelect, removeIndexedFonts } from "./fonts.js";
 import {
   productTypes as products,
   downloadPlan,
@@ -106,6 +107,7 @@ function shell(content, active = state.page) {
       ["home", "首页"],
       ["history", "历史记录"],
       ["stickers", "贴纸库"],
+      ["fonts", "字体库"],
       ["settings", "设置"],
     ]
       .map(
@@ -145,7 +147,8 @@ async function route() {
   try {
     await flush();
     const [page, jid] = location.hash.slice(1).split("/");
-    state.page = ["history", "settings", "stickers"].includes(page) ? page : "home";
+    state.page = ["history", "settings", "stickers", "fonts"].includes(page) ? page : "home";
+    await loadFonts(api);
     state.job = null;
     state.review = null;
     state.output = false;
@@ -153,7 +156,8 @@ async function route() {
       await openJob(jid);
       return;
     }
-    if (state.page === "stickers") await libraryPage({api,shell});
+    if (state.page === "fonts") await fontLibrary({api,shell,toast});
+    else if (state.page === "stickers") await libraryPage({api,shell});
     else if (state.page === "settings") await settings();
     else if (state.page === "history") await history();
     else await home();
@@ -263,10 +267,13 @@ async function history() {
       }),
   );
 }
+let defaultFontOverrides = {};
+const defaultFontFields = {brand_name:'vs.brand_name',address:'vs.address',consent_text:'vs.consent_text',before_text:'vs.before_text',after_text:'vs.after_text',vs_text:'vs.vs_text',title_front:'vs.titles.front',title_side:'vs.titles.side',title_back:'vs.titles.back'};
 async function settings() {
   const c = await api("/settings");
+  defaultFontOverrides = {...c.font_overrides};
   shell(
-    `<section class="page-head"><span class="eyebrow">PREFERENCES</span><h1>工作台设置</h1><p>新上传批次使用这里的默认设置，已有审核内容保持独立。</p></section><form id="settings" class="settings-grid"><section class="card"><div class="section-title"><span class="number">01</span><h2>品牌与成品</h2></div>${input("品牌名称", "brand_name", c.brand_name)}${input("默认地址", "address", c.address)}${input("案例说明", "consent_text", c.consent_text)}<div class="field-grid">${input("对比图宽度（像素）", "width", c.width, "number")}${input("标准照片宽度", "display_width", c.display_width, "number")}</div><div class="field-grid">${input("训练前文字", "before_text", c.before_text)}${input("训练后文字", "after_text", c.after_text)}</div>${input("中央文字", "vs_text", c.vs_text)}<div class="field-grid three">${Object.entries(
+    `<section class="page-head"><span class="eyebrow">PREFERENCES</span><h1>工作台设置</h1><p>品牌文案用于新批次；字体、画布与生活照遮挡在下一次预览或生成时生效，历史成品保留。</p></section><form id="settings" class="settings-grid"><section class="card"><div class="section-title"><span class="number">01</span><h2>品牌与成品</h2></div>${input("品牌名称", "brand_name", c.brand_name)}${input("默认地址", "address", c.address)}${input("案例说明", "consent_text", c.consent_text)}<div class="field-grid">${input("标准照片宽度", "display_width", c.display_width, "number")}</div><div class="field-grid">${input("训练前文字", "before_text", c.before_text)}${input("训练后文字", "after_text", c.after_text)}</div>${input("中央文字", "vs_text", c.vs_text)}<div class="field-grid three">${Object.entries(
       c.titles,
     )
       .map(([k, v]) =>
@@ -278,8 +285,11 @@ async function settings() {
       )
       .join(
         "",
-      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section>${imageSettings(c.image_model)}</form>`,
+      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section>${imageSettings(c.image_model)}<section class="card"><div class="section-title"><span class="number">04</span><h2>字体与统一画布</h2></div><label>全局默认字体<select name="default_font">${fontOptions(c.default_font,false)}</select></label><p class="muted">文字旁的字体选择优先；未指定的项跟随默认。<a href="#fonts">管理字体库 ↗</a></p><div class="field-grid"><label>统一成品宽度（像素）<input name="output_width" type="number" min="540" max="2160" step="3" value="${c.output_width}" required></label><label>填充背景色<input name="output_background" type="color" value="${E(c.output_background)}"></label></div><p class="info-panel" id="output-size">成品 ${c.output_width} × ${c.output_width*4/3} 像素 · 固定 3:4</p><label class="check"><input name="mask_lifestyle" type="checkbox" ${c.mask_lifestyle?'checked':''}>生活照也使用会员头像遮挡</label><p class="muted">默认保留生活照原图和尺寸。开启后，尚未检查的生活照需在会员审核中重新准备头部遮挡；原图已有的贴纸仍会保留。</p></section></form>`,
   );
+  $('#settings [name="output_width"]').oninput = event => {
+    const w=Number(event.target.value);$('#output-size').textContent=`成品 ${w} × ${Math.round(w*4/3)} 像素 · 固定 3:4`;
+  };
   $("#settings").onsubmit = async (e) => {
     e.preventDefault();
     const f = new FormData(e.target),
@@ -295,12 +305,20 @@ async function settings() {
     ])
       body[k] = v[k];
     for (const k of [
-      "width",
+      "output_width",
       "display_width",
       "model_workers",
       "gender_confidence_threshold",
     ])
       body[k] = Number(v[k]);
+    body.default_font = v.default_font;
+    body.output_background = v.output_background;
+    body.mask_lifestyle = f.has('mask_lifestyle');
+    body.font_overrides = {...c.font_overrides};
+    for(const [key,value] of f.entries()) if(key.startsWith('font__')) {
+      const path=key.slice(6), aliases=path==='vs.brand_name'?[path,'cover.brand_name','testimonial.brand']:path==='vs.address'?[path,'cover.address']:[path];
+      for(const target of aliases) {if(value)body.font_overrides[target]=value;else delete body.font_overrides[target];}
+    }
     body.titles = {
       front: v.title_front,
       side: v.title_side,
@@ -323,7 +341,8 @@ async function settings() {
   };
 }
 function input(label, name, value, type = "text") {
-  return `<label>${E(label)}<input type="${type}" name="${E(name)}" value="${E(value)}" autocomplete="${type === "password" ? "new-password" : "off"}"></label>`;
+  const path=defaultFontFields[name],picker=path?fontSelect(path,defaultFontOverrides[path],'font__'+path):'';
+  return `<label>${E(label)}<span class="font-field">${picker}<input aria-label="${E(label)}" type="${type}" name="${E(name)}" value="${E(value)}" autocomplete="${type === "password" ? "new-password" : "off"}"></span></label>`;
 }
 async function openJob(jid) {
   clearInterval(poll);
@@ -505,7 +524,16 @@ function identitySummary(m) {
     .join("")}</div>`;
 }
 function field(label, path, value, area = false) {
-  return `<label>${E(label)}${area ? `<textarea data-field="${path}" rows="4">${E(value)}</textarea>` : `<input data-field="${path}" value="${E(value)}">`}</label>`;
+  const picker=/^(vs|cover|table)\./.test(path)?fontSelect(path,member()?.fonts?.[path]):'';
+  return `<label>${E(label)}<span class="font-field ${area?'font-area':''}">${picker}${area ? `<textarea aria-label="${E(label)}" data-field="${path}" rows="4">${E(value)}</textarea>` : `<input aria-label="${E(label)}" data-field="${path}" value="${E(value)}">`}</span></label>`;
+}
+
+function bindFonts(root=document) {
+  root.querySelectorAll('[data-font]').forEach(el=>el.onchange=()=>{
+    const m=member(),key=el.dataset.font;m.fonts??={};
+    if(el.value)m.fonts[key]=el.value;else delete m.fonts[key];
+    dirty('fonts',[key.split('.')[0]]);
+  });
 }
 function reviewPanel() {
   const m = member();
@@ -528,7 +556,7 @@ ${section(
     )
     .join(
       "",
-    )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>${identitySummary(m)}`,
+    )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>${identitySummary(m)}<details class="extra-fonts"><summary>其他成品字体</summary><div class="field-grid three">${[['single.caption','单张体测图说明'],['testimonial.title','会员感言标题'],['testimonial.brand','感言品牌文字']].map(([key,label])=>`<label>${label}${fontSelect(key,m.fonts?.[key])}</label>`).join('')}</div><p class="muted">更改后在下一次成品生成时生效。</p></details>`,
 )}
 ${section("02", "体测图训练阶段", "拖动照片调整前后顺序；同朝向多张时，可选择首选图用于对比与封面。", `<div class="phase-boards" id="boards"></div><div class="row-actions"><button id="confirm-photos">确认本会员所有阶段标记</button><span class="muted">推断与待审结果会保留在下载包的审核说明中。</span></div>`)}
 ${section("02B", "审核完整六图", "训练前后各一组正面、侧面、背面；六个头像可分别调整。", `${updateAction("three_views")}<div class="six-preview" id="three_views-preview"><div class="empty">点击更新展示效果查看六图拼图，或直接调整面部遮罩。</div></div>`)}
@@ -556,6 +584,7 @@ ${section("05", "审核体测对比表", "原始体测数据优先，汇总表�
   renderBoards();
   renderMetrics();
   renderTable();
+  bindFonts();
   bindPrivacy({member:m,job:j.id,api,send,flush,version:()=>state.review.version,toast,
     apply:(result,redraw)=>{
       if(state.job?.id!==j.id||state.member!==m.id)return;
@@ -705,9 +734,10 @@ function renderMetrics() {
   $("#metrics").innerHTML = member()
     .vs.metrics.map(
       (m, i) =>
-        `<div class="metric-row"><input data-metric="${i}" value="${E(m.text)}"><button data-remove-metric="${i}" aria-label="删除指标">×</button></div>`,
+        `<div class="metric-row">${fontSelect('vs.metrics.'+i,member().fonts?.['vs.metrics.'+i])}<input data-metric="${i}" value="${E(m.text)}"><button data-remove-metric="${i}" aria-label="删除指标">×</button></div>`,
     )
     .join("");
+  bindFonts($('#metrics'));
   $$("[data-metric]").forEach(
     (el) =>
       (el.oninput = () => {
@@ -718,6 +748,8 @@ function renderMetrics() {
   $$("[data-remove-metric]").forEach(
     (el) =>
       (el.onclick = () => {
+        member().fonts=removeIndexedFonts(member().fonts,'vs.metrics',+el.dataset.removeMetric);
+        dirty('fonts',['vs']);
         member().vs.metrics.splice(+el.dataset.removeMetric, 1);
         renderMetrics();
         dirty("vs");
@@ -727,7 +759,8 @@ function renderMetrics() {
 function renderTable() {
   const t = member().table;
   $("#table-editor").innerHTML =
-    `<table class="edit-table"><thead><tr>${t.headers.map((v, i) => `<th><input data-header="${i}" value="${E(v)}"></th>`).join("")}<th></th></tr></thead><tbody>${t.rows.map((r, i) => `<tr>${["type", "before", "after", "delta", "unit"].map((k) => `<td><input data-cell="${i}:${k}" value="${E(r[k])}" aria-label="${E(r.type)} ${k}"></td>`).join("")}<td><button data-remove-row="${i}" title="删除行">×</button></td></tr>`).join("")}</tbody></table>`;
+    `<table class="edit-table"><thead><tr>${t.headers.map((v, i) => `<th>${fontSelect('table.headers.'+i,member().fonts?.['table.headers.'+i])}<input data-header="${i}" value="${E(v)}"></th>`).join("")}<th></th></tr></thead><tbody>${t.rows.map((r, i) => `<tr>${["type", "before", "after", "delta", "unit"].map((k) => `<td>${fontSelect(`table.rows.${i}.${k}`,member().fonts?.[`table.rows.${i}.${k}`])}<input data-cell="${i}:${k}" value="${E(r[k])}" aria-label="${E(r.type)} ${k}"></td>`).join("")}<td><button data-remove-row="${i}" title="删除行">×</button></td></tr>`).join("")}</tbody></table>`;
+  bindFonts($('#table-editor'));
   $$("[data-cell]").forEach(
     (el) =>
       (el.oninput = () => {
@@ -746,6 +779,8 @@ function renderTable() {
   $$("[data-remove-row]").forEach(
     (b) =>
       (b.onclick = () => {
+        member().fonts=removeIndexedFonts(member().fonts,'table.rows',+b.dataset.removeRow);
+        dirty('fonts',['table']);
         t.rows.splice(+b.dataset.removeRow, 1);
         renderTable();
         dirty("table");
@@ -753,12 +788,12 @@ function renderTable() {
   );
 }
 let saveTimer;
-function dirty(part) {
+function dirty(part, affected) {
   state.dirtyParts.add(part || "cover");
-  const sections =
+  const sections = affected || (
     part === "profile" || part === "photos"
       ? ["vs", "cover", "three_views"]
-      : [part || "cover"];
+      : [part || "cover"]);
   sections.forEach((s) => previewBook().local.add(s));
   previewButtons();
   state.dirty = true;
@@ -787,6 +822,7 @@ async function flush() {
     vs: m.vs,
     cover: m.cover,
     table: m.table,
+    fonts: m.fonts || {},
   };
   const payload = Object.fromEntries(parts.map(part => [part, available[part]]));
   state.saving = send(

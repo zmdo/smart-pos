@@ -19,7 +19,7 @@ def typeface(path, size, weight):
     return font
 
 
-def geometry(sizes, width, metric_count=3):
+def geometry(sizes, width, metric_count=3, canvas_height=None):
     if len(sizes)!=2 or any(w<=0 or h<=0 for w,h in sizes):raise ValueError('vs_requires_two_valid_photos')
     ratio = sum(w/h for w,h in sizes)
     height = round(width/ratio)
@@ -27,6 +27,19 @@ def geometry(sizes, width, metric_count=3):
     if height<1 or not 0<left<width:raise ValueError('unsupported_vs_photo_aspect_ratio')
     header = round(width*219/1080)
     footer = round(width*(338+90*(math.ceil(metric_count/3)-1))/1080)
+    if canvas_height is not None:
+        available = canvas_height-header-footer
+        if available < width*.25:
+            raise ValueError('vs_canvas_too_short')
+        height = min(height, available)
+        total = min(width, round(height*ratio))
+        left = round(total*(sizes[0][0]/sizes[0][1])/ratio)
+        offset = (width-total)//2
+        top = header+(available-height)//2
+        return {'width':width,'height':canvas_height,'header':header,'photo_height':height,
+                'footer':footer,'footer_top':canvas_height-footer,
+                'photo_boxes':[[offset,top,offset+left,top+height],
+                               [offset+left,top,offset+total,top+height]]}
     return {'width':width,'height':header+height+footer,'header':header,'photo_height':height,
             'footer':footer,'photo_boxes':[[0,header,left,header+height],[left,header,width,header+height]]}
 
@@ -35,18 +48,20 @@ def draw_vs(rows, photos, font, context, view):
     sources=[]
     for row in rows:
         with Image.open(photos[row['asset_id']]) as source:sources.append(source.convert('RGB'))
-    layout=geometry([im.size for im in sources],context['width'],len(context['metrics']))
+    layout=geometry([im.size for im in sources],context['width'],len(context['metrics']),context.get('canvas_height'))
     width=layout['width'];scale=width/1080
     px=lambda n:max(1,round(n*scale))
-    canvas=Image.new('RGB',(width,layout['height']),RED);draw=ImageDraw.Draw(canvas)
+    canvas=Image.new('RGB',(width,layout['height']),context.get('background',RED));draw=ImageDraw.Draw(canvas)
+    draw.rectangle((0,0,width,layout['header']-1),fill=RED)
+    draw.rectangle((0,layout.get('footer_top',layout['header']+layout['photo_height']),width,layout['height']),fill=RED)
     for source,box in zip(sources,layout['photo_boxes']):
         # The only aspect error is integer-pixel rounding (at most one pixel).
         canvas.paste(source.resize((box[2]-box[0],box[3]-box[1]),Image.Resampling.LANCZOS),box[:2])
 
-    def label(value,box,size=40,color=RED,bold=True,align='center'):
+    def label(value,box,size=40,color=RED,bold=True,align='center',key=''):
         x1,y1,x2,y2=box;stroke=0
         for fs in range(px(size),0,-1):
-            f=typeface(font,fs,700 if bold else 400)
+            f=typeface(context.get('fonts',{}).get(key,font),fs,700 if bold else 400)
             bounds=draw.textbbox((0,0),value,font=f,stroke_width=stroke)
             if bounds[2]-bounds[0]<=x2-x1 and bounds[3]-bounds[1]<=y2-y1:break
         x=x2 if align=='right' else (x1+x2)/2
@@ -60,31 +75,32 @@ def draw_vs(rows, photos, font, context, view):
         logo=load_logo(context['logo_path'],(px(660),px(130)),context.get('logo_sha256'))
         canvas.paste(logo,((width-logo.width)//2,px(35)+(px(130)-logo.height)//2),logo)
     else:
-        label(context['brand_name'],(px(200),px(45),width-px(200),px(150)),60,'white')
+        label(context['brand_name'],(px(200),px(45),width-px(200),px(150)),60,'white',key='brand_name')
     if context.get('consent_text'):
-        label(context['consent_text'],(px(690),px(186),width-px(16),px(212)),18,'white',False,align='right')
+        label(context['consent_text'],(px(690),px(186),width-px(16),px(212)),18,'white',False,align='right',key='consent_text')
 
     # The title overlaps only the top edge of the photo, as in the supplied reference.
     box=(width//2-px(135),px(173),width//2+px(135),px(270))
     draw.rounded_rectangle(box,radius=px(25),fill='white',outline=RED,width=px(6))
-    label(context.get('titles',TITLES)[view],(box[0]+px(18),box[1]+px(15),box[2]-px(18),box[3]-px(14)),42)
+    label(context.get('titles',TITLES)[view],(box[0]+px(18),box[1]+px(15),box[2]-px(18),box[3]-px(14)),42,key='titles.'+view)
 
     # Italic, outlined lettering drawn at the native output resolution.
     mark=Image.new('RGBA',(px(240),px(140)));md=ImageDraw.Draw(mark)
-    f=typeface(font,px(96),900)
+    f=typeface(context.get('fonts',{}).get('vs_text',font),px(96),900)
     md.text((px(119),px(66)),context.get('vs_text','VS'),font=f,anchor='mm',fill=RED,stroke_width=px(10),stroke_fill='white')
     md.text((px(119),px(66)),context.get('vs_text','VS'),font=f,anchor='mm',fill=RED,stroke_width=px(2),stroke_fill=RED)
     mark=mark.transform(mark.size,Image.Transform.AFFINE,(1,.23,-px(18),0,1,0),Image.Resampling.BICUBIC)
-    center_y=layout['header']+round(layout['photo_height']*.40)
+    center_y=layout['photo_boxes'][0][1]+round(layout['photo_height']*.40)
     canvas.paste(mark,(width//2-mark.width//2,center_y-mark.height//2),mark)
 
-    bottom=layout['header']+layout['photo_height'];y1=bottom-px(125);y2=bottom-px(25)
+    photo_bottom=layout['photo_boxes'][0][3]
+    bottom=layout.get('footer_top',photo_bottom);y1=photo_bottom-px(125);y2=photo_bottom-px(25)
     for index,photo_box in enumerate(layout['photo_boxes']):
         center=(photo_box[0]+photo_box[2])//2
         half=min(px(120),(photo_box[2]-photo_box[0])*.38)
         b=(round(center-half),y1,round(center+half),y2)
         capsule(b)
-        label((context.get('before_text','Before'),context.get('after_text','After'))[index],(b[0]+px(18),y1+px(6),b[2]-px(18),y2-px(6)),43)
+        label((context.get('before_text','Before'),context.get('after_text','After'))[index],(b[0]+px(18),y1+px(6),b[2]-px(18),y2-px(6)),43,key=('before_text','after_text')[index])
     cx=width//2;cy=(y1+y2)//2
     points=[(cx-px(56),cy-px(27)),(cx+px(16),cy-px(27)),(cx+px(16),cy-px(54)),
             (cx+px(77),cy),(cx+px(16),cy+px(54)),(cx+px(16),cy+px(27)),(cx-px(56),cy+px(27))]
@@ -94,13 +110,13 @@ def draw_vs(rows, photos, font, context, view):
     y=bottom+px(36);box=(px(62),y,width-px(56),y+px(100))
     capsule(box,fill=RED,outline='white',stroke=4)
     namebox=(box[0],box[1],px(300),box[3]);capsule(namebox,outline='white',stroke=1)
-    label(context['nickname'],(namebox[0]+px(20),y+px(15),namebox[2]-px(20),y+px(84)),43)
-    label(context['address'],(px(326),y+px(18),box[2]-px(24),y+px(82)),31,'white')
+    label(context['nickname'],(namebox[0]+px(20),y+px(15),namebox[2]-px(20),y+px(84)),43,key='nickname')
+    label(context['address'],(px(326),y+px(18),box[2]-px(24),y+px(82)),31,'white',key='address')
     for index,metric in enumerate(context['metrics']):
         line,col=divmod(index,3)
         count=min(3,len(context['metrics'])-line*3)
         gap=px(6);margin=px(14);cell=(width-2*margin-gap*(count-1))/count
         x=round(margin+col*(cell+gap));y=bottom+px(171+90*line)
         box=(x,y,round(x+cell),y+px(72));capsule(box,outline='white',stroke=1)
-        label(metric['text'],(box[0]+px(20),y+px(8),box[2]-px(20),y+px(64)),41)
+        label(metric['text'],(box[0]+px(20),y+px(8),box[2]-px(20),y+px(64)),41,key='metrics.'+str(index))
     return canvas

@@ -3,7 +3,7 @@
 import copy, math, uuid, zipfile
 from pathlib import Path
 from .common import read, save, job_dir, cache_dir, clean_name, now, PYTHON, signature
-from . import store
+from . import store, presentation, fonts
 from .work_cache import lock_for, RENDER_SLOTS
 
 PRODUCT_KINDS = frozenset(
@@ -40,17 +40,22 @@ COVER_LIMITS = {
 }
 
 
-def public(data):
+def public(data, preferences=None):
+    preferences = preferences or presentation.settings()
     if isinstance(data, dict):
-        result = {k: public(v) for k, v in data.items() if not k.startswith("_")}
+        result = {k: public(v, preferences) for k, v in data.items() if not k.startswith("_")}
         if "_engine" in data and "photos" in data:
+            from .privacy import review_state
+            result['privacy'] = review_state(data, preferences)
+            result.setdefault('fonts', {})
+            result['render_settings'] = preferences
             result["preview_keys"] = {
-                section: preview_key(data, section)
+                section: preview_key(data, section, preferences)
                 for section in ("vs", "cover", "table", "three_views")
             }
         return result
     if isinstance(data, list):
-        return [public(v) for v in data]
+        return [public(v, preferences) for v in data]
     return data
 
 
@@ -127,7 +132,7 @@ def update(jid, mid, payload):
     if not member:
         raise KeyError("会员不存在")
     incoming = payload.get("member", {})
-    if set(incoming) - {"profile", "photos", "vs", "cover", "table", "privacy"}:
+    if set(incoming) - {"profile", "photos", "vs", "cover", "table", "privacy", "fonts"}:
         raise ValueError("不支持修改该字段")
     old = copy.deepcopy(member)
     if "profile" in incoming:
@@ -234,6 +239,8 @@ def update(jid, mid, payload):
     if "privacy" in incoming:
         from .privacy import validate_update
         member["privacy"] = validate_update(member, incoming["privacy"])
+    if "fonts" in incoming:
+        member["fonts"] = fonts.validate_map(incoming["fonts"], member.get("fonts"))
     sync_profile(member, old)
     return store.save_review(jid, data, expected)
 
@@ -255,12 +262,14 @@ def output_public(jid, result, preview=False):
     return result
 
 
-def preview_key(member, section):
+def preview_key(member, section, preferences=None):
     if section not in ("vs", "cover", "table", "three_views"):
         raise ValueError("预览区域无效")
     engine = member["_engine"]
     data = {
-        "renderer": "studio-section-preview-v3-privacy",
+        "renderer": presentation.VERSION,
+        "presentation": preferences or presentation.settings(),
+        "fonts": {k:v for k,v in member.get('fonts', {}).items() if k.startswith(section+'.')},
         "section": section,
         "values": member.get(section, {}),
     }
@@ -306,11 +315,11 @@ def preview_latest(jid, mid):
 def section_preview(jid, mid, version, section):
     from .workflow import command
 
-    data = store.review(jid, version)
+    data = presentation.freeze(store.review(jid, version))
     member = next((m for m in data["members"] if m["id"] == mid), None)
     if not member:
         raise KeyError("会员不存在")
-    key = preview_key(member, section)
+    key = preview_key(member, section, data['_render_settings'])
     root = cache_dir(jid) / "previews-v3" / mid
     base = root / section / key
     with lock_for(str(base)):
@@ -348,10 +357,11 @@ def preview(jid, mid, version, section=None):
     from .privacy import RENDER_VERSION
 
     with lock_for((jid, mid, version, 'full-preview')), RENDER_SLOTS:
-        review = store.review(jid, version)
+        review = presentation.freeze(store.review(jid, version))
         if mid not in {m["id"] for m in review["members"]}:
             raise KeyError("会员不存在")
-        base = cache_dir(jid) / "previews" / str(version) / RENDER_VERSION / mid
+        style_key = signature({'settings': review['_render_settings'], 'renderer':presentation.VERSION})
+        base = cache_dir(jid) / "previews" / str(version) / RENDER_VERSION / style_key / mid
         base.mkdir(parents=True, exist_ok=True)
         save(base / "review.json", review, True)
         dest = base / mid
@@ -381,7 +391,7 @@ def preview(jid, mid, version, section=None):
 def render_version(jid, review_version):
     from .workflow import command
 
-    review = store.review(jid, review_version)
+    review = presentation.freeze(store.review(jid, review_version))
     vid = now().replace(":", "").replace(".", "") + "-" + uuid.uuid4().hex[:6]
     base = job_dir(jid) / "versions" / vid
     base.mkdir(parents=True)
@@ -405,7 +415,8 @@ def render_version(jid, review_version):
         results.append(output_public(jid, read(dest / "result.json")))
         store.patch(jid, progress=round((i + 1) / len(review["members"]) * 100))
     result = dict(
-        id=vid, review_version=review_version, created_at=now(), members=results
+        id=vid, review_version=review_version, created_at=now(), members=results,
+        render_settings=review['_render_settings'], renderer=presentation.VERSION,
     )
     save(base / "result.json", result)
     return result

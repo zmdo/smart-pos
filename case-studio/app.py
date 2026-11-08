@@ -5,10 +5,10 @@ from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
-from fastapi import FastAPI, Request, UploadFile, File, HTTPException, Query
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException, Query, Form
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from studio import store, config, review, workflow, copywriter, parallel, privacy, stickers, storage_backup
+from studio import store, config, review, workflow, copywriter, parallel, privacy, stickers, storage_backup, fonts
 from studio.common import APP_ROOT, DATA, WEB_DATA, PUBLIC_URL, job_dir, read, save
 from studio.render_errors import RenderInputError
 
@@ -132,6 +132,39 @@ def settings():
 @app.get("/api/stickers")
 def sticker_catalog():
     return [stickers.public(s) for s in stickers.catalog()]
+
+
+@app.get("/api/fonts")
+def font_catalog():
+    return [fonts.public(f) for f in fonts.catalog()]
+
+
+@app.get("/api/fonts/{fid}/preview")
+def font_preview(fid: str):
+    return FileResponse(fonts.preview(fid), media_type="image/png")
+
+
+@app.get("/api/fonts/{fid}/license")
+def font_license(fid: str):
+    font = fonts.get(fid)
+    path = Path(font['path'] + '.OFL.txt')
+    if not font['builtin'] or not path.is_file():
+        raise KeyError('未提供字体许可文件')
+    return FileResponse(path, media_type='text/plain; charset=utf-8')
+
+
+@app.post("/api/fonts")
+async def font_upload(file: UploadFile = File(...), name: str = Form("")):
+    try:
+        data = await file.read(fonts.MAX_BYTES + 1)
+        return await asyncio.to_thread(fonts.upload, data, file.filename, name)
+    finally:
+        await file.close()
+
+
+@app.delete("/api/fonts/{fid}")
+def font_deactivate(fid: str):
+    return fonts.deactivate(fid)
 
 
 @app.get("/api/stickers/{sid}/image")

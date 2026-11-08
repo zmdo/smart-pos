@@ -1,5 +1,5 @@
 {
-  "version": "body-scan-delivery-best-practice-v5",
+  "version": "body-scan-delivery-best-practice-v6",
   "authority": "user-authorized eight-family product generation",
   "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
   "entrypoint": "run.sh",
@@ -18,7 +18,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "9b3f195aaee068706cf3e7551ed9ea4b5804f8d27a7c07a771b1a4c2dd477656"
+      "sha256": "4f01444b4db46967b6e1b0be7316ebf88e729abe8c7a688f3420a337d4b0ae00"
     },
     {
       "path": "category.py",
@@ -177,7 +177,7 @@
       "source_commit": "eaf9964b24ed85e52b70dfaae348ef54c572996c",
       "source_sha256": "b0b7b1c2fb128046051239b52c37f0c0b9f03bc89a187450697ecaff6e7c62ec",
       "unchanged": true,
-      "sha256": "61a9ce55305a459379dcf85733288bbbe0aa59ca2ba4372144f8f407a11e1bde"
+      "sha256": "3169003a3407636f6b7aca89085df0496cf97c8d5e04cedddc79212d3eed71cc"
     },
     {
       "path": "member_cover/run.sh",
@@ -270,7 +270,7 @@
     },
     {
       "path": "report_comparison/render.py",
-      "sha256": "7ce7215b1b183d758d2b84c14b059f966339378f0f5eb7dc3da28e729430aa93",
+      "sha256": "1c1e2a2477130918242167ced71185d785207d8a810000158767ddb9180199b3",
       "source": "best-practices/body-scan-delivery/report_comparison/render.py",
       "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
       "source_sha256": "0706515352851e68432981082565de4b0d2af6a9ed40964315f0a4b3aed2b922",
@@ -431,7 +431,7 @@
     },
     {
       "path": "scripts/body_scan_delivery/render.py",
-      "sha256": "02ed7ab87821544c20bc90c7f752296c63eba3340ad720929f23bc2568ff81ea",
+      "sha256": "48052aa05fc3311f82d473ade6f96de531b302d1807d4f3a74c3e39c73d69c5d",
       "source": "scripts/body_scan_delivery/render.py",
       "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
       "source_sha256": "82189612af7e481baf92553937cf7c176073ebe90f7fa98c2ce6da594d74d47e",
@@ -514,7 +514,7 @@
     },
     {
       "path": "single_view/render.py",
-      "sha256": "fc9bbd81a3331c34a538259f89f7274e963f059ade2f4094fc4928bfc3117b1d",
+      "sha256": "7e8a1f282ccbb3b974f560d1ea20188755b379d1c4964338bdff1813b388630d",
       "source": "scripts/body_scan_delivery/render.py",
       "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
       "source_sha256": "82189612af7e481baf92553937cf7c176073ebe90f7fa98c2ce6da594d74d47e",
@@ -630,7 +630,7 @@
     },
     {
       "path": "testimonial_album/render.py",
-      "sha256": "132cfb2d9cc42b3c920ba5cce6f09c8cad852b449b6c2ccc3a1b75569ca9205d",
+      "sha256": "2a7c6b289565423e31b4f8422f6831b03758a1dc92702c3bb78400001c828497",
       "source": "scripts/testimonial_album/render.py",
       "source_commit": "4ae1d98aef16ca6a2ccf65b6927c23522d90a152",
       "source_sha256": "132cfb2d9cc42b3c920ba5cce6f09c8cad852b449b6c2ccc3a1b75569ca9205d",
@@ -827,7 +827,7 @@
     },
     {
       "path": "view_comparison/render.py",
-      "sha256": "b2b4da0a7d7585994a9c3f3df6df3643d61fbb559edf18dfa59e34512a061901",
+      "sha256": "d793e7f2e0e3b88287900cf1e30fa00a9768653ad95bd67a10014a012f92b416",
       "source": "scripts/body_scan_delivery/vs_layout.py",
       "source_commit": "6d6e20f3767a24ff7d2f26e82abbdf3586183316",
       "source_sha256": "2da0e2392e04577664b10427ca6c1d477e18f6d28b0e8ecf6d7626eb8cff5723",
@@ -904,5 +904,6 @@
       "input_contract": "existing classification-comparison inventory plus original image SHA bindings",
       "archive_validation": "life_photos/validation.json"
     }
-  }
+  },
+  "optional_presentation": "Per-field font paths and fixed canvas geometry; legacy renderer calls remain supported"
 }

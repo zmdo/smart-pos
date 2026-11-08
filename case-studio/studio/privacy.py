@@ -39,7 +39,9 @@ def back_enabled(member, face, back=False):
     return member.get("privacy", {}).get("mask_back", True) or not (back or face["state"] == "hidden")
 
 
-def source_specs(member):
+def source_specs(member, preferences=None):
+    from . import presentation
+    settings = preferences or member.get('_render_settings') or presentation.settings()
     eng = member["_engine"]
     views = {p["asset_id"]: p["view"] for p in member["photos"]}
     specs = {}
@@ -49,9 +51,29 @@ def source_specs(member):
         if aid in eng.get("editors", {}):
             specs.setdefault(meta["source"], {"asset_id": aid, "role": "cover", "front": True})
     for index, e in enumerate(eng.get("extras", [])):
-        if e["kind"] in ("life", "training"):
+        if e["kind"] == "training" or (e["kind"] == "life" and settings['mask_lifestyle']):
             specs.setdefault(e["path"], {"asset_id": e.get("name", str(index)), "role": e["kind"], "front": False})
     return specs
+
+
+def review_state(member, preferences):
+    """Reflect the current scope without rewriting historical scan evidence."""
+    result = dict(defaults(), **copy.deepcopy(member.get('privacy', {})))
+    if not any(e['kind'] == 'life' for e in member['_engine'].get('extras', [])):
+        return result
+    engine = member['_engine'].get('privacy', {})
+    specs = source_specs(member, preferences)
+    required = {s['asset_id'] for s in specs.values()}
+    result['issues'] = [i for i in result.get('issues', []) if i.get('asset_id') in required]
+    if not result.get('sticker_id') or engine.get('version') != VERSION:
+        result['status'] = 'unprepared'
+        return result
+    known = {i['asset_id'] for i in result['issues']}
+    for path, spec in specs.items():
+        if path not in engine.get('sources', {}) and spec['asset_id'] not in known:
+            result['issues'].append({'asset_id':spec['asset_id'], 'reason':'尚未完成头部检查，请重新准备头部遮挡'})
+    result['status'] = 'needs_review' if result['issues'] else 'ready'
+    return result
 
 
 def normalize_scan(value):

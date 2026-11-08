@@ -73,7 +73,7 @@ def plan(rows):
 def draw_product(product,rows,photos,font,context=None):
     if product['kind']=='three_views':return seamless_grid(rows,photos)
     if product['kind']=='vs':return draw_vs(rows,photos,font,context or resolve(product),product['view'])
-    if product['kind']=='single':return draw_single(rows,photos,font)
+    if product['kind']=='single':return draw_single(rows,photos,font,context)
     raise ValueError('unsupported_product_kind')
 
 
