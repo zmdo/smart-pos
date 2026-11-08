@@ -59,17 +59,27 @@ class FacePrivacyTests(unittest.TestCase):
         privacy.overlay(self.source,{'faces':[dict(self.face,box=[0,0,160,200])]},self.sticker,out)
         self.assertTrue(out.is_file())
 
-    def test_compact_backing_covers_face_oval_even_with_alpha_holes(self):
-        # Transparent artwork isolates the protection supplied by the backing.
+    def test_transparent_sticker_pixels_never_gain_an_extra_backing(self):
         avatar=Image.new('RGBA',(80,110),(190,130,80,0))
         for width,height in [(1,1),(3,7),(7,3),(17,23),(23,17),(97,187),(215,287),(300,120)]:
             with self.subTest(size=(width,height)):
                 layer=privacy.face_layer(avatar,width,height)
-                x,y=(layer.width-width)//2,(layer.height-height)//2
-                alpha=layer.getchannel('A').crop((x,y,x+width,y+height))
-                face=Image.new('L',(width,height))
-                ImageDraw.Draw(face).ellipse((0,0,width-1,height-1),fill=255)
-                self.assertIsNone(ImageChops.subtract(face,alpha).getbbox())
+                self.assertIsNone(layer.getchannel('A').getbbox())
+
+    def test_single_photo_keeps_original_pixels_through_sticker_holes(self):
+        source=Image.new('RGB',(240,300),'white')
+        for x in range(0,240,8):
+            ImageDraw.Draw(source).rectangle((x,0,x+3,299),fill='black')
+        source.save(self.source)
+        avatar=Image.new('RGBA',(100,120),'#3d7188')
+        ImageDraw.Draw(avatar).rectangle((25,25,75,95),fill=(0,0,0,0))
+        avatar.save(self.sticker)
+        for state in ('uncovered','hidden'):
+            out=self.folder/(state+'.png')
+            privacy.overlay(self.source,{'faces':[dict(self.face,state=state)]},self.sticker,out)
+            with Image.open(out) as result:
+                self.assertEqual(result.getpixel((108,120)),source.getpixel((108,120)))
+                self.assertIsNotNone(ImageChops.difference(result,source).getbbox())
 
     def test_compact_avatar_reduces_footprint_without_stretching(self):
         avatar=Image.new('RGBA',(634,755),(190,130,80,255))
@@ -230,6 +240,21 @@ class SharedPanelTests(unittest.TestCase):
         evidence={'faces':[dict(self.face,box=[100,200,300,400])]}
         f=privacy_panels.project_faces(evidence,(1000,1000),[[.5,0,-20],[0,.25,10],[0,0,1]],(500,478))
         self.assertEqual(f[0]['box'],[30,60,130,110])
+
+    def test_panel_keeps_photo_detail_through_transparent_sticker_area(self):
+        avatar=Image.new('RGBA',(100,120),'#3d7188')
+        ImageDraw.Draw(avatar).rectangle((25,25,75,95),fill=(0,0,0,0))
+        avatar.save(self.avatar)
+        for state in ('uncovered','hidden'):
+            self.face['state']=state
+            panel=self.panel()
+            for x in range(0,480,8):
+                ImageDraw.Draw(panel['image']).rectangle((x,0,x+3,599),fill='black')
+            outputs,layout=self.mask([panel])
+            l,t,r,b=layout['panels'][0]['faces'][0]['sticker_rect']
+            point=((l+r)//2,(t+b)//2)
+            self.assertEqual(outputs[0].getpixel(point),panel['image'].getpixel(point))
+            self.assertIsNotNone(ImageChops.difference(outputs[0],panel['image']).getbbox())
 
     def test_nonfinite_or_singular_projection_is_rejected(self):
         for H in [[[1,0,0],[0,1,0],[0,0,0]],[[0,0,0],[0,0,0],[0,0,1]],[[float('nan'),0,0],[0,1,0],[0,0,1]]]:

@@ -126,15 +126,10 @@ def mask_panels(member, panels):
         for index, face in enumerate(faces):
             if not privacy.needs_mask(face):
                 continue
-            l, t, r, b = face["box"]
-            cx, cy = (l+r)/2, (t+b)/2
             size = shared if index == main else artwork_size(avatar, face["box"])
             sw, sh = size
             if sw > image.width or sh > image.height:
                 raise ValueError("取景框过紧，无法完整放下统一头像，请扩大取景范围")
-            region = image.crop((math.floor(l), math.floor(t), math.ceil(r), math.ceil(b)))
-            backing = privacy.face_backing(r-l, b-t, region)
-            image.alpha_composite(backing, (round(cx-backing.width/2), round(cy-backing.height/2)))
             anchor, method = head_anchor(face, panel.get("head_points") if index == main else None)
             ax, bottom = anchor
             x = min(max(0, round(ax-sw/2)), image.width-sw)

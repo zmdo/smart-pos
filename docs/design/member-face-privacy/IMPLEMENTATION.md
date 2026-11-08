@@ -61,3 +61,11 @@
 验证：108 项后端测试和 13 项前端行为检查通过。通过真实 Qwen API 生成三张新标准头像，以及唐怡婷、周俊仿的带装饰专属头像；检查真实透明通道与头颈衔接，拒用带脖子的候选。两名会员完整生成 25 张成品，唐怡婷的六图中六个头部均已遮挡，背面对比图两侧也已遮挡；周俊仿的背向单图已遮挡。原图与审核阶段数据不变，缺少后期背面配对时仍如实记录缺项。
 
 验收产物位于服务器 `face-privacy-qa/expressive-v6/`，本机 `artifacts/member-face-privacy/expressive-v6/`；测试日志为 `experiments/face-privacy-expressive-tests.log`。部署记录与备份路径为 `website/expressive-heads-deployment.json`。恢复旧代码时保留新增头像与贴纸目录数据，避免后续审核引用失效。
+
+## 仅贴纸遮挡（2026-11-08）
+
+按最新展示要求移除旧版 3×3 模糊椭圆底板。`privacy.overlay`（独立照片）与 `privacy_panels.mask_panels`（封面、对比、拼图和朝向单图）只做透明头像的 alpha 合成，透明区域保留原图，允许少量边缘露出。头像的统一尺寸、头颈锚点、装饰表情和背向遮挡规则保持不变；不重新生成头像或检测人物。上述历史章节中的椭圆补遮罩不再使用。
+
+绘制版本更新为 `head-overlay-sticker-only-v7`，使遮挡副本、分区预览和完整预览重新生成。旧成品版本保留，报告和人工审核内容不变。回归检查覆盖透明像素不附加底板、单图与拼图的透明孔洞保留原图纹理、背向头部继续贴图，以及原有尺寸、定位和缓存规则。
+
+验证：110 项后端测试通过。复用唐怡婷、周俊仿原有头像与检测证据生成 25 张成品，逐项核对输出数量、尺寸与 19 组成品的头像布局完全一致；可见脸和背向头部只叠加贴纸。验收产物位于服务器 `face-privacy-qa/sticker-only-v7/`，本机 `artifacts/member-face-privacy/sticker-only-v7/`；测试日志为 `experiments/face-privacy-sticker-only-tests.log`。部署备份与验证记录为 `website/sticker-only-deployment.json`。

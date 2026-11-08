@@ -4,13 +4,13 @@ import copy, math, threading, uuid
 import httpx
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageOps
 from . import model_client, avatar_api, stickers, store
 from .common import WEB_DATA, DATA, read, save, sha, signature, contained, job_dir, now
 
 VERSION = "face-privacy-v1"
 SCAN_VERSION = "face-and-back-head-v2"
-RENDER_VERSION = "head-overlay-expressive-v6"
+RENDER_VERSION = "head-overlay-sticker-only-v7"
 STICKER_SCALE = 1.16
 POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="face-privacy")
 LOCK = threading.RLock()
@@ -181,36 +181,12 @@ def validate_update(member, incoming):
     return old
 
 
-def face_backing(face_width, face_height, background=None):
-    """Opaque facial oval with a 5% margin and no recognizable facial detail."""
+def face_layer(avatar, face_width, face_height):
+    """Resize only the sticker; transparent pixels leave the photo untouched."""
     fw, fh = max(1, math.ceil(face_width)), max(1, math.ceil(face_height))
-    px, py = max(2, math.ceil(fw*.05)), max(2, math.ceil(fh*.05))
-    w, h = fw+2*px, fh+2*py
-    # Destroy facial detail underneath transparent corners. Source colors blend
-    # with the photo instead of leaving a conspicuous skin-colored rectangle.
-    if background is None:
-        backing = Image.new("RGBA", (w, h), (0, 0, 0, 255))
-    else:
-        backing = background.convert("RGB").resize((3, 3), Image.Resampling.BOX)
-        backing = backing.resize((w, h), Image.Resampling.BILINEAR).convert("RGBA")
-    alpha = Image.new("L", (w, h))
-    ImageDraw.Draw(alpha).ellipse((0, 0, w-1, h-1), fill=255)
-    backing.putalpha(alpha)
-    return backing
-
-
-def face_layer(avatar, face_width, face_height, background=None):
-    """Cover the facial oval without enlarging the sticker to fill box corners."""
-    fw, fh = max(1, math.ceil(face_width)), max(1, math.ceil(face_height))
-    backing = face_backing(fw, fh, background)
-    w, h = backing.size
     scale = max(fw*STICKER_SCALE/avatar.width, fh*STICKER_SCALE/avatar.height)
     sw, sh = max(1, math.ceil(avatar.width*scale)), max(1, math.ceil(avatar.height*scale))
-    canvas = Image.new("RGBA", (max(w, sw), max(h, sh)))
-    canvas.alpha_composite(backing, ((canvas.width-w)//2, (canvas.height-h)//2))
-    canvas.alpha_composite(avatar.resize((sw, sh), Image.Resampling.LANCZOS),
-                           ((canvas.width-sw)//2, (canvas.height-sh)//2))
-    return canvas
+    return avatar.resize((sw, sh), Image.Resampling.LANCZOS)
 
 
 def overlay(source, evidence, sticker_path, dest):
@@ -225,8 +201,7 @@ def overlay(source, evidence, sticker_path, dest):
             continue
         l,t,r,b = [v*s/1000 for v,s in zip(face["box"], (im.width,im.height,im.width,im.height))]
         cx,cy = (l+r)/2,(t+b)/2
-        region = im.crop((math.floor(l), math.floor(t), math.ceil(r), math.ceil(b)))
-        canvas = face_layer(avatar, r-l, b-t, region)
+        canvas = face_layer(avatar, r-l, b-t)
         im.alpha_composite(canvas, (round(cx-canvas.width/2), round(cy-canvas.height/2)))
     Path(dest).parent.mkdir(parents=True, exist_ok=True)
     im.convert("RGB").save(dest, "PNG")
