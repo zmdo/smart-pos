@@ -1,6 +1,7 @@
 """Authenticated per-product sticker editing, bound to exact render geometry."""
 
 import copy, math, shutil
+from pathlib import Path
 from PIL import Image
 from . import store, review, stickers, presentation
 from .common import cache_dir, read, save, signature, PYTHON, clean_name
@@ -40,6 +41,7 @@ def geometry_key(member, section):
     return signature({
         'editor': 'mask-editor-v2-thumbnails', 'renderer': RENDER_VERSION, 'section': section,
         'layout': presentation.VERSION, 'output_width': presentation.settings()['output_width'],
+        'mask_back': member.get('privacy', {}).get('mask_back', False),
         'sticker': member['privacy']['sticker_id'],
         'photos': [{k:p.get(k) for k in ('asset_id','phase','view','confirmed','preferred')} for p in member['photos']],
         'sources': {k:engine.get(k) for k in ('rows','photos','privacy','metadata')},
@@ -79,7 +81,6 @@ def load(jid, mid, version, section):
             neutral = presentation.freeze(data)
             selected = next(m for m in neutral['members'] if m['id'] == mid)
             selected['mask_edits'] = {}
-            selected['privacy']['mask_back'] = True
             save(base / "review.json", neutral, True)
             with EDITOR_SLOTS:
                 command(jid, [PYTHON, "-m", "studio.bridge", "render", base / "review.json", mid,
@@ -101,9 +102,21 @@ def update(jid, mid, payload):
     if not isinstance(payload, dict) or set(payload) != {"version", "section", "fingerprint", "edits"}:
         raise ValueError("遮罩修改参数无效")
     data, member, key, base = context(jid, mid, payload["version"], payload["section"])
-    if payload["fingerprint"] != key or not (base / "output/editor.json").exists():
-        raise store.Conflict("取景或遮罩设置已更新，请重新打开调整面板")
-    manifest = read(base / "output/editor.json")
+    if payload['fingerprint'] == 'instant-v1':
+        # Recompute trusted geometry only; no image downloads, browser or raster generation.
+        import json, subprocess, playwright
+        from .render_materials import load as materials
+        from .common import APP_ROOT
+        node = Path(playwright.__file__).parent/'driver/node'
+        process = subprocess.run([str(node),str(APP_ROOT/'static/render/geometry.mjs')],
+            input=json.dumps(dict(member=review.public(member),materials=materials(jid,mid),section=payload['section'])),
+            text=True,capture_output=True,timeout=30)
+        if process.returncode: raise ValueError(process.stderr.strip() or '头像几何验证失败')
+        manifest=json.loads(process.stdout)
+    else:
+        if payload["fingerprint"] != key or not (base / "output/editor.json").exists():
+            raise store.Conflict("取景或遮罩设置已更新，请重新打开调整面板")
+        manifest = read(base / "output/editor.json")
     known = {(g["scope"], p["asset_id"], f["source_face"]): (p, f)
              for g in manifest["groups"] for p in g["panels"] for f in p["faces"]}
     incoming = payload["edits"]

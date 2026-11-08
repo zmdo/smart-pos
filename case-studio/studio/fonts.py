@@ -1,5 +1,5 @@
 """Immutable font files and an authenticated catalog for output typography."""
-import hashlib, io, re, threading
+import hashlib, io, re, threading, uuid
 from functools import lru_cache
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
@@ -112,6 +112,23 @@ def preview(fid):
         target.parent.mkdir(parents=True, exist_ok=True)
         canvas.save(target)
     return target
+
+
+def browser_file(fid):
+    """Lossless WOFF2 compression, full character set and variable font axes."""
+    row=get(fid)
+    path=ROOT/'web'/f"{fid}-{row['sha256']}.woff2"
+    if path.exists():
+        return path
+    with LOCK:
+        if not path.exists():
+            path.parent.mkdir(parents=True,exist_ok=True)
+            with TTFont(row['path']) as face:
+                face.flavor='woff2'
+                temp=path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')
+                face.save(temp)
+                temp.replace(path)
+    return path
 
 
 def valid_key(key):

@@ -3,12 +3,14 @@ from pathlib import Path
 from .common import read, save
 
 MESSAGES = {
-    'privacy_unprepared': '尚未完成头部遮挡检查。请在「会员基础信息」点击「准备头部遮挡」，完成后再更新展示效果。',
-    'rear_unprepared': '背向照片尚无可靠头部位置。请在「会员基础信息」重新检查头部，完成后再更新展示效果。',
+    'privacy_unprepared': '尚未完成头部遮挡检查。请在「会员基础信息」点击「准备头部遮挡」，完成后预览会自动更新。',
+    'rear_unprepared': '背向照片尚无可靠头部位置。请在「会员基础信息」重新检查头部，完成后预览会自动更新。',
     'sticker_missing': '尚未准备本会员的头像贴纸。请在「会员基础信息」准备或选择贴纸后重试。',
     'avatar_frame_tight': '照片取景过紧，无法完整放下统一头像。请检查人物头部是否贴近边缘；封面可调整照片取景范围。',
     'cover_crop_invalid': '封面取景超出了有效图片范围，请重新调整左右照片取景框。',
     'face_projection_invalid': '取景后的头部位置无效，请重新检查头部位置和照片取景范围。',
+    'six_sizes_invalid': '完整六图的标准化照片尺寸不一致，请重新预处理该会员；文案与封面取景无需修改。',
+    'text_too_long': '文字超出固定排版区域，请缩短对应文字或更换字体后再生成。',
 }
 KNOWN_ERRORS = {
     '面部遮挡尚未完成检查，请在会员信息顶部准备或重新检查': 'privacy_unprepared',
@@ -17,6 +19,9 @@ KNOWN_ERRORS = {
     '取景框过紧，无法完整放下统一头像，请扩大取景范围': 'avatar_frame_tight',
     '取景后的面部位置无效，请调整取景框': 'face_projection_invalid',
     '取景后的面部范围无效，请调整取景框': 'face_projection_invalid',
+    '封面取景不能超出完整原图范围，请调整取景框': 'cover_crop_invalid',
+    '完整六图需要六张相同尺寸的标准化照片': 'six_sizes_invalid',
+    '文字超出固定区域，请缩短内容或更换字体': 'text_too_long',
 }
 
 

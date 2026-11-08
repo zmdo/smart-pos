@@ -46,6 +46,8 @@ def public(data, preferences=None):
         result = {k: public(v, preferences) for k, v in data.items() if not k.startswith("_")}
         if "_engine" in data and "photos" in data:
             from .privacy import review_state
+            from .render_materials import key
+            result['material_key'] = key(data)
             result['privacy'] = review_state(data, preferences)
             result['fonts'] = fonts.unify_table(data.get('fonts', {}))
             result['render_settings'] = preferences

@@ -24,8 +24,13 @@ def main():
         from .rendering import prepare
 
         prepare(args[0], Path(args[1]))
+    elif action == "materials":
+        from .render_materials import build
+        from .common import read
+        data = read(args[0])
+        build(next(m for m in data['members'] if m['id'] == args[1]), Path(args[2]))
     elif action == "render":
-        from .rendering import render
+        from .canvas_render import render
         from .render_errors import record
 
         try:

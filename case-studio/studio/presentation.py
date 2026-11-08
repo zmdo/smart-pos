@@ -3,7 +3,7 @@ import copy
 from PIL import Image, ImageOps
 from . import config, fonts
 
-VERSION = 'studio-typography-canvas-v2-compact-report'
+VERSION = 'instant-canvas-v1'
 KEYS = ('default_font', 'font_overrides', 'output_width', 'output_background', 'mask_lifestyle', 'mask_training')
 
 

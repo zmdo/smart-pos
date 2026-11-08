@@ -59,7 +59,8 @@ async def access(request, call_next):
     response.headers["Referrer-Policy"] = "same-origin"
     response.headers["X-Frame-Options"] = "DENY"
     if path.startswith("/api/"):
-        response.headers["Cache-Control"] = "no-store"
+        if not (path.startswith('/api/fonts/') and path.endswith('/file') and response.status_code == 200):
+            response.headers["Cache-Control"] = "no-store"
     else:
         response.headers["Cache-Control"] = "no-cache"
     return response
@@ -142,6 +143,12 @@ def font_catalog():
 @app.get("/api/fonts/{fid}/preview")
 def font_preview(fid: str):
     return FileResponse(fonts.preview(fid), media_type="image/png")
+
+
+@app.get("/api/fonts/{fid}/file")
+def font_file(fid: str):
+    return FileResponse(fonts.browser_file(fid), media_type='font/woff2',
+                        headers={'Cache-Control':'private, max-age=31536000, immutable'})
 
 
 @app.get("/api/fonts/{fid}/license")
@@ -278,6 +285,43 @@ def retry(jid: str):
 @app.get("/api/jobs/{jid}/review")
 def get_review(jid: str):
     return review.public(store.review(jid))
+
+
+@app.get('/api/jobs/{jid}/members/{mid}/materials')
+def render_materials(jid: str, mid: str):
+    from studio.render_materials import load
+    return load(jid, mid)
+
+
+@app.get('/api/jobs/{jid}/members/{mid}/defaults')
+def review_defaults(jid: str, mid: str):
+    initial = next(m for m in store.review(jid, 1)['members'] if m['id'] == mid)
+    current = next(m for m in store.review(jid)['members'] if m['id'] == mid)
+    import copy
+    baseline = copy.deepcopy(initial)
+    baseline['profile'] = current['profile']
+    review.sync_profile(baseline, initial)
+    return {k:baseline.get(k,{}) for k in ('profile','vs','cover','table','fonts')}
+
+
+@app.post('/api/jobs/{jid}/members/{mid}/reset')
+async def reset_review(jid: str, mid: str, request: Request):
+    body = await request.json()
+    section = body.get('section')
+    if type(body.get('version')) is not int:
+        raise ValueError('审核版本无效')
+    if section not in ('vs','cover','table','three_views'):
+        raise ValueError('不支持的重置区域')
+    data = store.review(jid)
+    if data['version'] != body.get('version'):
+        raise store.Conflict('审核内容已更新，请刷新后重试')
+    baseline = review_defaults(jid, mid)
+    m = next(m for m in data['members'] if m['id'] == mid)
+    if section != 'three_views': m[section] = baseline[section]
+    m['fonts'] = {k:v for k,v in m.get('fonts',{}).items() if not k.startswith(section+'.')}
+    m['fonts'].update({k:v for k,v in baseline['fonts'].items() if k.startswith(section+'.')})
+    m['mask_edits'] = {k:v for k,v in m.get('mask_edits',{}).items() if not k.startswith(section+':')}
+    return review.public(store.save_review(jid,data,body['version']))
 
 
 @app.patch("/api/jobs/{jid}/members/{mid}")

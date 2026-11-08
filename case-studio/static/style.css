@@ -1957,3 +1957,8 @@ input[type=color] { width:100%; height:46px; padding:5px; }
 
 .report-font-setting { max-width:360px; }
 .report-font-setting .font-select { width:100%; max-width:none; }
+
+/* The same Canvas scene is rendered locally and on the export server. */
+.preview-pane canvas,.table-preview canvas,.six-preview canvas{display:block;max-width:100%;height:auto;margin:auto;border-radius:8px}
+.preview-pane canvas{width:100%}.table-preview canvas{width:min(100%,540px)}.six-preview canvas{width:min(100%,540px)}
+#save-status{cursor:pointer}

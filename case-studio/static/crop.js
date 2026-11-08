@@ -1,13 +1,30 @@
 /* Fixed-aspect independent crop windows. Pointer movement never reshapes a person. */
-export async function openCrop(photos, onSave, previewUrl = null) {
+import { imageURL } from "./media-cache.js";
+export async function openCrop(
+  photos,
+  onSave,
+  previewUrl = null,
+  renderLive = null,
+) {
   const host = document.querySelector("#modal");
-  let closed = false;
-  host.innerHTML = `<div class="modal-backdrop"><section class="crop-dialog" role="dialog" aria-modal="true" aria-labelledby="crop-title"><div class="section-title"><div><span class="eyebrow">COVER FRAMING</span><h2 id="crop-title">调整封面照片取景</h2><p>拖动框调整位置，拖动右下角改变范围。固定 500:478，等比缩放。</p></div><button id="crop-close" aria-label="关闭">×</button></div><p id="crop-loading" class="muted" role="status">正在载入原图，加载完成后可调整取景…</p><div class="crop-editors">${photos.map((_, i) => `<div><h3>${i ? "训练后" : "训练前"}</h3><canvas id="crop-${i}" aria-label="${i ? "训练后" : "训练前"}取景框"></canvas><div class="crop-controls"><label>取景大小 <input type="range" min="20" max="100" id="crop-zoom-${i}"></label><button id="crop-reset-${i}">重置</button></div><div class="crop-nudges" data-index="${i}"><button data-dx="-1">←</button><button data-dy="-1">↑</button><button data-dy="1">↓</button><button data-dx="1">→</button></div></div>`).join("")}</div><div class="live-pair"><span>实时取景预览</span><canvas id="crop-pair" width="1000" height="478"></canvas></div><p class="muted">棋盘格表示原图没有像素的区域，请将取景框放在完整照片内。应用后点击「更新展示效果」刷新完整封面。</p><p id="crop-error" class="error-text"></p><div class="modal-actions"><button id="crop-cancel">取消</button><button class="primary" id="crop-save" disabled>应用取景 ↗</button></div></section></div>`;
+  let closed = false,
+    liveSequence = 0,
+    liveFrame = null;
+  host.innerHTML = `<div class="modal-backdrop"><section class="crop-dialog" role="dialog" aria-modal="true" aria-labelledby="crop-title"><div class="section-title"><div><span class="eyebrow">COVER FRAMING</span><h2 id="crop-title">调整封面照片取景</h2><p>拖动框调整位置，拖动右下角改变范围。固定 500:478，等比缩放。</p></div><button id="crop-close" aria-label="关闭">×</button></div><p id="crop-loading" class="muted" role="status">正在载入原图，加载完成后可调整取景…</p><div class="crop-editors">${photos.map((_, i) => `<div><h3>${i ? "训练后" : "训练前"}</h3><canvas id="crop-${i}" aria-label="${i ? "训练后" : "训练前"}取景框"></canvas><div class="crop-controls"><label>取景大小 <input type="range" min="20" max="100" id="crop-zoom-${i}"></label><button id="crop-reset-${i}">重置</button></div><div class="crop-nudges" data-index="${i}"><button data-dx="-1">←</button><button data-dy="-1">↑</button><button data-dy="1">↓</button><button data-dx="1">→</button></div></div>`).join("")}</div><div class="live-pair"><span>实时取景预览</span><canvas id="crop-pair" width="1000" height="478"></canvas></div><p class="muted">棋盘格表示原图没有像素的区域，请将取景框放在完整照片内。拖动时即时展示完整封面，点击应用保存；取消保留原取景。</p><p id="crop-error" class="error-text"></p><div class="modal-actions"><button id="crop-cancel">取消</button><button class="primary" id="crop-save" disabled>应用取景 ↗</button></div></section></div>`;
   document.body.classList.add("modal-open");
   const data = [];
+  const cropValues = () =>
+    Object.fromEntries(
+      data.map(({ p, im, rect }) => [
+        p.asset_id,
+        rect.map((v, j) => v / (j % 2 ? im.height : im.width)),
+      ]),
+    );
   const ratio = 500 / 478;
   const close = () => {
     closed = true;
+    liveSequence++;
+    if (liveFrame !== null) cancelAnimationFrame(liveFrame);
     host.innerHTML = "";
     document.body.classList.remove("modal-open");
     window.removeEventListener("keydown", key);
@@ -29,6 +46,13 @@ export async function openCrop(photos, onSave, previewUrl = null) {
     }
   }
   let baseCover = null;
+  if (renderLive) {
+    const live = document.querySelector("#crop-pair");
+    live.width = 540;
+    live.height = 720;
+    live.classList.add("full-cover");
+    document.querySelector(".live-pair span").textContent = "实时成品预览";
+  }
   if (previewUrl) {
     baseCover = new Image();
     baseCover.src = previewUrl;
@@ -43,7 +67,7 @@ export async function openCrop(photos, onSave, previewUrl = null) {
   for (let i = 0; i < photos.length; i++) {
     const p = photos[i],
       im = new Image();
-    im.src = p.url;
+    im.src = await imageURL(p.url);
     await decodeImage(im);
     if (closed) return;
     const canvas = document.querySelector("#crop-" + i),
@@ -51,7 +75,16 @@ export async function openCrop(photos, onSave, previewUrl = null) {
     canvas.width = Math.round(im.width * scale);
     canvas.height = Math.round(im.height * scale);
     const rect = p.crop.map((v, j) => v * (j % 2 ? im.height : im.width));
-    data.push({ p, im, canvas, rect, scale, initial: [...rect] });
+    data.push({
+      p,
+      im,
+      canvas,
+      rect,
+      scale,
+      initial: (p.default_crop || p.crop).map(
+        (v, j) => v * (j % 2 ? im.height : im.width),
+      ),
+    });
     let drag;
     const point = (e) => {
       const box = canvas.getBoundingClientRect();
@@ -137,7 +170,7 @@ export async function openCrop(photos, onSave, previewUrl = null) {
   function draw() {
     const pair = document.querySelector("#crop-pair").getContext("2d");
     pair.fillStyle = "#f3f0ea";
-    pair.fillRect(0, 0, 1000, 478);
+    if (!renderLive) pair.fillRect(0, 0, 1000, 478);
     if (baseCover) {
       pair.drawImage(baseCover, 0, 0, 1080, 1440);
       pair.save();
@@ -176,21 +209,43 @@ export async function openCrop(photos, onSave, previewUrl = null) {
         c.lineTo((x + w) * scale, (y + (h * k) / 3) * scale);
         c.stroke();
       }
-      pair.drawImage(
-        im,
-        x,
-        y,
-        w,
-        h,
-        i * 500 + (baseCover ? 40 : 0),
-        baseCover ? 460 : 0,
-        500,
-        478,
-      );
+      if (!renderLive)
+        pair.drawImage(
+          im,
+          x,
+          y,
+          w,
+          h,
+          i * 500 + (baseCover ? 40 : 0),
+          baseCover ? 460 : 0,
+          500,
+          478,
+        );
       document.querySelector("#crop-zoom-" + i).value =
         (w / Math.min(im.width, im.height * ratio)) * 100;
     });
     if (baseCover) pair.restore();
+    if (renderLive) {
+      const seq = ++liveSequence;
+      if (liveFrame !== null) cancelAnimationFrame(liveFrame);
+      liveFrame = requestAnimationFrame(async () => {
+        liveFrame = null;
+        try {
+          const result = await renderLive(cropValues());
+          if (closed || seq !== liveSequence) return;
+          pair.canvas.width = result.canvas.width;
+          pair.canvas.height = result.canvas.height;
+          pair.drawImage(result.canvas, 0, 0);
+          document.querySelector("#crop-error").textContent = "";
+          document.querySelector("#crop-save").disabled = false;
+        } catch (e) {
+          if (!closed && seq === liveSequence) {
+            document.querySelector("#crop-error").textContent = e.message;
+            document.querySelector("#crop-save").disabled = true;
+          }
+        }
+      });
+    }
   }
   draw();
   document.querySelector("#crop-loading").hidden = true;

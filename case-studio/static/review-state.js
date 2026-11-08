@@ -14,5 +14,5 @@ export function previewPrerequisite(member, section) {
   if (section === 'table' || !member.photos?.length || member.privacy?.enabled === false || member.privacy?.status === 'ready') return '';
   return member.privacy?.status === 'needs_review'
     ? '头部检查尚有未通过的照片，请在会员基础信息查看原因并重新检查。'
-    : '请先在会员基础信息点击「准备头部遮挡」，完成后再更新展示效果。';
+    : '请先在会员基础信息点击「准备头部遮挡」，完成后预览会自动更新。';
 }

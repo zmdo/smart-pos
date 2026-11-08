@@ -4,7 +4,7 @@
 
 完整设计见 [重构方案](../docs/design/case-studio-workflow-rebuild/README.md)，部署及实际验收见同目录 `IMPLEMENTATION.md`。此前 `tools/` 实验实现已经删除，历史版本保留在 Git；新网站不导入它们。
 
-审核增强见 [设计与验证](../docs/design/case-studio-review-v2/README.md)：身份自动补全、分区手动更新、封面 AI 文案与提示词模板、浏览器预览缓存。
+审核增强见 [设计与验证](../docs/design/case-studio-review-v2/README.md)：身份自动补全、封面 AI 文案与提示词模板。审核绘制现已升级为 [即时预览与共用绘制器](../docs/design/instant-review-renderer/README.md)：变更事件直接在浏览器重绘，后台串行合并保存；每区可重置。高清导出由服务器运行同一 Canvas 模块，照片、字体和头像编辑复用浏览器素材缓存。
 
 面部隐私保护见 [设计](../docs/design/member-face-privacy/README.md) 与 [验收记录](../docs/design/member-face-privacy/IMPLEMENTATION.md)：默认启用 Qwen API 透明卡通头像，每位会员固定一张，已有完整卡通遮挡保留。提供 100 张带标签的图库贴纸及手动选择；体测图与封面在成品绘制时使用遮挡副本；生活照、训练照由设置页分别控制，默认不加遮挡；新会员后视图默认不贴头像，可单独开启。新任务自动准备；旧任务在审核顶部点击「准备面部遮挡」，再更新预览、生成新版成品。原始照片和旧成品版本保留。
 
@@ -30,7 +30,17 @@ bash start.sh
 # 托管时使用 supervisord.conf；仅运行一个 HTTP worker 和一条 GPU 队列。
 ```
 
-本机仅开发代码，图片处理、模型调用和验证均在服务器运行。
+预处理与高清导出在服务器运行；审核时浏览器使用准备好的素材进行本地排版，不执行模型识别。
+
+首次升级即时绘制器需安装依赖并预热完整字符集 WOFF2 字体（无损压缩，无删字）：
+
+```sh
+$CASE_PYTHON -m pip install -r requirements.txt
+$CASE_PYTHON -m playwright install --with-deps --only-shell chromium
+$CASE_PYTHON -c "from studio import fonts; [fonts.browser_file(f['id']) for f in fonts.catalog()]"
+```
+
+设置 `CASE_PYTHON=/root/apps/non-grid-calibration/.venv/bin/python`；Chromium 仅在离线资源映射中绘图，不访问外站，不占 GPU。头像位置保存使用同一包自带的 Node 运行时校验共享几何规则，不生成预览图片。
 
 生产库已迁到本地盘；手工维护命令也必须使用上述 `STUDIO_DB_PATH`/`STUDIO_RUNTIME_DIR`，不能读取迁移前的数据盘旧库。迁移、持久备份与恢复步骤见 [审核性能优化](../docs/design/review-performance/README.md)。首次部署这些环境变量前必须先迁移数据库。
 

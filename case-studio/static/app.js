@@ -1,10 +1,24 @@
+import { drainChanges } from "./save-pump.js";
+import { createPreview, clearInstant } from "./instant-preview.js";
+import { resetSection, syncProfile } from "./render/model.js";
 import { openMaskEditor } from "./mask-editor.js";
-import { mergeSaved, previewPrerequisite } from "./review-state.js";
+import { mergeSaved } from "./review-state.js";
 import { openCrop } from "./crop.js";
 import { openCoverAI } from "./cover-ai.js";
 import { imageURL, clearMediaCache } from "./media-cache.js";
-import { privacyPanel, bindPrivacy, libraryPage, imageSettings } from "./privacy.js";
-import { loadFonts, fontLibrary, fontOptions, fontSelect, removeIndexedFonts } from "./fonts.js";
+import {
+  privacyPanel,
+  bindPrivacy,
+  libraryPage,
+  imageSettings,
+} from "./privacy.js";
+import {
+  loadFonts,
+  fontLibrary,
+  fontOptions,
+  fontSelect,
+  removeIndexedFonts,
+} from "./fonts.js";
 import {
   productTypes as products,
   downloadPlan,
@@ -34,24 +48,10 @@ const state = {
   dirtyParts: new Set(),
   saving: null,
 };
-let timer,
-  poll,
-  previewSeq = 0;
-const previewBooks = new Map();
+let timer, poll;
+let instant = null,
+  instantGeneration = 0;
 const downloadSelections = new Map();
-function previewBook(jid = state.job.id, mid = state.member) {
-  const key = jid + "/" + mid;
-  if (!previewBooks.has(key))
-    previewBooks.set(key, {
-      results: {},
-      local: new Set(),
-      busy: new Set(),
-      queued: new Set(),
-      sequence: {},
-      selectedView: null,
-    });
-  return previewBooks.get(key);
-}
 const stages = {
   uploading: "上传中",
   queued: "等待处理",
@@ -120,14 +120,20 @@ function shell(content, active = state.page) {
   $("#logout").onclick = async () => {
     await api("/session", { method: "DELETE" });
     await clearMediaCache();
-    previewBooks.clear();
+    instant?.destroy();
+    instant = null;
+    instantGeneration++;
+    clearInstant();
     showLogin();
   };
 }
 function showLogin() {
   clearInterval(poll);
   clearMediaCache();
-  previewBooks.clear();
+  instant?.destroy();
+  instant = null;
+  instantGeneration++;
+  clearInstant();
   $("#modal").innerHTML = "";
   document.body.classList.remove("modal-open");
   $("#app").innerHTML =
@@ -147,7 +153,9 @@ async function route() {
   try {
     await flush();
     const [page, jid] = location.hash.slice(1).split("/");
-    state.page = ["history", "settings", "stickers", "fonts"].includes(page) ? page : "home";
+    state.page = ["history", "settings", "stickers", "fonts"].includes(page)
+      ? page
+      : "home";
     await loadFonts(api);
     state.job = null;
     state.review = null;
@@ -156,8 +164,8 @@ async function route() {
       await openJob(jid);
       return;
     }
-    if (state.page === "fonts") await fontLibrary({api,shell,toast});
-    else if (state.page === "stickers") await libraryPage({api,shell});
+    if (state.page === "fonts") await fontLibrary({ api, shell, toast });
+    else if (state.page === "stickers") await libraryPage({ api, shell });
     else if (state.page === "settings") await settings();
     else if (state.page === "history") await history();
     else await home();
@@ -268,10 +276,20 @@ async function history() {
   );
 }
 let defaultFontOverrides = {};
-const defaultFontFields = {brand_name:'vs.brand_name',address:'vs.address',consent_text:'vs.consent_text',before_text:'vs.before_text',after_text:'vs.after_text',vs_text:'vs.vs_text',title_front:'vs.titles.front',title_side:'vs.titles.side',title_back:'vs.titles.back'};
+const defaultFontFields = {
+  brand_name: "vs.brand_name",
+  address: "vs.address",
+  consent_text: "vs.consent_text",
+  before_text: "vs.before_text",
+  after_text: "vs.after_text",
+  vs_text: "vs.vs_text",
+  title_front: "vs.titles.front",
+  title_side: "vs.titles.side",
+  title_back: "vs.titles.back",
+};
 async function settings() {
   const c = await api("/settings");
-  defaultFontOverrides = {...c.font_overrides};
+  defaultFontOverrides = { ...c.font_overrides };
   shell(
     `<section class="page-head"><span class="eyebrow">PREFERENCES</span><h1>工作台设置</h1><p>品牌文案用于新批次；字体、画布与照片遮挡在下一次预览或生成时生效，历史成品保留。</p></section><form id="settings" class="settings-grid"><section class="card"><div class="section-title"><span class="number">01</span><h2>品牌与成品</h2></div>${input("品牌名称", "brand_name", c.brand_name)}${input("默认地址", "address", c.address)}${input("案例说明", "consent_text", c.consent_text)}<div class="field-grid">${input("标准照片宽度", "display_width", c.display_width, "number")}</div><div class="field-grid">${input("训练前文字", "before_text", c.before_text)}${input("训练后文字", "after_text", c.after_text)}</div>${input("中央文字", "vs_text", c.vs_text)}<div class="field-grid three">${Object.entries(
       c.titles,
@@ -285,10 +303,12 @@ async function settings() {
       )
       .join(
         "",
-      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section>${imageSettings(c.image_model)}<section class="card"><div class="section-title"><span class="number">04</span><h2>字体与统一画布</h2></div><label>全局默认字体<select name="default_font">${fontOptions(c.default_font,false)}</select></label><p class="muted">文字旁的字体选择优先；未指定的项跟随默认。<a href="#fonts">管理字体库 ↗</a></p><div class="field-grid"><label>统一成品宽度（像素）<input name="output_width" type="number" min="540" max="2160" step="3" value="${c.output_width}" required></label><label>填充背景色<input name="output_background" type="color" value="${E(c.output_background)}"></label></div><p class="info-panel" id="output-size">成品 ${c.output_width} × ${c.output_width*4/3} 像素 · 固定 3:4</p><label class="check"><input name="mask_lifestyle" type="checkbox" ${c.mask_lifestyle?'checked':''}>生活照也使用会员头像遮挡</label><label class="check"><input name="mask_training" type="checkbox" ${c.mask_training?'checked':''}>训练照也使用会员头像遮挡</label><p class="muted">生活照与训练照默认不加头像。两个开关分别设置；开启后，尚未检查的对应照片需在会员审核中重新准备头部遮挡。后视体测图默认关闭，可在会员信息中单独开启。</p></section></form>`,
+      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section>${imageSettings(c.image_model)}<section class="card"><div class="section-title"><span class="number">04</span><h2>字体与统一画布</h2></div><label>全局默认字体<select name="default_font">${fontOptions(c.default_font, false)}</select></label><p class="muted">文字旁的字体选择优先；未指定的项跟随默认。<a href="#fonts">管理字体库 ↗</a></p><div class="field-grid"><label>统一成品宽度（像素）<input name="output_width" type="number" min="540" max="2160" step="3" value="${c.output_width}" required></label><label>填充背景色<input name="output_background" type="color" value="${E(c.output_background)}"></label></div><p class="info-panel" id="output-size">成品 ${c.output_width} × ${(c.output_width * 4) / 3} 像素 · 固定 3:4</p><label class="check"><input name="mask_lifestyle" type="checkbox" ${c.mask_lifestyle ? "checked" : ""}>生活照也使用会员头像遮挡</label><label class="check"><input name="mask_training" type="checkbox" ${c.mask_training ? "checked" : ""}>训练照也使用会员头像遮挡</label><p class="muted">生活照与训练照默认不加头像。两个开关分别设置；开启后，尚未检查的对应照片需在会员审核中重新准备头部遮挡。后视体测图默认关闭，可在会员信息中单独开启。</p></section></form>`,
   );
-  $('#settings [name="output_width"]').oninput = event => {
-    const w=Number(event.target.value);$('#output-size').textContent=`成品 ${w} × ${Math.round(w*4/3)} 像素 · 固定 3:4`;
+  $('#settings [name="output_width"]').oninput = (event) => {
+    const w = Number(event.target.value);
+    $("#output-size").textContent =
+      `成品 ${w} × ${Math.round((w * 4) / 3)} 像素 · 固定 3:4`;
   };
   $("#settings").onsubmit = async (e) => {
     e.preventDefault();
@@ -313,20 +333,35 @@ async function settings() {
       body[k] = Number(v[k]);
     body.default_font = v.default_font;
     body.output_background = v.output_background;
-    body.mask_lifestyle = f.has('mask_lifestyle');
-    body.mask_training = f.has('mask_training');
-    body.font_overrides = {...c.font_overrides};
-    for(const [key,value] of f.entries()) if(key.startsWith('font__')) {
-      const path=key.slice(6), aliases=path==='vs.brand_name'?[path,'cover.brand_name','testimonial.brand']:path==='vs.address'?[path,'cover.address']:[path];
-      for(const target of aliases) {if(value)body.font_overrides[target]=value;else delete body.font_overrides[target];}
-    }
+    body.mask_lifestyle = f.has("mask_lifestyle");
+    body.mask_training = f.has("mask_training");
+    body.font_overrides = { ...c.font_overrides };
+    for (const [key, value] of f.entries())
+      if (key.startsWith("font__")) {
+        const path = key.slice(6),
+          aliases =
+            path === "vs.brand_name"
+              ? [path, "cover.brand_name", "testimonial.brand"]
+              : path === "vs.address"
+                ? [path, "cover.address"]
+                : [path];
+        for (const target of aliases) {
+          if (value) body.font_overrides[target] = value;
+          else delete body.font_overrides[target];
+        }
+      }
     body.titles = {
       front: v.title_front,
       side: v.title_side,
       back: v.title_back,
     };
     body.model = { base_url: v.base_url, model: v.model, api_key: v.api_key };
-    body.image_model = {base_url:v.image_base_url,model:v.image_model,api_key:v.image_api_key,reuse_model_key:f.has("image_reuse_key")};
+    body.image_model = {
+      base_url: v.image_base_url,
+      model: v.image_model,
+      api_key: v.image_api_key,
+      reuse_model_key: f.has("image_reuse_key"),
+    };
     try {
       await send("/settings", body, "PUT");
       if ($("#logo").files[0]) {
@@ -342,7 +377,10 @@ async function settings() {
   };
 }
 function input(label, name, value, type = "text") {
-  const path=defaultFontFields[name],picker=path?fontSelect(path,defaultFontOverrides[path],'font__'+path):'';
+  const path = defaultFontFields[name],
+    picker = path
+      ? fontSelect(path, defaultFontOverrides[path], "font__" + path)
+      : "";
   return `<label>${E(label)}<span class="font-field">${picker}<input aria-label="${E(label)}" type="${type}" name="${E(name)}" value="${E(value)}" autocomplete="${type === "password" ? "new-password" : "off"}"></span></label>`;
 }
 async function openJob(jid) {
@@ -506,7 +544,7 @@ function section(n, title, hint, body) {
   return `<section class="card review-section"><div class="section-title"><span class="number">${n}</span><div><h2>${title}</h2><p>${hint}</p></div></div>${body}</section>`;
 }
 function updateAction(section) {
-  return `<div class="preview-actions"><button type="button" class="outline-red" data-refresh="${section}">更新展示效果 ↗</button><span class="muted" data-preview-status="${section}"></span>${section!=="table"?`<button type="button" data-mask-editor="${section}">调整面部遮罩</button>`:""}</div>`;
+  return `<div class="preview-actions"><button type="button" class="outline-red" data-reset-section="${section}">重置</button><span class="muted" data-preview-status="${section}">正在载入绘制素材…</span>${section !== "table" ? `<button type="button" data-mask-editor="${section}">调整面部遮罩</button>` : ""}</div>`;
 }
 function identitySummary(m) {
   return `<div class="identity-summary">${["gender", "coach"]
@@ -525,16 +563,24 @@ function identitySummary(m) {
     .join("")}</div>`;
 }
 function field(label, path, value, area = false) {
-  const picker=/^(vs|cover)\./.test(path)?fontSelect(path,member()?.fonts?.[path]):'';
-  return `<label>${E(label)}<span class="font-field ${area?'font-area':''}">${picker}${area ? `<textarea aria-label="${E(label)}" data-field="${path}" rows="4">${E(value)}</textarea>` : `<input aria-label="${E(label)}" data-field="${path}" value="${E(value)}">`}</span></label>`;
+  const picker = /^(vs|cover)\./.test(path)
+    ? fontSelect(path, member()?.fonts?.[path])
+    : "";
+  return `<label>${E(label)}<span class="font-field ${area ? "font-area" : ""}">${picker}${area ? `<textarea aria-label="${E(label)}" data-field="${path}" rows="4">${E(value)}</textarea>` : `<input aria-label="${E(label)}" data-field="${path}" value="${E(value)}">`}</span></label>`;
 }
 
-function bindFonts(root=document) {
-  root.querySelectorAll('[data-font]').forEach(el=>el.onchange=()=>{
-    const m=member(),key=el.dataset.font;m.fonts??={};
-    if(el.value)m.fonts[key]=el.value;else delete m.fonts[key];
-    dirty('fonts',[key.split('.')[0]]);
-  });
+function bindFonts(root = document) {
+  root.querySelectorAll("[data-font]").forEach(
+    (el) =>
+      (el.onchange = () => {
+        const m = member(),
+          key = el.dataset.font;
+        m.fonts ??= {};
+        if (el.value) m.fonts[key] = el.value;
+        else delete m.fonts[key];
+        dirty("fonts", [key.split(".")[0]]);
+      }),
+  );
 }
 function reviewPanel() {
   const m = member();
@@ -557,14 +603,24 @@ ${section(
     )
     .join(
       "",
-    )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>${identitySummary(m)}<details class="extra-fonts"><summary>其他成品字体</summary><div class="field-grid">${[['testimonial.title','会员感言标题'],['testimonial.brand','感言品牌文字']].map(([key,label])=>`<label>${label}${fontSelect(key,m.fonts?.[key])}</label>`).join('')}</div><p class="muted">更改后在下一次成品生成时生效。</p></details>`,
+    )}</select></label>${field("教练姓名", "profile.coach", m.profile.coach)}</div>${identitySummary(m)}<details class="extra-fonts"><summary>其他成品字体</summary><div class="field-grid">${[
+    ["testimonial.title", "会员感言标题"],
+    ["testimonial.brand", "感言品牌文字"],
+  ]
+    .map(
+      ([key, label]) =>
+        `<label>${label}${fontSelect(key, m.fonts?.[key])}</label>`,
+    )
+    .join(
+      "",
+    )}</div><p class="muted">更改后在下一次成品生成时生效。</p></details>`,
 )}
 ${section("02", "体测图训练阶段", "拖动照片调整前后顺序；同朝向多张时，可选择首选图用于对比与封面。", `<div class="phase-boards" id="boards"></div><div class="row-actions"><button id="confirm-photos">确认本会员所有阶段标记</button><span class="muted">推断与待审结果会保留在下载包的审核说明中。</span></div>`)}
-${section("02B", "审核完整六图", "训练前后各一组正面、侧面、背面；六个头像可分别调整。", `${updateAction("three_views")}<div class="six-preview" id="three_views-preview"><div class="empty">点击更新展示效果查看六图拼图，或直接调整面部遮罩。</div></div>`)}
+${section("02B", "审核完整六图", "训练前后各一组正面、侧面、背面；六个头像可分别调整。", `${updateAction("three_views")}<div class="six-preview" id="three_views-preview"><div class="empty">正在载入六图绘制素材…</div></div>`)}
 ${section(
   "03",
   "审核同朝向对比图",
-  "修改会自动保存；点击更新展示效果后刷新本区域图片。",
+  "修改后即时展示，后台自动保存；可重置本区域的默认方案。",
   `${updateAction("vs")}<div class="edit-with-preview"><div><div class="field-grid">${field("会员称呼", "vs.nickname", m.vs.nickname)}${field("品牌名称", "vs.brand_name", m.vs.brand_name)}</div>${field("地址", "vs.address", m.vs.address)}${field("案例说明", "vs.consent_text", m.vs.consent_text)}<div class="field-grid three">${field("训练前", "vs.before_text", m.vs.before_text)}${field("训练后", "vs.after_text", m.vs.after_text)}${field("中央文字", "vs.vs_text", m.vs.vs_text)}</div><div class="field-grid three">${Object.keys(
     m.vs.titles,
   )
@@ -580,26 +636,43 @@ ${section(
     )}</div><label>底部指标文字</label><div id="metrics"></div><button class="small" id="add-metric">＋ 添加一项</button></div><div class="preview-pane" id="vs-preview"><div class="empty">正在准备成品预览…</div></div></div>`,
 )}
 ${section("04", "审核会员案例封面", "封面独立取景：从正面原图选取头部至胯部，保持人物比例。", `${updateAction("cover")}<div class="row-actions"><button id="cover-ai" class="outline-red">AI生成 ✦</button><span class="muted">选择生成项与资料，套用你的提示词模板。</span></div><div class="edit-with-preview"><div><div class="field-grid">${field("主标题", "cover.title", m.cover.title)}${field("角标", "cover.badge", m.cover.badge)}</div>${field("副标题", "cover.subtitle", m.cover.subtitle)}${field("成果标题", "cover.headline", m.cover.headline)}${field("内容介绍", "cover.story", m.cover.story, true)}<div class="field-grid">${field("品牌名称", "cover.brand_name", m.cover.brand_name)}${field("地址", "cover.address", m.cover.address)}</div>${field("地址第二行 / 门店", "cover.store_text", m.cover.store_text)}<button id="crop" class="outline-red">调整左右照片取景 ↗</button><p class="muted">也可点击右侧封面。左右取景框独立调整，可即时查看组合效果。</p></div><div class="preview-pane cover-preview" id="cover-preview"><div class="empty">正在准备封面预览…</div></div></div>`)}
-${section("05", "审核体测对比表", "原始体测数据优先，汇总表补充缺项。可修改五列内容、增加或删除行。", `${updateAction("table")}<label class="report-font-setting">报告与表格统一字体${fontSelect("table.all",m.fonts?.["table.all"])}</label><p class="muted">统一用于报告标题、表格标题、标签、表头及所有数据。</p><div class="field-grid">${field("表格标题", "table.table_title", m.table.table_title)}${field("报告标题", "table.report_title", m.table.report_title)}</div><div class="field-grid">${field("报告左标签", "table.before_label", m.table.before_label)}${field("报告右标签", "table.after_label", m.table.after_label)}</div><div id="table-editor" class="table-scroll"></div><button id="add-row" class="small">＋ 增加一行</button><div class="table-preview" id="table-preview"></div>`)}
+${section("05", "审核体测对比表", "原始体测数据优先，汇总表补充缺项。可修改五列内容、增加或删除行。", `${updateAction("table")}<label class="report-font-setting">报告与表格统一字体${fontSelect("table.all", m.fonts?.["table.all"])}</label><p class="muted">统一用于报告标题、表格标题、标签、表头及所有数据。</p><div class="field-grid">${field("表格标题", "table.table_title", m.table.table_title)}${field("报告标题", "table.report_title", m.table.report_title)}</div><div class="field-grid">${field("报告左标签", "table.before_label", m.table.before_label)}${field("报告右标签", "table.after_label", m.table.after_label)}</div><div id="table-editor" class="table-scroll"></div><button id="add-row" class="small">＋ 增加一行</button><div class="table-preview" id="table-preview"></div>`)}
 <details class="card sources"><summary>查看原始素材分类与跳过信息 · ${m.sources.length} 张</summary><div class="source-grid">${m.sources.map((s) => `<figure><a href="${media(j.id, s.media)}" target="_blank"><img loading="lazy" src="${media(j.id, s.media)}"></a><figcaption><b>${kinds[s.kind] || s.kind}</b><small>${E(s.reason)}</small></figcaption></figure>`).join("")}</div><div id="gaps"></div></details><div class="review-bottom"><div><b>确认这一批案例</b><small>共 ${state.review.members.length} 位会员 · 可以保留待审标记生成，之后再修正</small></div><button id="generate" class="primary" ${["queued", "processing", "generating"].includes(j.status) ? "disabled" : ""}>${j.status === "generating" ? "正在生成…" : "生成整批成品"} ↗</button></div>`;
   renderBoards();
   renderMetrics();
   renderTable();
   bindFonts();
-  bindPrivacy({member:m,job:j.id,api,send,flush,version:()=>state.review.version,toast,
-    apply:(result,redraw)=>{
-      if(state.job?.id!==j.id||state.member!==m.id)return;
-      if(state.dirty||state.saving)throw new Error("审核内容正在修改，请保存后刷新查看遮挡结果");
-      if(result){state.review=result;state.job.review_version=result.version;}
-      if(redraw)reviewPanel();
-    }});
+  bindPrivacy({
+    member: m,
+    job: j.id,
+    api,
+    send,
+    flush,
+    version: () => state.review.version,
+    toast,
+    apply: (result, redraw) => {
+      if (state.job?.id !== j.id || state.member !== m.id) return;
+      if (state.dirty || state.saving)
+        throw new Error("审核内容正在修改，请保存后刷新查看遮挡结果");
+      if (result) {
+        state.review = result;
+        acceptReviewVersion(result.version);
+      }
+      if (redraw) reviewPanel();
+    },
+  });
   $$("[data-field]").forEach(
     (el) =>
       (el.oninput = () => {
         const parts = el.dataset.field.split(".");
+        const oldProfile = { ...m.profile };
         let obj = m;
         for (const p of parts.slice(0, -1)) obj = obj[p];
         obj[parts.at(-1)] = el.value;
+        if (parts[0] === "profile") {
+          syncProfile(m, oldProfile);
+          syncDerivedInputs();
+        }
         dirty(parts[0]);
         if (parts[0] === "profile") sidebar();
       }),
@@ -628,11 +701,13 @@ ${section("05", "审核体测对比表", "原始体测数据优先，汇总表�
     renderMetrics();
     dirty("vs");
   };
-  $$("[data-mask-editor]").forEach(b=>b.onclick=()=>editMasks(b.dataset.maskEditor));
+  $$("[data-mask-editor]").forEach(
+    (b) => (b.onclick = () => editMasks(b.dataset.maskEditor)),
+  );
   $("#crop").onclick = crop;
   $("#cover-ai").onclick = aiCover;
-  $$("[data-refresh]").forEach(
-    (b) => (b.onclick = () => updatePreview(b.dataset.refresh)),
+  $$("[data-reset-section]").forEach(
+    (b) => (b.onclick = () => resetPreview(b.dataset.resetSection)),
   );
   $("#generate").onclick = generate;
   $("#regen") && ($("#regen").onclick = generate);
@@ -735,10 +810,10 @@ function renderMetrics() {
   $("#metrics").innerHTML = member()
     .vs.metrics.map(
       (m, i) =>
-        `<div class="metric-row">${fontSelect('vs.metrics.'+i,member().fonts?.['vs.metrics.'+i])}<input data-metric="${i}" value="${E(m.text)}"><button data-remove-metric="${i}" aria-label="删除指标">×</button></div>`,
+        `<div class="metric-row">${fontSelect("vs.metrics." + i, member().fonts?.["vs.metrics." + i])}<input data-metric="${i}" value="${E(m.text)}"><button data-remove-metric="${i}" aria-label="删除指标">×</button></div>`,
     )
     .join("");
-  bindFonts($('#metrics'));
+  bindFonts($("#metrics"));
   $$("[data-metric]").forEach(
     (el) =>
       (el.oninput = () => {
@@ -749,8 +824,12 @@ function renderMetrics() {
   $$("[data-remove-metric]").forEach(
     (el) =>
       (el.onclick = () => {
-        member().fonts=removeIndexedFonts(member().fonts,'vs.metrics',+el.dataset.removeMetric);
-        dirty('fonts',['vs']);
+        member().fonts = removeIndexedFonts(
+          member().fonts,
+          "vs.metrics",
+          +el.dataset.removeMetric,
+        );
+        dirty("fonts", ["vs"]);
         member().vs.metrics.splice(+el.dataset.removeMetric, 1);
         renderMetrics();
         dirty("vs");
@@ -761,7 +840,7 @@ function renderTable() {
   const t = member().table;
   $("#table-editor").innerHTML =
     `<table class="edit-table"><thead><tr>${t.headers.map((v, i) => `<th><input data-header="${i}" value="${E(v)}"></th>`).join("")}<th></th></tr></thead><tbody>${t.rows.map((r, i) => `<tr>${["type", "before", "after", "delta", "unit"].map((k) => `<td><input data-cell="${i}:${k}" value="${E(r[k])}" aria-label="${E(r.type)} ${k}"></td>`).join("")}<td><button data-remove-row="${i}" title="删除行">×</button></td></tr>`).join("")}</tbody></table>`;
-  bindFonts($('#table-editor'));
+  bindFonts($("#table-editor"));
   $$("[data-cell]").forEach(
     (el) =>
       (el.oninput = () => {
@@ -786,268 +865,225 @@ function renderTable() {
       }),
   );
 }
-let saveTimer;
+
+function acceptReviewVersion(version) {
+  state.review.version = version;
+  state.job.review_version = version;
+  if (!["processing", "generating"].includes(state.job.status)) {
+    state.job.status = "review";
+    const badge = $(".workspace-head .status");
+    if (badge) {
+      badge.className = "status review";
+      badge.textContent = stages.review;
+    }
+  }
+}
+function syncDerivedInputs() {
+  const m = member();
+  for (const path of [
+    "vs.nickname",
+    "cover.title",
+    "cover.subtitle",
+    "cover.headline",
+    "cover.story",
+  ]) {
+    const [group, key] = path.split("."),
+      input = $(`[data-field="${path}"]`);
+    if (
+      input &&
+      document.activeElement !== input &&
+      input.value !== m[group][key]
+    )
+      input.value = m[group][key];
+  }
+}
 function dirty(part, affected) {
   state.dirtyParts.add(part || "cover");
-  const sections = affected || (
-    part === "profile" || part === "photos"
+  state.dirty = true;
+  const sections =
+    affected ||
+    (part === "profile" || part === "photos"
       ? ["vs", "cover", "three_views"]
       : [part || "cover"]);
-  sections.forEach((s) => previewBook().local.add(s));
-  previewButtons();
-  state.dirty = true;
-  $("#save-status") && ($("#save-status").textContent = "尚未保存…");
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(
-    () => flush().catch((e) => toast(e.message, true)),
-    800,
+  instant?.update(sections);
+  $("#save-status") && ($("#save-status").textContent = "正在保存…");
+  // A change event starts the save pump; there is no timer or periodic scan.
+  queueMicrotask(() =>
+    flush().catch((e) => {
+      $("#save-status") &&
+        ($("#save-status").textContent =
+          "未保存：" + e.message + "（点击重试）");
+      if ($("#save-status"))
+        $("#save-status").onclick = () =>
+          flush().catch((e) => toast(e.message, true));
+    }),
   );
 }
 async function flush() {
-  clearTimeout(saveTimer);
-  if (state.saving) await state.saving;
+  if (state.saving) return state.saving;
   if (!state.dirty || !state.review) return;
-  const m = member(), before = structuredClone(m), parts = [...state.dirtyParts];
-  const available = {
-    profile: m.profile,
-    photos: m.photos.map((p) =>
-      Object.fromEntries(
-        ["asset_id", "phase", "view", "confirmed", "preferred"].map((k) => [
-          k,
-          p[k],
-        ]),
+  return drainChanges(state, async () => {
+    const m = member(),
+      before = structuredClone(m),
+      parts = [...state.dirtyParts];
+    const available = {
+      profile: m.profile,
+      photos: m.photos.map((p) =>
+        Object.fromEntries(
+          ["asset_id", "phase", "view", "confirmed", "preferred"].map((k) => [
+            k,
+            p[k],
+          ]),
+        ),
       ),
-    ),
-    vs: m.vs,
-    cover: m.cover,
-    table: m.table,
-    fonts: m.fonts || {},
-  };
-  const payload = Object.fromEntries(parts.map(part => [part, available[part]]));
-  state.saving = send(
-    `/jobs/${state.job.id}/members/${m.id}?compact=true`,
-    { version: state.review.version, member: payload },
-    "PATCH",
-  );
-  try {
-    const r = await state.saving;
-    state.review.version = r.version;
-    state.job.review_version = r.version;
-    for (const part of parts) {
-      if (JSON.stringify(m[part]) === JSON.stringify(before[part])) state.dirtyParts.delete(part);
-    }
+      vs: m.vs,
+      cover: m.cover,
+      table: m.table,
+      fonts: m.fonts || {},
+    };
+    const r = await send(
+      `/jobs/${state.job.id}/members/${m.id}?compact=true`,
+      {
+        version: state.review.version,
+        member: Object.fromEntries(parts.map((p) => [p, available[p]])),
+      },
+      "PATCH",
+    );
+    acceptReviewVersion(r.version);
+    for (const part of parts)
+      if (JSON.stringify(m[part]) === JSON.stringify(before[part]))
+        state.dirtyParts.delete(part);
     mergeSaved(m, r.member, before);
     state.dirty = state.dirtyParts.size > 0;
-    if (!state.dirty) {
-      previewBook().local.clear();
-      $("#save-status") && ($("#save-status").textContent = "所有修改已保存");
-      for (const path of [
-        "vs.nickname",
-        "cover.title",
-        "cover.subtitle",
-        "cover.headline",
-        "cover.story",
-      ]) {
-        const [group, key] = path.split("."),
-          input = $(`[data-field="${path}"]`);
-        if (input && input.value !== m[group][key]) input.value = m[group][key];
-      }
-      const identity = $(".identity-summary");
-      if (identity) identity.outerHTML = identitySummary(m);
-    }
+    syncDerivedInputs();
     sidebar();
-    previewButtons();
-  } finally {
-    state.saving = null;
-  }
-  if (state.dirty) await flush();
+    const identity = $(".identity-summary");
+    if (identity) identity.outerHTML = identitySummary(m);
+    if (!state.dirty) {
+      $("#save-status") && ($("#save-status").textContent = "所有修改已保存");
+      if ($("#save-status")) $("#save-status").onclick = null;
+    }
+  });
 }
 function previewButtons() {
-  if (!member() || state.output) return;
-  const b = previewBook(),
-    m = member();
-  for (const section of ["vs", "cover", "table", "three_views"]) {
-    const button = $(`[data-refresh="${section}"]`),
-      label = $(`[data-preview-status="${section}"]`);
-    if (!button) continue;
-    const pending =
-      b.local.has(section) ||
-      !b.results[section] ||
-      b.results[section].fingerprint !== m.preview_keys?.[section];
-    const prerequisite = previewPrerequisite(m, section);
-    button.disabled = b.busy.has(section) || !pending || !!prerequisite;
-    button.textContent = b.busy.has(section) ? "正在更新…" : "更新展示效果 ↗";
-    if (label)
-      label.textContent = prerequisite || (b.busy.has(section)
-        ? "正在生成本区域预览"
-        : pending
-          ? "展示效果待更新"
-          : "展示效果已更新");
-  }
-}
-function mergePreview() {
-  const results = previewBook().results;
-  state.preview = {
-    products: Object.values(results).flatMap((r) => r.products),
-    cover_sources: results.cover?.cover_sources || [],
-  };
-}
-function showPreview(section, result, jid, mid) {
-  if (state.job?.id !== jid || state.member !== mid || state.output) return;
-  const b = previewBook(),
-    target = $(`#${section}-preview`);
-  if (!target) return;
-  async function showImage(img, product) {
-    img.dataset.media = product.media;
-    try {
-      const url = await imageURL(media(jid, product.media));
-      if (img.isConnected && img.dataset.media === product.media) img.src = url;
-    } catch (e) {
-      if (img.isConnected) toast(e.message, true);
-    }
-  }
-  if (section === "vs") {
-    const items = result.products.filter((p) => p.kind === "vs");
-    target.innerHTML = items.length
-      ? `<div class="preview-tabs">${items.map((v, i) => `<button data-vstab="${i}">${E(v.name.replace("对比图.jpg", ""))}</button>`).join("")}</div><img id="vs-image" alt="同朝向对比图预览">`
-      : '<div class="empty">需要同朝向的训练前后照片，才能生成对比图。</div>';
-    if (items.length) {
-      const select = (i) => {
-        b.selectedView = items[i].view || items[i].name;
-        showImage($("#vs-image"), items[i]);
-        $$("[data-vstab]").forEach((el) =>
-          el.classList.toggle("active", +el.dataset.vstab === i),
-        );
-      };
-      $$("[data-vstab]").forEach(
-        (el) => (el.onclick = () => select(+el.dataset.vstab)),
-      );
-      select(
-        Math.max(
-          0,
-          items.findIndex((p) => (p.view || p.name) === b.selectedView),
-        ),
-      );
-      items.forEach((p) => imageURL(media(jid, p.media)).catch(() => {}));
-    }
-  } else if (section === "three_views") {
-    const product=result.products.find(p=>p.kind==="three_views");
-    target.innerHTML=product?'<img alt="完整六图预览">':'<div class="empty">缺少完整的训练前后正面、侧面、背面配对，暂不能生成六图。</div>';
-    if(product)showImage(target.querySelector('img'),product);
-  } else {
-    const product = result.products.find(
-      (p) => p.kind === (section === "table" ? "report" : "cover"),
-    );
-    target.innerHTML = product
-      ? section === "cover"
-        ? '<button class="image-button" id="open-cover"><img alt="会员案例封面预览"><span>点击调整照片取景 ↗</span></button>'
-        : '<img alt="体测对比表预览">'
-      : `<div class="empty">${section === "cover" ? "暂无可用封面，需要正面前后配对与可靠肩胯标定。" : "没有表格数据时，不生成体测报告成品。"}</div>`;
-    if (product) showImage(target.querySelector("img"), product);
-    if (section === "cover" && $("#open-cover"))
-      $("#open-cover").onclick = crop;
-  }
-  mergePreview();
-  previewButtons();
+  /* Local Canvas is always current; saving has a separate status. */
 }
 async function loadPreviews() {
-  const jid = state.job.id,
-    mid = state.member,
-    b = previewBook(jid, mid);
-  previewSeq++;
-  for (const [section, result] of Object.entries(b.results))
-    showPreview(section, result, jid, mid);
-  previewButtons();
+  instant?.destroy();
+  instant = null;
+  const generation = ++instantGeneration,
+    jid = state.job.id,
+    mid = state.member;
+  const active = () =>
+    generation === instantGeneration &&
+    state.job?.id === jid &&
+    state.member === mid &&
+    !state.output;
   try {
-    const summary = await api(`/jobs/${jid}/previews/${mid}`);
-    if (state.job?.id !== jid || state.member !== mid || state.output) return;
-    for (const section of ["vs", "cover", "table", "three_views"]) {
-      const result = summary.sections[section];
-      if (
-        result &&
-        (!b.results[section] ||
-          result.review_version >= b.results[section].review_version)
-      ) {
-        b.results[section] = result;
-        showPreview(section, result, jid, mid);
-      }
-    }
-    // Only the first ever preview is automatic. Existing images stay visible until explicitly updated.
-    for (const section of ["vs", "cover", "table", "three_views"]) {
-      if(section==="three_views")continue;
-      const privacy = member()?.privacy;
-      if(section!=="table" && privacy?.enabled!==false && privacy?.status!=="ready") {
-        if(!b.results[section]) $(`#${section}-preview`).innerHTML='<div class="empty">请先在会员信息顶部准备面部遮挡。</div>';
-        continue;
-      }
-      if (!b.results[section] && !b.local.has(section) && !state.dirty)
-        updatePreview(section, true);
-    }
-    previewButtons();
+    const next = await createPreview({
+      job: jid,
+      mid,
+      api,
+      getMember: member,
+      active,
+      onCover: crop,
+      onResult: (section, result) => {
+        if (section === "cover")
+          state.preview = { products: [], cover_sources: result.cover_sources };
+      },
+    });
+    if (active()) instant = next;
+    else next?.destroy();
   } catch (e) {
-    toast(e.message, true);
+    if (active()) {
+      for (const section of ["vs", "cover", "table", "three_views"]) {
+        const el = $(`#${section}-preview`);
+        if (el)
+          el.innerHTML = `<p class="empty">${E(e.message)}</p><button data-retry-local>重新载入素材</button>`;
+      }
+      $$("[data-retry-local]").forEach((b) => (b.onclick = loadPreviews));
+    }
   }
 }
-async function updatePreview(section, initial = false) {
-  const jid = state.job.id,
-    mid = state.member,
-    b = previewBook(jid, mid);
-  if (b.busy.has(section)) {
-    if (!initial) b.queued.add(section);
-    return;
-  }
-  if (initial && (b.local.has(section) || state.dirty)) return;
-  b.busy.add(section);
-  previewButtons();
-  const seq = (b.sequence[section] || 0) + 1;
-  b.sequence[section] = seq;
+async function updatePreview(section) {
+  instant?.update([section]);
+}
+async function resetPreview(section) {
   try {
     await flush();
-    if (
-      state.job?.id !== jid ||
-      state.member !== mid ||
-      (initial && b.local.has(section))
-    )
-      return;
-    const result = await send(`/jobs/${jid}/preview/${mid}`, {
+    if (!instant) throw Error("请等待绘制素材加载完成");
+    const m = member(),
+      before = structuredClone(m),
+      baseline = instant.defaults;
+    // Preserve identity edits made since the first revision.
+    const defaults = structuredClone(baseline);
+    const oldProfile = { ...defaults.profile };
+    defaults.profile = m.profile;
+    syncProfile(defaults, oldProfile);
+    resetSection(m, defaults, section);
+    const resetState = structuredClone(m);
+    const task = send(`/jobs/${state.job.id}/members/${m.id}/reset`, {
       version: state.review.version,
       section,
-    });
-    if (seq !== b.sequence[section]) return;
-    if (!b.queued.has(section)) {
-      b.results[section] = result;
-      showPreview(section, result, jid, mid);
-    }
-    if (!initial && !b.queued.has(section) && !b.local.has(section) &&
-        state.member === mid && state.job?.id === jid &&
-        member()?.preview_keys?.[section] === result.fingerprint)
-      toast("展示效果已更新");
+    })
+      .then((result) => {
+        mergeSaved(
+          m,
+          result.members.find((x) => x.id === m.id),
+          resetState,
+        );
+        acceptReviewVersion(result.version);
+      })
+      .catch((e) => {
+        mergeSaved(m, before, resetState);
+        reviewPanel();
+        throw Error("重置未保存，已保留此前方案：" + e.message);
+      })
+      .finally(() => (state.saving = null));
+    state.saving = task;
+    reviewPanel();
+    await task;
+    if (state.dirty) await flush();
+    else if ($("#save-status"))
+      $("#save-status").textContent = "已恢复本区域默认方案";
+    toast("已重置本区域");
   } catch (e) {
-    if (state.member === mid && state.job?.id === jid) toast(e.message, true);
-  } finally {
-    b.busy.delete(section);
-    const again = b.queued.delete(section);
-    if (state.member === mid && state.job?.id === jid) {
-      previewButtons();
-      if (again) void updatePreview(section);
-    }
+    toast(e.message, true);
   }
 }
 async function editMasks(section) {
   try {
     await flush();
-    const jid=state.job.id, mid=state.member;
-    await openMaskEditor({job:jid,member:member(),section,version:state.review.version,send,
-      onSave:async result=>{
-        if(state.job?.id!==jid||state.member!==mid)return;
-        const current=member();
-        mergeSaved(current,result.members.find(m=>m.id===mid),structuredClone(current));
-        state.review.version=result.version;state.job.review_version=result.version;
+    const jid = state.job.id,
+      mid = state.member;
+    await openMaskEditor({
+      job: jid,
+      member: member(),
+      section,
+      version: state.review.version,
+      send,
+      localManifest: async () => {
+        if (!instant) await loadPreviews();
+        if (!instant) throw Error("绘制素材尚未就绪，请重试");
+        return instant.mask(section, state.review.version);
+      },
+      onSave: async (result) => {
+        if (state.job?.id !== jid || state.member !== mid) return;
+        const current = member();
+        mergeSaved(
+          current,
+          result.members.find((m) => m.id === mid),
+          structuredClone(current),
+        );
+        acceptReviewVersion(result.version);
         previewButtons();
         void updatePreview(section);
-        toast("面部遮罩调整已保存，预览正在后台更新");
-      }});
-  }catch(e){toast(e.message,true);}
+        toast("面部遮罩调整已保存");
+      },
+    });
+  } catch (e) {
+    toast(e.message, true);
+  }
 }
 
 async function aiCover() {
@@ -1076,7 +1112,7 @@ async function aiCover() {
         }
         dirty("cover");
         await flush();
-        toast("AI 文案已填入，点击更新展示效果查看封面");
+        toast("AI 文案已填入，封面已更新");
       },
     });
   } catch (e) {
@@ -1111,6 +1147,13 @@ async function crop() {
       pics.map((p) => ({
         ...p,
         url: media(state.job.id, p.cover_media),
+        default_crop:
+          instant?.mats.pairs[
+            pics
+              .map((p) => p.asset_id)
+              .sort()
+              .join("|")
+          ]?.crops[p.asset_id] || p.default_crop,
         crop:
           m.cover.crops[p.asset_id] ||
           state.preview?.cover_sources.find((s) => s.asset_id === p.asset_id)
@@ -1121,16 +1164,10 @@ async function crop() {
         Object.assign(m.cover.crops, crops);
         dirty("cover");
         await flush();
-        toast("取景已保存，点击更新展示效果查看最新封面");
+        toast("取景已保存，封面已更新");
       },
-      state.preview?.products.find((p) => p.kind === "cover")
-        ? await imageURL(
-            media(
-              state.job.id,
-              state.preview.products.find((p) => p.kind === "cover").media,
-            ),
-          )
-        : null,
+      null,
+      (crops, canvas) => instant.cover(crops, canvas),
     );
   } catch (e) {
     toast(e.message, true);
