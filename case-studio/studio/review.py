@@ -345,12 +345,13 @@ def preview(jid, mid, version, section=None):
     if section is not None:
         return section_preview(jid, mid, version, section)
     from .workflow import command
+    from .privacy import RENDER_VERSION
 
     with PREVIEW_LOCK:
         review = store.review(jid, version)
         if mid not in {m["id"] for m in review["members"]}:
             raise KeyError("会员不存在")
-        base = job_dir(jid) / "previews" / str(version)
+        base = job_dir(jid) / "previews" / str(version) / RENDER_VERSION
         base.mkdir(parents=True, exist_ok=True)
         save(base / "review.json", review, True)
         dest = base / mid

@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 from PIL import Image, ImageDraw, ImageChops
 from test_studio import sample
-from studio import privacy, avatar_api, stickers, config, review, store
+from studio import privacy, privacy_panels, avatar_api, stickers, config, review, store
 from studio.common import DATA, WEB_DATA, save, sha, job_dir
 
 
@@ -167,6 +167,150 @@ class FacePrivacyTests(unittest.TestCase):
         with patch.object(privacy,'prepare',side_effect=slow): privacy.run_job(jid,'m001',data['version'])
         self.assertEqual(store.review(jid)['members'][0]['profile']['name'],'新名字')
         self.assertEqual(privacy.status(jid,'m001')['status'],'failed')
+
+    def test_full_preview_rebuilds_after_renderer_change_and_keeps_old_files(self):
+        jid=store.create('privacy-preview-test',config.snapshot())['id']
+        data=store.save_review(jid,{'members':[self.m],'excluded':[]},0)
+        destinations=[]
+        def render(_jid,args,_log):
+            dest=Path(args[6]);destinations.append(dest)
+            save(dest/'result.json',{'products':[]})
+        with patch('studio.workflow.command',side_effect=render):
+            review.preview(jid,'m001',data['version'])
+            with patch.object(privacy,'RENDER_VERSION','new-panel-renderer'):
+                review.preview(jid,'m001',data['version'])
+                review.preview(jid,'m001',data['version'])
+        self.assertEqual(len(destinations),2)
+        self.assertNotEqual(destinations[0],destinations[1])
+        self.assertTrue(all((p/'result.json').exists() for p in destinations))
+
+
+class SharedPanelTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory(dir=DATA);self.addCleanup(self.tmp.cleanup)
+        root=Path(self.tmp.name);self.source=root/'source.png';self.avatar=root/'avatar.png'
+        Image.new('RGB',(240,300),'#f02020').save(self.source)
+        Image.new('RGBA',(100,120),'#3d7188').save(self.avatar)
+        self.face={'box':[250,200,650,600],'state':'uncovered','confidence':.99,'front':True}
+        self.evidence={'faces':[self.face],'source_sha256':sha(self.source),'version':privacy.VERSION}
+        self.member=sample();self.member['privacy']={**privacy.defaults(),'sticker_id':'test'}
+        self.member['_engine']['privacy']={'version':privacy.VERSION,'sources':{str(self.source):self.evidence}}
+
+    def panel(self,scale=1,size=(480,600),dx=0,dy=0):
+        return {'source':str(self.source),'image':Image.new('RGB',size,'#f02020'),
+                'transform':[[scale,0,dx],[0,scale,dy],[0,0,1]]}
+
+    def mask(self,panels,**kwargs):
+        with patch.object(stickers,'get',return_value={'path':str(self.avatar)}):
+            return privacy_panels.mask_panels(self.member,panels,**kwargs)
+
+    def test_source_boxes_follow_resize_and_crop_matrix(self):
+        evidence={'faces':[dict(self.face,box=[100,200,300,400])]}
+        f=privacy_panels.project_faces(evidence,(1000,1000),[[.5,0,-20],[0,.25,10],[0,0,1]],(500,478))
+        self.assertEqual(f[0]['box'],[30,60,130,110])
+
+    def test_nonfinite_or_singular_projection_is_rejected(self):
+        for H in [[[1,0,0],[0,1,0],[0,0,0]],[[0,0,0],[0,0,0],[0,0,1]],[[float('nan'),0,0],[0,1,0],[0,0,1]]]:
+            with self.assertRaises(ValueError):privacy_panels.project_faces(self.evidence,(240,300),H,(480,600))
+
+    def test_different_zoom_produces_identical_final_artwork_sizes(self):
+        before=self.source.read_bytes();panels=[self.panel(1.5),self.panel(2)]
+        outputs,layout=self.mask(panels)
+        faces=[p['faces'][0] for p in layout['panels']]
+        self.assertNotEqual(faces[0]['face_box'],faces[1]['face_box'])
+        self.assertEqual(faces[0]['sticker_size'],faces[1]['sticker_size'])
+        self.assertEqual(faces[0]['sticker_size'],[230,277])
+        for image,f in zip(outputs,faces):
+            l,t,r,b=f['sticker_rect']
+            self.assertEqual([r-l,b-t],layout['shared_sticker_size'])
+            self.assertEqual(image.crop((l,t,r,b)).getextrema(),((61,61),(113,113),(136,136)))
+        self.assertEqual(before,self.source.read_bytes())
+
+    def test_near_edge_fits_whole_group_without_moving_chins(self):
+        panels=[self.panel(1,dy=-44),self.panel(1)]
+        _,layout=self.mask(panels)
+        first,second=[p['faces'][0] for p in layout['panels']]
+        self.assertEqual(first['sticker_size'],second['sticker_size'])
+        for face in (first,second):
+            self.assertAlmostEqual(face['sticker_rect'][3],face['head_anchor'][1],delta=.5)
+        self.assertGreaterEqual(first['sticker_rect'][1],0)
+
+    def test_preserved_faces_and_offscreen_faces_do_not_change_the_pair_size(self):
+        panels=[self.panel(1),self.panel(3),self.panel(10,dx=-10000)]
+        with patch.object(privacy,'checked_evidence',side_effect=[self.evidence,dict(self.evidence,faces=[dict(self.face,state='sticker')]),self.evidence]):
+            outputs,layout=self.mask(panels)
+        self.assertEqual(layout['shared_sticker_size'],[116,140])
+        self.assertEqual(outputs[1].tobytes(),panels[1]['image'].tobytes())
+        self.assertEqual(outputs[2].tobytes(),panels[2]['image'].tobytes())
+
+    def test_background_faces_keep_individual_small_size(self):
+        self.evidence['faces'].append(dict(self.face,box=[800,500,850,550]))
+        _,layout=self.mask([self.panel(1.5),self.panel(2)])
+        for panel in layout['panels']:
+            main,extra=panel['faces']
+            self.assertTrue(main['shared']);self.assertFalse(extra['shared'])
+            self.assertLess(extra['sticker_size'][0],main['sticker_size'][0]/2)
+
+    def test_six_panels_share_size_but_follow_each_person(self):
+        _,layout=self.mask([self.panel(s) for s in (1,1.1,1.2,1.3,1.4,1.5)])
+        self.assertEqual(len({tuple(p['faces'][0]['sticker_size']) for p in layout['panels']}),1)
+        self.assertGreater(len({tuple(p['faces'][0]['sticker_rect']) for p in layout['panels']}),1)
+        for panel in layout['panels']:
+            f=panel['faces'][0];l,t,r,b=f['sticker_rect']
+            self.assertAlmostEqual((l+r)/2,f['head_anchor'][0],delta=.5)
+            self.assertAlmostEqual(b,f['head_anchor'][1],delta=.5)
+
+    def test_jaw_anchor_prevents_big_avatar_from_covering_neck(self):
+        _,layout=self.mask([self.panel(1.5),self.panel(2)])
+        a,b=[p['faces'][0] for p in layout['panels']]
+        self.assertEqual(a['sticker_size'],b['sticker_size'])
+        self.assertNotEqual(a['sticker_rect'],b['sticker_rect'])
+        for f in (a,b):
+            l,t,r,bottom=f['face_box']
+            self.assertAlmostEqual(f['sticker_rect'][3],bottom+.04*(bottom-t),delta=.5)
+        self.assertEqual(layout['alignment'],'individual_head_and_jaw')
+
+    def test_reliable_ears_connect_avatar_to_head_not_nose(self):
+        face=dict(self.face,box=[100,80,220,230])
+        points=[[140,150,.99],[120,120,.99],[180,120,.99],[110,155,.95],[210,155,.96]]
+        anchor,method=privacy_panels.head_anchor(face,points)
+        self.assertEqual(anchor,[160,236]);self.assertEqual(method,'bilateral_ears')
+        side=dict(face,front=False)
+        points[3][2]=.1
+        anchor,method=privacy_panels.head_anchor(side,points)
+        self.assertEqual(anchor,[210,236]);self.assertEqual(method,'visible_ear')
+
+    def test_unreliable_or_unrelated_pose_does_not_displace_avatar(self):
+        face=dict(self.face,box=[100,80,220,230])
+        for points in [None,[[999,999,.99]]*7,[[140,150,.2]]*7,[[float('nan'),150,.99]]*7]:
+            self.assertEqual(privacy_panels.head_anchor(face,points),([160,236],'face_box'))
+
+    def test_each_panel_projects_its_own_head_attachment(self):
+        panels=[self.panel(1.5),self.panel(2)]
+        for panel in panels:
+            scale=panel['transform'][0][0]
+            panel['head_points']=[[110*scale,110*scale,.99]]*7
+        _,layout=self.mask(panels)
+        for scale,p in zip((1.5,2),layout['panels']):
+            f=p['faces'][0];l,t,r,b=f['sticker_rect']
+            self.assertEqual(f['anchor_method'],'bilateral_ears')
+            self.assertAlmostEqual((l+r)/2,110*scale,delta=.5)
+        self.assertEqual(layout['panels'][0]['faces'][0]['sticker_size'],layout['panels'][1]['faces'][0]['sticker_size'])
+
+    def test_tight_crop_fails_instead_of_truncating_one_avatar(self):
+        with self.assertRaisesRegex(ValueError,'取景框过紧'):
+            self.mask([self.panel(2,size=(200,300)),self.panel(1)])
+
+    def test_disabled_masking_keeps_pixels_without_evidence(self):
+        self.member['privacy']['enabled']=False;self.member['_engine']['privacy']={}
+        panels=[self.panel(1),self.panel(2)]
+        result,layout=self.mask(panels)
+        self.assertFalse(layout['enabled'])
+        self.assertEqual([i.tobytes() for i in result],[p['image'].tobytes() for p in panels])
+
+    def test_missing_evidence_blocks_transformed_output(self):
+        self.member['_engine']['privacy']['sources']={}
+        with self.assertRaisesRegex(ValueError,'尚未完成检查'):self.mask([self.panel()])
 
 
 class AvatarAlphaTests(unittest.TestCase):

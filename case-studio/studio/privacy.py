@@ -9,7 +9,7 @@ from . import model_client, avatar_api, stickers, store
 from .common import WEB_DATA, DATA, read, save, sha, signature, contained, job_dir, now
 
 VERSION = "face-privacy-v1"
-RENDER_VERSION = "face-overlay-compact-v2.2"
+RENDER_VERSION = "face-overlay-body-anchor-v5"
 STICKER_SCALE = 1.16
 POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix="face-privacy")
 LOCK = threading.RLock()
@@ -167,10 +167,8 @@ def validate_update(member, incoming):
     return old
 
 
-def face_layer(avatar, face_width, face_height, background=None):
-    """Cover the facial oval without enlarging the sticker to fill box corners."""
-    # Only the artwork scales by 16%; the backing has a small 5% safety margin.
-    # Box corners mostly contain hair/background; a facial oval avoids a square patch.
+def face_backing(face_width, face_height, background=None):
+    """Opaque facial oval with a 5% margin and no recognizable facial detail."""
     fw, fh = max(1, math.ceil(face_width)), max(1, math.ceil(face_height))
     px, py = max(2, math.ceil(fw*.05)), max(2, math.ceil(fh*.05))
     w, h = fw+2*px, fh+2*py
@@ -184,6 +182,14 @@ def face_layer(avatar, face_width, face_height, background=None):
     alpha = Image.new("L", (w, h))
     ImageDraw.Draw(alpha).ellipse((0, 0, w-1, h-1), fill=255)
     backing.putalpha(alpha)
+    return backing
+
+
+def face_layer(avatar, face_width, face_height, background=None):
+    """Cover the facial oval without enlarging the sticker to fill box corners."""
+    fw, fh = max(1, math.ceil(face_width)), max(1, math.ceil(face_height))
+    backing = face_backing(fw, fh, background)
+    w, h = backing.size
     scale = max(fw*STICKER_SCALE/avatar.width, fh*STICKER_SCALE/avatar.height)
     sw, sh = max(1, math.ceil(avatar.width*scale)), max(1, math.ceil(avatar.height*scale))
     canvas = Image.new("RGBA", (max(w, sw), max(h, sh)))
@@ -212,14 +218,19 @@ def overlay(source, evidence, sticker_path, dest):
     im.convert("RGB").save(dest, "PNG")
 
 
-def masked_source(member, source):
-    p = dict(defaults(), **member.get("privacy", {}))
-    if not p["enabled"]:
-        return str(source)
+def checked_evidence(member, source):
     engine = member["_engine"].get("privacy", {})
     evidence = engine.get("sources", {}).get(str(source))
     if not evidence or engine.get("version") != VERSION or sha(source) != evidence.get("source_sha256"):
         raise ValueError("面部遮挡尚未完成检查，请在会员信息顶部准备或重新检查")
+    return evidence
+
+
+def masked_source(member, source):
+    p = dict(defaults(), **member.get("privacy", {}))
+    if not p["enabled"]:
+        return str(source)
+    evidence = checked_evidence(member, source)
     if not any(f["state"] == "uncovered" for f in evidence["faces"]):
         return str(source)
     if not p.get("sticker_id"):

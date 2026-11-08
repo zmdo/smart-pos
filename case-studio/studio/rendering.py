@@ -3,15 +3,17 @@
 import copy, sys, shutil
 from pathlib import Path
 import cv2, numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 from .common import REPO, FONT, read, save, sha, job_dir, clean_name
 from . import store, privacy
+from .privacy_panels import mask_panels
 from scripts.body_scan_delivery.render import plan, draw_product
 from scripts.body_scan_delivery.presentation import nickname
 from member_cover.copy import compose
 from member_cover.render import draw_cover
 from report_comparison.render import render as draw_report, HEADERS
 from report_comparison.presentation import select_display_rows
+from view_comparison.render import geometry as vs_geometry
 
 sys.path.insert(0, str(REPO / "best-practices/body-scan-group-display-v3/scripts"))
 from body_scan_cover_frames.geometry import plan_pair, measure, project
@@ -103,7 +105,7 @@ def crop_from_plan(frame, H, size):
     ]
 
 
-def manual_frame(meta, ed, rect):
+def manual_plan(ed, rect):
     w, h = ed["size"]
     x, y, cw, ch = np.asarray(rect, float) * [w, h, w, h]
     if abs(cw / ch - 500 / 478) > 0.003:
@@ -111,14 +113,66 @@ def manual_frame(meta, ed, rect):
     H = np.array(
         [[500 / cw, 0, -x * 500 / cw], [0, 478 / ch, -y * 478 / ch], [0, 0, 1]]
     ) @ np.asarray(ed["H"])
-    return render_frame(
-        meta,
-        dict(
-            output_size=[500, 478],
-            H_source_to_cover=H.tolist(),
-            source_content_bounds_xyxy=ed["bounds"],
-        ),
-    )[0]
+    return dict(output_size=[500, 478], H_source_to_cover=H.tolist(),
+                source_content_bounds_xyxy=ed["bounds"])
+
+
+def manual_frame(meta, ed, rect):
+    return render_frame(meta, manual_plan(ed, rect))[0]
+
+
+def panel_head_points(member, aid, source, transform):
+    """Reuse pose evidence only when its image hash and geometry match."""
+    meta = member["_engine"].get("metadata", {}).get(aid, {})
+    try:
+        digest = sha(source)
+        if str(source) == meta["source"] and digest == meta["source_sha256"]:
+            source_H = np.eye(3)
+        else:
+            output = meta["output"]
+            variant = next((v for v in ("display", "uniform")
+                            if output.get(v+"_sha256") == digest), None)
+            if not variant:
+                return None
+            source_H = np.asarray(output["H_source_to_"+variant])
+        H = np.asarray(transform) @ source_H @ np.linalg.inv(np.asarray(meta["H_source_to_normalized"]))
+        points = project(meta["keypoints_normalized"], H)
+        confidence = meta["keypoint_confidence"]
+        if len(points) != len(confidence) or not np.isfinite(points).all():
+            return None
+        return [[float(x),float(y),float(c)] for (x,y),c in zip(points,confidence)]
+    except (KeyError, TypeError, ValueError, np.linalg.LinAlgError):
+        return None
+
+
+def grouped_private_photos(member, product, context, out):
+    """Resize to final photo panels first, then apply identical subject avatars."""
+    paths = member["_engine"]["photos"]
+    images = []
+    for aid in product["asset_ids"]:
+        with Image.open(paths[aid]) as image:
+            images.append(ImageOps.exif_transpose(image).convert("RGB"))
+    if product["kind"] == "vs":
+        layout = vs_geometry([im.size for im in images], context["width"], len(context["metrics"]))
+        sizes = [(r-l, b-t) for l,t,r,b in layout["photo_boxes"]]
+    else:
+        sizes = [im.size for im in images]
+    panels = []
+    for aid, image, size in zip(product["asset_ids"], images, sizes):
+        transform = [[size[0]/image.width,0,0], [0,size[1]/image.height,0], [0,0,1]]
+        panels.append({"source": paths[aid],
+                       "image": image.resize(size, Image.Resampling.LANCZOS),
+                       "transform": transform,
+                       "head_points": panel_head_points(member,aid,paths[aid],transform)})
+    protected, privacy_layout = mask_panels(member, panels)
+    folder = out / "privacy-panels" / clean_name(product["product_id"])
+    folder.mkdir(parents=True)
+    result = {}
+    for aid, image in zip(product["asset_ids"], protected):
+        file = folder / (clean_name(aid)+".png")
+        image.save(file)
+        result[aid] = str(file)
+    return result, privacy_layout
 
 
 def prepare(jid, out):
@@ -425,10 +479,6 @@ def render(review_path, mid, out, section=None):
     review = read(review_path)
     m = next(m for m in review["members"] if m["id"] == mid)
     eng = m["_engine"]
-    # Geometry and phase inference keep originals; only output pixels use copies.
-    private_photos = {
-        aid: privacy.masked_source(m, path) for aid, path in eng["photos"].items()
-    } if section in (None, "vs") else eng["photos"]
     out.mkdir(parents=True, exist_ok=False)
     rows = []
     public = {p["asset_id"]: p for p in m["photos"]}
@@ -470,6 +520,11 @@ def render(review_path, mid, out, section=None):
         if section is not None and not (section == "vs" and p["kind"] == "vs"):
             continue
         selected = [lookup[a] for a in p["asset_ids"]]
+        privacy_layout = None
+        if p["kind"] in ("vs", "three_views") and m.get("privacy", {}).get("enabled") is not False:
+            private_photos, privacy_layout = grouped_private_photos(m, p, context, out)
+        else:
+            private_photos = {a: privacy.masked_source(m, eng["photos"][a]) for a in p["asset_ids"]}
         im = draw_product(p, selected, private_photos, FONT, context)
         labels = {"front": "正面", "side": "侧面", "back": "背面", "all": "完整三视图"}
         name = (
@@ -488,7 +543,8 @@ def render(review_path, mid, out, section=None):
         )
         file = out / name
         im.save(file, **({"quality": 94} if file.suffix == ".jpg" else {}))
-        product(file, p["kind"], name, asset_ids=p["asset_ids"], view=p["view"])
+        product(file, p["kind"], name, asset_ids=p["asset_ids"], view=p["view"],
+                privacy_layout=privacy_layout)
     fronts = next(
         (p for p in plans if p["kind"] == "vs" and p["view"] == "front"), None
     )
@@ -499,23 +555,23 @@ def render(review_path, mid, out, section=None):
             metas = [eng["metadata"][a] for a in ids]
             try:
                 defaults = plan_pair(metas)
-                ims = []
+                panels = []
                 for aid, meta, frame in zip(ids, metas, defaults):
                     ed = eng["editors"][aid]
                     rect = m["cover"]["crops"].get(aid)
-                    masked_meta = dict(meta, source=privacy.masked_source(m, meta["source"]))
-                    image = (
-                        manual_frame(masked_meta, ed, rect)
-                        if rect
-                        else render_frame(masked_meta, frame)[0]
-                    )
-                    ims.append(Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)))
+                    current_plan = manual_plan(ed, rect) if rect else frame
+                    image = render_frame(meta, current_plan)[0]
+                    panels.append({"source": meta["source"],
+                                   "image": Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)),
+                                   "transform": current_plan["H_source_to_cover"],
+                                   "head_points": panel_head_points(m,aid,meta["source"],current_plan["H_source_to_cover"])})
                     cover_sources.append(
                         dict(
                             asset_id=aid,
                             crop=rect or crop_from_plan(frame, ed["H"], ed["size"]),
                         )
                     )
+                ims, privacy_layout = mask_panels(m, panels)
                 c = m["cover"]
                 c = dict(c, segments=[{"text": c["story"], "emphasis": False}])
                 im, _ = draw_cover(
@@ -527,7 +583,7 @@ def render(review_path, mid, out, section=None):
                 )
                 file = out / "会员案例封面.jpg"
                 im.save(file, quality=94)
-                product(file, "cover", file.name, asset_ids=ids)
+                product(file, "cover", file.name, asset_ids=ids, privacy_layout=privacy_layout)
             except ValueError as e:
                 if m["cover"]["crops"]:
                     raise ValueError(
