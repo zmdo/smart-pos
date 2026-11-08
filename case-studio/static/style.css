@@ -1954,3 +1954,6 @@ input[type=color] { width:100%; height:46px; padding:5px; }
  .font-field .font-select { max-width:none; width:100%; }
  .metric-row { flex-wrap:wrap; }
 }
+
+.report-font-setting { max-width:360px; }
+.report-font-setting .font-select { width:100%; max-width:none; }

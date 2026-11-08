@@ -27,7 +27,7 @@ front=true仅用于清晰正脸（不是侧面、不是背面、不是卡通）�
 
 
 def defaults():
-    return {"enabled": True, "mask_back": True, "mode": "ai", "sticker_id": None,
+    return {"enabled": True, "mask_back": False, "mode": "ai", "sticker_id": None,
             "status": "unprepared", "issues": [], "masked_faces": 0, "masked_back_heads": 0, "preserved_faces": 0}
 
 
@@ -36,7 +36,7 @@ def needs_mask(face):
 
 
 def back_enabled(member, face, back=False):
-    return member.get("privacy", {}).get("mask_back", True) or not (back or face["state"] == "hidden")
+    return member.get("privacy", {}).get("mask_back", False) or not (back or face["state"] == "hidden")
 
 
 def source_specs(member, preferences=None):
@@ -51,7 +51,7 @@ def source_specs(member, preferences=None):
         if aid in eng.get("editors", {}):
             specs.setdefault(meta["source"], {"asset_id": aid, "role": "cover", "front": True})
     for index, e in enumerate(eng.get("extras", [])):
-        if e["kind"] == "training" or (e["kind"] == "life" and settings['mask_lifestyle']):
+        if (e["kind"] == "training" and settings.get('mask_training', False)) or (e["kind"] == "life" and settings.get('mask_lifestyle', False)):
             specs.setdefault(e["path"], {"asset_id": e.get("name", str(index)), "role": e["kind"], "front": False})
     return specs
 
@@ -59,7 +59,7 @@ def source_specs(member, preferences=None):
 def review_state(member, preferences):
     """Reflect the current scope without rewriting historical scan evidence."""
     result = dict(defaults(), **copy.deepcopy(member.get('privacy', {})))
-    if not any(e['kind'] == 'life' for e in member['_engine'].get('extras', [])):
+    if not any(e['kind'] in ('life', 'training') for e in member['_engine'].get('extras', [])):
         return result
     engine = member['_engine'].get('privacy', {})
     specs = source_specs(member, preferences)
@@ -238,13 +238,16 @@ def overlay(source, evidence, sticker_path, dest):
 
 
 def checked_evidence(member, source):
+    spec = source_specs(member).get(str(source), {})
+    if spec.get('back') and not member.get('privacy', {}).get('mask_back', False):
+        return {'source_sha256':sha(source), 'faces':[], 'version':VERSION, 'scan_version':SCAN_VERSION}
     engine = member["_engine"].get("privacy", {})
     evidence = engine.get("sources", {}).get(str(source))
     if not evidence or engine.get("version") != VERSION or sha(source) != evidence.get("source_sha256"):
         raise ValueError("面部遮挡尚未完成检查，请在会员信息顶部准备或重新检查")
     if not evidence["faces"] and evidence.get("scan_version") != SCAN_VERSION:
         spec = source_specs(member).get(str(source), {})
-        if spec.get("back") and member.get("privacy", {}).get("mask_back", True):
+        if spec.get("back") and member.get("privacy", {}).get("mask_back", False):
             raise ValueError("背向图尚无可靠头部位置，请在会员信息顶部重新检查头部")
     return evidence
 

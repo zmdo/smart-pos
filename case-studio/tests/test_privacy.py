@@ -19,7 +19,7 @@ class FacePrivacyTests(unittest.TestCase):
         self.face={'box':[250,200,650,600],'state':'uncovered','front':True,'confidence':.96}
         self.evidence={'faces':[self.face],'source_sha256':sha(self.source),'version':privacy.VERSION}
         self.m=sample(); self.m['_engine'].update(photos={'a0001':str(self.source)},metadata={},extras=[],editors={})
-        self.m['privacy']={**privacy.defaults(),'sticker_id':'demo','status':'ready'}
+        self.m['privacy']={**privacy.defaults(),'mask_back':True,'sticker_id':'demo','status':'ready'}
         self.m['_engine']['privacy']={'version':privacy.VERSION,'sources':{str(self.source):self.evidence}}
 
     def test_normalized_faces_distinguish_existing_sticker_and_side_face(self):
@@ -103,6 +103,17 @@ class FacePrivacyTests(unittest.TestCase):
         self.assertNotEqual(output,str(self.source))
         with Image.open(output) as im:self.assertNotEqual(im.getpixel((100,100)),(240,32,32))
         self.assertEqual(self.source.read_bytes(),before)
+
+    def test_rear_default_is_off_and_requires_no_head_evidence(self):
+        self.m['privacy']=privacy.defaults()
+        self.m['photos'][0]['view']='back'
+        self.m['_engine']['privacy']['sources']={}
+        self.assertFalse(self.m['privacy']['mask_back'])
+        with patch.object(stickers,'get',side_effect=AssertionError('rear masking is off')):
+            self.assertEqual(privacy.masked_source(self.m,str(self.source)),str(self.source))
+        self.m['privacy']['mask_back']=True
+        with self.assertRaisesRegex(ValueError,'尚未完成检查'):
+            privacy.masked_source(self.m,str(self.source))
 
     def test_legacy_back_without_head_box_requires_check(self):
         self.m['photos'][0]['view']='back';self.evidence['faces']=[]
@@ -225,7 +236,7 @@ class SharedPanelTests(unittest.TestCase):
         Image.new('RGBA',(100,120),'#3d7188').save(self.avatar)
         self.face={'box':[250,200,650,600],'state':'uncovered','confidence':.99,'front':True}
         self.evidence={'faces':[self.face],'source_sha256':sha(self.source),'version':privacy.VERSION}
-        self.member=sample();self.member['privacy']={**privacy.defaults(),'sticker_id':'test'}
+        self.member=sample();self.member['privacy']={**privacy.defaults(),'mask_back':True,'sticker_id':'test'}
         self.member['_engine']['privacy']={'version':privacy.VERSION,'sources':{str(self.source):self.evidence}}
 
     def panel(self,scale=1,size=(480,600),dx=0,dy=0):

@@ -16,20 +16,24 @@ class PresentationPolicyTests(unittest.TestCase):
         self.addCleanup(lambda:save(WEB_DATA/'settings.json',original,True))
         for value in (True,541,500,2163,1080.0):
             with self.assertRaises(ValueError):config.update({'output_width':value})
-        for field,value in [('output_background','white'),('output_background','#123'),('mask_lifestyle','false'),('default_font','../secret')]:
+        for field,value in [('output_background','white'),('output_background','#123'),('mask_lifestyle','false'),('mask_training','true'),('default_font','../secret')]:
             with self.assertRaises(ValueError):config.update({field:value})
         result=config.update({'output_width':900,'output_background':'#aaBBcc','mask_lifestyle':False})
         self.assertEqual(result['output_background'],'#AABBCC')
         self.assertEqual(result['output_width'],900)
         self.assertNotIn('access_token',result)
 
-    def test_life_excluded_by_default_but_training_still_checked(self):
+    def test_lifestyle_and_training_scopes_are_independent(self):
         m=sample();m['_engine'].update(photos={},metadata={},extras=[
             {'kind':'life','path':'life.jpg'}, {'kind':'training','path':'train.jpg'}])
-        m['_render_settings']={'mask_lifestyle':False}
+        m['_render_settings']={'mask_lifestyle':False,'mask_training':True}
         self.assertEqual(set(privacy.source_specs(m)),{'train.jpg'})
         m['_render_settings']['mask_lifestyle']=True
         self.assertEqual(set(privacy.source_specs(m)),{'life.jpg','train.jpg'})
+        m['_render_settings']['mask_training']=False
+        self.assertEqual(set(privacy.source_specs(m)),{'life.jpg'})
+        m['_render_settings']['mask_lifestyle']=False
+        self.assertFalse(privacy.source_specs(m))
 
     def test_letterbox_preserves_content_and_exact_ratio(self):
         prefs=dict(output_width=1080,output_background='#112233')
@@ -67,6 +71,13 @@ class PresentationPolicyTests(unittest.TestCase):
         frozen['_render_settings']['output_width']=900
         self.assertNotEqual(presentation.settings()['output_width'],900)
 
+    def test_table_fonts_collapse_without_changing_other_sections(self):
+        old={'cover.title':'cover-font','table.table_title':'title-font','table.rows.0.type':'cell-font'}
+        self.assertEqual(fonts.unify_table(old),{'cover.title':'cover-font','table.all':'title-font'})
+        self.assertEqual(fonts.unify_table(dict(old,**{'table.all':'chosen'}))['table.all'],'chosen')
+        self.assertIn('table.rows.0.type',old)
+        self.assertTrue(fonts.valid_key('table.all'))
+
 
 @unittest.skipUnless(REAL_FONT.exists(),'server font required')
 class FontLibraryTests(unittest.TestCase):
@@ -95,6 +106,34 @@ class FontLibraryTests(unittest.TestCase):
 
 @unittest.skipUnless(REAL_FONT.exists() and SERIF.exists(),'server rendering environment required')
 class FixedRendererTests(unittest.TestCase):
+    def test_reports_flow_directly_into_table_without_distortion(self):
+        from report_comparison.render import render
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);images={}
+            for side,size in [('before',(600,800)),('after',(700,400))]:
+                images[side]=root/(side+'.png');Image.new('RGB',size,'#72a086').save(images[side])
+            row=dict(type='体重',before='80',after='70',delta='-10',unit='kg')
+            for width in (540,1080,2160):
+                for count in (1,9,20):
+                    case=dict(rows=[],reviewed_rows=[row]*count,pair={},canvas_height=width*4//3)
+                    meta=render(case,images,width,REAL_FONT,root/'report.png')
+                    bottom=max(g['placement'][1]+g['placement'][3] for g in meta['images'])
+                    self.assertEqual(meta['table_frame'][1]-round(width*.046)-bottom,round(width*.018))
+                    for g in meta['images']:
+                        self.assertAlmostEqual(g['placement'][2]/g['placement'][3],g['source_size'][0]/g['source_size'][1],delta=.01)
+                        self.assertFalse(g['content_clipped'])
+                    self.assertEqual(meta['table_frame'][1]+meta['table_frame'][3],case['canvas_height']-round(width*.025)-1)
+
+    def test_unified_report_font_overrides_legacy_cell_fonts(self):
+        from report_comparison.render import render
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);row=dict(type='体重',before='80',after='70',delta='-10',unit='kg')
+            case=dict(rows=[],reviewed_rows=[row],pair={},canvas_height=1440,fonts={'all':str(SERIF)})
+            render(case,{},1080,REAL_FONT,root/'a.png')
+            case['fonts'].update({'table_title':str(REAL_FONT),'rows.0.type':str(REAL_FONT),'headers.1':str(REAL_FONT)})
+            render(case,{},1080,REAL_FONT,root/'b.png')
+            self.assertEqual((root/'a.png').read_bytes(),(root/'b.png').read_bytes())
+
     def test_vs_photos_touch_without_distortion_and_outside_padding_uses_color(self):
         from view_comparison.render import geometry, draw_vs
         for sizes in ([(768,1792),(768,1792)],[(400,900),(300,600)],[(800,300),(1000,300)]):

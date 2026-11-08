@@ -642,7 +642,7 @@ def render(review_path, mid, out, section=None, editor=False):
             gaps.append(dict(product="report", reason="没有可输出的表格数据"))
     for e in eng["extras"] if section is None else []:
         file = out / e["name"]
-        masking = e['kind'] == 'training' or (e['kind'] == 'life' and preferences['mask_lifestyle'])
+        masking = (e['kind'] == 'training' and preferences.get('mask_training', False)) or (e['kind'] == 'life' and preferences.get('mask_lifestyle', False))
         source = privacy.masked_source(m, e["path"]) if masking else e["path"]
         if e['kind'] == 'life' and source == e["path"]:
             shutil.copy2(source, file)

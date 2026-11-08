@@ -23,7 +23,8 @@ def render(case,images,width,font_path,out):
     canvas=Image.new('RGB',(width,height),case.get('background',PAPER));draw=ImageDraw.Draw(canvas)
     @lru_cache(maxsize=256)
     def load_font(size,key=''):
-        f=ImageFont.truetype(str(case.get('fonts',{}).get(key,font_path)),size)
+        selected=case.get('fonts',{})
+        f=ImageFont.truetype(str(selected.get('all') or selected.get(key,font_path)),size)
         try:
             axes=f.get_variation_axes()
             f.set_variation_by_axes([max(a['minimum'],min(a['maximum'],500)) if a['name']==b'Weight' else a['default'] for a in axes])
@@ -54,16 +55,27 @@ def render(case,images,width,font_path,out):
         else:
             draw.text((margin,width*.025),case.get('report_title','体测数据 · 前后对比'),font=font(.029),fill=INK)
         half=inner//2; y=round(width*.111); ih=round(half*4/3)
+        title_band=round(width*.046);section_gap=round(width*.018)
+        if fixed:
+            # Fit the reports first, then give the table all remaining height.
+            minimum_table=max(table_height,round(width*(.043+.025*len(rows))))
+            ih=height-margin-1-minimum_table-title_band-section_gap-y
+            if ih<=0:raise ValueError('report_canvas_too_short')
+        prepared=[]
+        for side in ('before','after'):
+            with Image.open(images[side]) as raw: im=raw.convert('RGB')
+            scale=min(half/im.width,ih/im.height);sz=(round(im.width*scale),round(im.height*scale))
+            prepared.append((im.size,scale,im.resize(sz,Image.Resampling.LANCZOS)))
+        report_height=max(p[2].height for p in prepared) if fixed else ih
         for i,side in enumerate(('before','after')):
             x=margin+i*half
             label(case.get(side+'_label','训练前' if i==0 else '训练后')+'  '+str(case['pair'].get(side+'_date') or ''),(x,width*.074,half,width*.028),size=.017,fill=RED if i else INK,key=side+'_label')
-            with Image.open(images[side]) as raw: im=raw.convert('RGB')
-            scale=min(half/im.width,ih/im.height);sz=(round(im.width*scale),round(im.height*scale))
-            scaled=im.resize(sz,Image.Resampling.LANCZOS)
-            px=x+(half-sz[0])//2;py=y+(ih-sz[1])//2;canvas.paste(scaled,(px,py))
-            geometry.append({'side':side,'source_size':list(im.size),'placement':[px,py,*sz],
+            source_size,scale,scaled=prepared[i];sz=scaled.size
+            px=x+(half-sz[0])//2;py=y+(report_height-sz[1])//2;canvas.paste(scaled,(px,py))
+            geometry.append({'side':side,'source_size':list(source_size),'placement':[px,py,*sz],
                              'scale':scale,'uniform_scale':True,'content_clipped':False})
-        table_y=height-table_height-margin-1 if fixed else round(width*.807)
+        table_y=y+report_height+section_gap+title_band if fixed else round(width*.807)
+        if fixed:table_height=height-table_y-margin-1
         label(case.get('table_title','阶段性训练成果'),(margin,table_y-width*.046,inner,width*.039),size=.025,fill=RED,key='table_title')
     else:
         # Missing pair does not justify duplicating a report or guessing order.
@@ -91,7 +103,7 @@ def render(case,images,width,font_path,out):
             'source_row_count':len(case['rows']),'display_policy':DISPLAY_POLICY,
             'display_metrics':[r['type'] for r in rows],
             'table_frame':[margin,table_y,inner,table_height],'header_height':header_h,'row_height':row_h,
-            'table_height_rule':'remaining fixed canvas after title and padding' if fixed and not images else 'round(width * 0.398); independent of row count and report images',
+            'table_height_rule':'remaining fixed canvas after reports, title and padding' if fixed else 'round(width * 0.398); independent of row count and report images',
             'images':geometry,'width_rule':'configured output width' if fixed else '2 * max(original before width, original after width)',
             'height_rule':'configured 3:4 canvas' if fixed else ('round(width * 1.25)' if images else 'table title + fixed table height + edge padding'),
             'table_only':not bool(images)}

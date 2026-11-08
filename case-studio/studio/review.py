@@ -47,7 +47,7 @@ def public(data, preferences=None):
         if "_engine" in data and "photos" in data:
             from .privacy import review_state
             result['privacy'] = review_state(data, preferences)
-            result.setdefault('fonts', {})
+            result['fonts'] = fonts.unify_table(data.get('fonts', {}))
             result['render_settings'] = preferences
             result["preview_keys"] = {
                 section: preview_key(data, section, preferences)
@@ -240,7 +240,7 @@ def update(jid, mid, payload):
         from .privacy import validate_update
         member["privacy"] = validate_update(member, incoming["privacy"])
     if "fonts" in incoming:
-        member["fonts"] = fonts.validate_map(incoming["fonts"], member.get("fonts"))
+        member["fonts"] = fonts.unify_table(fonts.validate_map(incoming["fonts"], fonts.unify_table(member.get("fonts", {}))))
     sync_profile(member, old)
     return store.save_review(jid, data, expected)
 

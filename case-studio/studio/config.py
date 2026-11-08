@@ -12,6 +12,7 @@ DEFAULTS = {
     "default_font": "noto-sans-sc",
     "font_overrides": {},
     "mask_lifestyle": False,
+    "mask_training": False,
     "display_width": 768,
     "consent_text": "*案例真实有效，经会员本人同意使用",
     "before_text": "Before",
@@ -84,9 +85,9 @@ def update(values):
                 if not isinstance(value, str) or not re.fullmatch(r'#[0-9a-fA-F]{6}', value):
                     raise ValueError("背景色必须为 #RRGGBB 格式")
                 cfg[key] = value.upper()
-            elif key == "mask_lifestyle":
+            elif key in ("mask_lifestyle", "mask_training"):
                 if type(value) is not bool:
-                    raise ValueError("生活照遮挡设置无效")
+                    raise ValueError("照片遮挡设置无效")
                 cfg[key] = value
             elif key == "default_font":
                 from . import fonts

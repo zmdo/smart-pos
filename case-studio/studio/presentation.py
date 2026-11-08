@@ -3,8 +3,8 @@ import copy
 from PIL import Image, ImageOps
 from . import config, fonts
 
-VERSION = 'studio-typography-canvas-v1'
-KEYS = ('default_font', 'font_overrides', 'output_width', 'output_background', 'mask_lifestyle')
+VERSION = 'studio-typography-canvas-v2-compact-report'
+KEYS = ('default_font', 'font_overrides', 'output_width', 'output_background', 'mask_lifestyle', 'mask_training')
 
 
 def settings():
@@ -21,7 +21,7 @@ def freeze(data):
 def font_context(member, preferences, section):
     available = {f['id']:f['path'] for f in fonts.catalog()}
     default = available[preferences['default_font']]
-    overrides = dict(preferences.get('font_overrides', {}), **member.get('fonts', {}))
+    overrides = dict(fonts.unify_table(preferences.get('font_overrides', {})), **fonts.unify_table(member.get('fonts', {})))
     selected = {k[len(section)+1:]: available[v] for k,v in overrides.items() if k.startswith(section+'.')}
     return default, selected
 

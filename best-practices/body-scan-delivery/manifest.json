@@ -18,7 +18,7 @@
   "files": [
     {
       "path": "README.md",
-      "sha256": "4bf871e1bc6e4ddb46ffc329b1ae0a3a784f3d0906f44085716511a986bccbdb"
+      "sha256": "237651d1f8f4a26b1255b026c43d3a06715ccda6d52152b1fa2d5eae0c2dc74e"
     },
     {
       "path": "category.py",
@@ -270,7 +270,7 @@
     },
     {
       "path": "report_comparison/render.py",
-      "sha256": "1c1e2a2477130918242167ced71185d785207d8a810000158767ddb9180199b3",
+      "sha256": "9269ba4a5f5ae17bf800ff7d574c020a01974018ad12e94069c9ee3e1bb8cf2f",
       "source": "best-practices/body-scan-delivery/report_comparison/render.py",
       "source_commit": "f1320dd32b3a2d3bec451ab9e2520058b15b3506",
       "source_sha256": "0706515352851e68432981082565de4b0d2af6a9ed40964315f0a4b3aed2b922",

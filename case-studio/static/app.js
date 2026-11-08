@@ -273,7 +273,7 @@ async function settings() {
   const c = await api("/settings");
   defaultFontOverrides = {...c.font_overrides};
   shell(
-    `<section class="page-head"><span class="eyebrow">PREFERENCES</span><h1>工作台设置</h1><p>品牌文案用于新批次；字体、画布与生活照遮挡在下一次预览或生成时生效，历史成品保留。</p></section><form id="settings" class="settings-grid"><section class="card"><div class="section-title"><span class="number">01</span><h2>品牌与成品</h2></div>${input("品牌名称", "brand_name", c.brand_name)}${input("默认地址", "address", c.address)}${input("案例说明", "consent_text", c.consent_text)}<div class="field-grid">${input("标准照片宽度", "display_width", c.display_width, "number")}</div><div class="field-grid">${input("训练前文字", "before_text", c.before_text)}${input("训练后文字", "after_text", c.after_text)}</div>${input("中央文字", "vs_text", c.vs_text)}<div class="field-grid three">${Object.entries(
+    `<section class="page-head"><span class="eyebrow">PREFERENCES</span><h1>工作台设置</h1><p>品牌文案用于新批次；字体、画布与照片遮挡在下一次预览或生成时生效，历史成品保留。</p></section><form id="settings" class="settings-grid"><section class="card"><div class="section-title"><span class="number">01</span><h2>品牌与成品</h2></div>${input("品牌名称", "brand_name", c.brand_name)}${input("默认地址", "address", c.address)}${input("案例说明", "consent_text", c.consent_text)}<div class="field-grid">${input("标准照片宽度", "display_width", c.display_width, "number")}</div><div class="field-grid">${input("训练前文字", "before_text", c.before_text)}${input("训练后文字", "after_text", c.after_text)}</div>${input("中央文字", "vs_text", c.vs_text)}<div class="field-grid three">${Object.entries(
       c.titles,
     )
       .map(([k, v]) =>
@@ -285,7 +285,7 @@ async function settings() {
       )
       .join(
         "",
-      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section>${imageSettings(c.image_model)}<section class="card"><div class="section-title"><span class="number">04</span><h2>字体与统一画布</h2></div><label>全局默认字体<select name="default_font">${fontOptions(c.default_font,false)}</select></label><p class="muted">文字旁的字体选择优先；未指定的项跟随默认。<a href="#fonts">管理字体库 ↗</a></p><div class="field-grid"><label>统一成品宽度（像素）<input name="output_width" type="number" min="540" max="2160" step="3" value="${c.output_width}" required></label><label>填充背景色<input name="output_background" type="color" value="${E(c.output_background)}"></label></div><p class="info-panel" id="output-size">成品 ${c.output_width} × ${c.output_width*4/3} 像素 · 固定 3:4</p><label class="check"><input name="mask_lifestyle" type="checkbox" ${c.mask_lifestyle?'checked':''}>生活照也使用会员头像遮挡</label><p class="muted">默认保留生活照原图和尺寸。开启后，尚未检查的生活照需在会员审核中重新准备头部遮挡；原图已有的贴纸仍会保留。</p></section></form>`,
+      )}</div><label>默认 Logo <input id="logo" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="muted">${c.logo_configured ? "已配置默认 Logo。" : "尚未设置 Logo，默认显示品牌文字。"}上传包内的 logo 目录优先使用。</p></section><section class="card"><div class="section-title"><span class="number">02</span><h2>视觉模型</h2></div>${input("兼容接口 Base URL", "base_url", c.model.base_url)}${input("模型名", "model", c.model.model)}${input(c.model.key_configured ? "API Key · 已配置，留空保留" : "API Key", "api_key", "", "password")}${input("模型并发数（1–4）", "model_workers", c.model_workers, "number")}<label>性别自动采用阈值<input name="gender_confidence_threshold" type="number" min="0.5" max="0.99" step="0.01" value="${c.gender_confidence_threshold}"></label><p class="muted">仅根据报告或文字依据补全，低于阈值保留待确认，不按人物外貌推断。</p><div class="info-panel">照片校正与人物检测在远程 GPU 服务器运行；视觉模型用于分类与语义判断。审核预览和成品生成复用既有结果。</div><button class="primary" type="submit">保存设置 <span>↗</span></button><p class="muted">API Key 仅保存在服务端，不会返回浏览器。</p></section>${imageSettings(c.image_model)}<section class="card"><div class="section-title"><span class="number">04</span><h2>字体与统一画布</h2></div><label>全局默认字体<select name="default_font">${fontOptions(c.default_font,false)}</select></label><p class="muted">文字旁的字体选择优先；未指定的项跟随默认。<a href="#fonts">管理字体库 ↗</a></p><div class="field-grid"><label>统一成品宽度（像素）<input name="output_width" type="number" min="540" max="2160" step="3" value="${c.output_width}" required></label><label>填充背景色<input name="output_background" type="color" value="${E(c.output_background)}"></label></div><p class="info-panel" id="output-size">成品 ${c.output_width} × ${c.output_width*4/3} 像素 · 固定 3:4</p><label class="check"><input name="mask_lifestyle" type="checkbox" ${c.mask_lifestyle?'checked':''}>生活照也使用会员头像遮挡</label><label class="check"><input name="mask_training" type="checkbox" ${c.mask_training?'checked':''}>训练照也使用会员头像遮挡</label><p class="muted">生活照与训练照默认不加头像。两个开关分别设置；开启后，尚未检查的对应照片需在会员审核中重新准备头部遮挡。后视体测图默认关闭，可在会员信息中单独开启。</p></section></form>`,
   );
   $('#settings [name="output_width"]').oninput = event => {
     const w=Number(event.target.value);$('#output-size').textContent=`成品 ${w} × ${Math.round(w*4/3)} 像素 · 固定 3:4`;
@@ -314,6 +314,7 @@ async function settings() {
     body.default_font = v.default_font;
     body.output_background = v.output_background;
     body.mask_lifestyle = f.has('mask_lifestyle');
+    body.mask_training = f.has('mask_training');
     body.font_overrides = {...c.font_overrides};
     for(const [key,value] of f.entries()) if(key.startsWith('font__')) {
       const path=key.slice(6), aliases=path==='vs.brand_name'?[path,'cover.brand_name','testimonial.brand']:path==='vs.address'?[path,'cover.address']:[path];
@@ -524,7 +525,7 @@ function identitySummary(m) {
     .join("")}</div>`;
 }
 function field(label, path, value, area = false) {
-  const picker=/^(vs|cover|table)\./.test(path)?fontSelect(path,member()?.fonts?.[path]):'';
+  const picker=/^(vs|cover)\./.test(path)?fontSelect(path,member()?.fonts?.[path]):'';
   return `<label>${E(label)}<span class="font-field ${area?'font-area':''}">${picker}${area ? `<textarea aria-label="${E(label)}" data-field="${path}" rows="4">${E(value)}</textarea>` : `<input aria-label="${E(label)}" data-field="${path}" value="${E(value)}">`}</span></label>`;
 }
 
@@ -579,7 +580,7 @@ ${section(
     )}</div><label>底部指标文字</label><div id="metrics"></div><button class="small" id="add-metric">＋ 添加一项</button></div><div class="preview-pane" id="vs-preview"><div class="empty">正在准备成品预览…</div></div></div>`,
 )}
 ${section("04", "审核会员案例封面", "封面独立取景：从正面原图选取头部至胯部，保持人物比例。", `${updateAction("cover")}<div class="row-actions"><button id="cover-ai" class="outline-red">AI生成 ✦</button><span class="muted">选择生成项与资料，套用你的提示词模板。</span></div><div class="edit-with-preview"><div><div class="field-grid">${field("主标题", "cover.title", m.cover.title)}${field("角标", "cover.badge", m.cover.badge)}</div>${field("副标题", "cover.subtitle", m.cover.subtitle)}${field("成果标题", "cover.headline", m.cover.headline)}${field("内容介绍", "cover.story", m.cover.story, true)}<div class="field-grid">${field("品牌名称", "cover.brand_name", m.cover.brand_name)}${field("地址", "cover.address", m.cover.address)}</div>${field("地址第二行 / 门店", "cover.store_text", m.cover.store_text)}<button id="crop" class="outline-red">调整左右照片取景 ↗</button><p class="muted">也可点击右侧封面。左右取景框独立调整，可即时查看组合效果。</p></div><div class="preview-pane cover-preview" id="cover-preview"><div class="empty">正在准备封面预览…</div></div></div>`)}
-${section("05", "审核体测对比表", "原始体测数据优先，汇总表补充缺项。可修改五列内容、增加或删除行。", `${updateAction("table")}<div class="field-grid">${field("表格标题", "table.table_title", m.table.table_title)}${field("报告标题", "table.report_title", m.table.report_title)}</div><div class="field-grid">${field("报告左标签", "table.before_label", m.table.before_label)}${field("报告右标签", "table.after_label", m.table.after_label)}</div><div id="table-editor" class="table-scroll"></div><button id="add-row" class="small">＋ 增加一行</button><div class="table-preview" id="table-preview"></div>`)}
+${section("05", "审核体测对比表", "原始体测数据优先，汇总表补充缺项。可修改五列内容、增加或删除行。", `${updateAction("table")}<label class="report-font-setting">报告与表格统一字体${fontSelect("table.all",m.fonts?.["table.all"])}</label><p class="muted">统一用于报告标题、表格标题、标签、表头及所有数据。</p><div class="field-grid">${field("表格标题", "table.table_title", m.table.table_title)}${field("报告标题", "table.report_title", m.table.report_title)}</div><div class="field-grid">${field("报告左标签", "table.before_label", m.table.before_label)}${field("报告右标签", "table.after_label", m.table.after_label)}</div><div id="table-editor" class="table-scroll"></div><button id="add-row" class="small">＋ 增加一行</button><div class="table-preview" id="table-preview"></div>`)}
 <details class="card sources"><summary>查看原始素材分类与跳过信息 · ${m.sources.length} 张</summary><div class="source-grid">${m.sources.map((s) => `<figure><a href="${media(j.id, s.media)}" target="_blank"><img loading="lazy" src="${media(j.id, s.media)}"></a><figcaption><b>${kinds[s.kind] || s.kind}</b><small>${E(s.reason)}</small></figcaption></figure>`).join("")}</div><div id="gaps"></div></details><div class="review-bottom"><div><b>确认这一批案例</b><small>共 ${state.review.members.length} 位会员 · 可以保留待审标记生成，之后再修正</small></div><button id="generate" class="primary" ${["queued", "processing", "generating"].includes(j.status) ? "disabled" : ""}>${j.status === "generating" ? "正在生成…" : "生成整批成品"} ↗</button></div>`;
   renderBoards();
   renderMetrics();
@@ -759,7 +760,7 @@ function renderMetrics() {
 function renderTable() {
   const t = member().table;
   $("#table-editor").innerHTML =
-    `<table class="edit-table"><thead><tr>${t.headers.map((v, i) => `<th>${fontSelect('table.headers.'+i,member().fonts?.['table.headers.'+i])}<input data-header="${i}" value="${E(v)}"></th>`).join("")}<th></th></tr></thead><tbody>${t.rows.map((r, i) => `<tr>${["type", "before", "after", "delta", "unit"].map((k) => `<td>${fontSelect(`table.rows.${i}.${k}`,member().fonts?.[`table.rows.${i}.${k}`])}<input data-cell="${i}:${k}" value="${E(r[k])}" aria-label="${E(r.type)} ${k}"></td>`).join("")}<td><button data-remove-row="${i}" title="删除行">×</button></td></tr>`).join("")}</tbody></table>`;
+    `<table class="edit-table"><thead><tr>${t.headers.map((v, i) => `<th><input data-header="${i}" value="${E(v)}"></th>`).join("")}<th></th></tr></thead><tbody>${t.rows.map((r, i) => `<tr>${["type", "before", "after", "delta", "unit"].map((k) => `<td><input data-cell="${i}:${k}" value="${E(r[k])}" aria-label="${E(r.type)} ${k}"></td>`).join("")}<td><button data-remove-row="${i}" title="删除行">×</button></td></tr>`).join("")}</tbody></table>`;
   bindFonts($('#table-editor'));
   $$("[data-cell]").forEach(
     (el) =>
@@ -779,8 +780,6 @@ function renderTable() {
   $$("[data-remove-row]").forEach(
     (b) =>
       (b.onclick = () => {
-        member().fonts=removeIndexedFonts(member().fonts,'table.rows',+b.dataset.removeRow);
-        dirty('fonts',['table']);
         t.rows.splice(+b.dataset.removeRow, 1);
         renderTable();
         dirty("table");

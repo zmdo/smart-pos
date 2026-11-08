@@ -118,7 +118,7 @@ def valid_key(key):
     return isinstance(key, str) and bool(re.fullmatch(
         r'(vs\.(brand_name|address|nickname|consent_text|before_text|after_text|vs_text|titles\.(front|side|back)|metrics\.[0-5])'
         r'|cover\.(title|subtitle|headline|story|badge|store_text|address|brand_name)'
-        r'|table\.(table_title|report_title|before_label|after_label|headers\.[0-4]|rows\.([0-9]|1[0-9])\.(type|before|after|delta|unit))'
+        r'|table\.(all|table_title|report_title|before_label|after_label|headers\.[0-4]|rows\.([0-9]|1[0-9])\.(type|before|after|delta|unit))'
         r'|single\.caption|testimonial\.(title|brand))', key))
 
 
@@ -136,4 +136,14 @@ def validate_map(value, previous=None):
             if row is None or (not row['active'] and (previous or {}).get(key) != fid):
                 raise ValueError('字体不存在或已停用，请重新选择')
             result[key] = fid
+    return result
+
+
+def unify_table(value):
+    """Project legacy per-cell fonts onto one report font without rewriting history."""
+    table = {k:v for k,v in value.items() if k.startswith('table.') and v}
+    result = {k:v for k,v in value.items() if not k.startswith('table.')}
+    selected = table.get('table.all') or table.get('table.table_title') or next(iter(sorted(table.items())), ('', ''))[1]
+    if selected:
+        result['table.all'] = selected
     return result
